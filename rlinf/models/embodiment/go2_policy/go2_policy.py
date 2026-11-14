@@ -85,18 +85,20 @@ class Go2Policy(nn.Module, BasePolicy):
         self,
         env_obs: dict,
         mode: str = "train",
+        do_sample: bool | None = None,
         calculate_logprobs: bool = True,
         calculate_values: bool = True,
         return_obs: bool = True,
         **kwargs: Any,
     ) -> tuple:
-        """Return [N, 1, 12] actions and PPO rollout bookkeeping."""
+        """Return actions; explicit do_sample overrides train/eval sampling."""
         obs = self.preprocess_env_obs(env_obs)
         mean = self.actor(obs["states"])
         distribution = Normal(mean, self.std)
         if mode not in ("train", "eval"):
             raise ValueError(f"Expected train or eval mode, got {mode!r}.")
-        action = distribution.sample() if mode == "train" else mean
+        sample = mode == "train" if do_sample is None else do_sample
+        action = distribution.sample() if sample else mean
         forward_inputs = {**obs, "action": action, "model_action": action}
         result = {
             "prev_logprobs": distribution.log_prob(action),

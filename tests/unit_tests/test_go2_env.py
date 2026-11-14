@@ -123,3 +123,16 @@ def test_go2_rsl_checkpoint_import(tmp_path):
     b, new = restored.predict_action_batch(obs, mode="eval")
     torch.testing.assert_close(a, b, rtol=0, atol=0)
     torch.testing.assert_close(old["prev_values"], new["prev_values"], rtol=0, atol=0)
+
+
+def test_go2_generic_rollout_sampling():
+    policy = Go2Policy()
+    obs = {"states": torch.randn(4, 45), "critic_states": torch.randn(4, 60)}
+    deterministic, _ = policy.predict_action_batch(obs, do_sample=False)
+    with torch.no_grad():
+        mean = policy.actor(obs["states"])[:, None]
+    torch.testing.assert_close(deterministic, mean, rtol=0, atol=0)
+    repeated, _ = policy.predict_action_batch(obs, do_sample=False)
+    torch.testing.assert_close(deterministic, repeated, rtol=0, atol=0)
+    sampled, _ = policy.predict_action_batch(obs, do_sample=True)
+    assert not torch.equal(sampled, mean)
