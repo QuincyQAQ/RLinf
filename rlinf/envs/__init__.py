@@ -44,6 +44,7 @@ class SupportedEnvType(Enum):
     GENIESIM = "geniesim"
     D4RL = "d4rl"
     MUJOCO_WARP = "mujoco_warp"
+    GO2_MUJOCO = "go2_mujoco"
     DIFFUSION = "diffusion"
     POLARIS = "polaris"
     SIMPLE = "simple"
@@ -189,6 +190,10 @@ def get_env_cls(env_type: str, env_cfg=None):
         from rlinf.envs.sim.d4rl.d4rl_env import D4RLEnv
 
         return D4RLEnv
+    elif env_type == SupportedEnvType.GO2_MUJOCO:
+        from rlinf.envs.sim.go2_mujoco.go2_mujoco_env import Go2MujocoEnv
+
+        return Go2MujocoEnv
     elif env_type == SupportedEnvType.MUJOCO_WARP:
         from rlinf.envs.sim.mujoco_warp.mujoco_warp_env import MujocoWarpEnv
 

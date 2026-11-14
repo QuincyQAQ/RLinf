@@ -217,6 +217,14 @@
 
    </div>
 
+.. grid:: 1
+
+   .. grid-item-card:: Go2 MuJoCo
+      :link: embodied/go2_mujoco
+      :link-type: doc
+
+      CPU 仿真、非对称运动控制策略与 PPO。
+
 .. toctree::
    :hidden:
    :maxdepth: 2
@@ -239,4 +247,5 @@
    Genesis <embodied/genesis>
    GenieSim <embodied/geniesim>
    MuJoCo Warp <embodied/mujoco_warp>
+   Go2 MuJoCo <embodied/go2_mujoco>
    真机仿真器 <embodied/real_simulator>

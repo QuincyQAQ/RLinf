@@ -1706,7 +1706,7 @@ class EnvOutput:
             key: obs.get(key)
             for key in ("main_images", "wrist_images", "extra_view_images", "states")
         }
-        for key in ("reset_mask", "history"):
+        for key in ("reset_mask", "history", "critic_states"):
             if key in obs:
                 prepared[key] = obs[key]
         task_descriptions = obs.get("task_descriptions")

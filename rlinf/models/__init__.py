@@ -94,6 +94,11 @@ def _register_builtin_models():
 
         return get_model(cfg, torch_dtype)
 
+    def _build_go2_policy(cfg: DictConfig, torch_dtype):
+        from rlinf.models.embodiment.go2_policy import get_model
+
+        return get_model(cfg, torch_dtype)
+
     def _build_mlp_policy(cfg: DictConfig, torch_dtype):
         from rlinf.models.embodiment.mlp_policy import get_model
 
@@ -247,6 +252,7 @@ def _register_builtin_models():
         category="embodied",
         force=True,
     )
+    register_model("go2_policy", _build_go2_policy, category="embodied", force=True)
     register_model(
         SupportedModel.MLP_POLICY.value,
         _build_mlp_policy,

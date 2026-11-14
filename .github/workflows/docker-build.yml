@@ -1044,6 +1044,24 @@ jobs:
           outputs: type=cacheonly
           tags: rlinf:embodied-genesis
 
+  build-embodied-go2-mujoco:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Go2 MuJoCo
+        uses: docker/build-push-action@v6
+        with:
+          file: ./docker/Dockerfile
+          push: false
+          build-args: |
+            BUILD_TARGET=embodied-go2_mujoco
+            NO_MIRROR=1
+          outputs: type=cacheonly
+          tags: rlinf:embodied-go2_mujoco
+
   build-embodied-mujoco-warp:
     runs-on: ubuntu-latest
     steps:

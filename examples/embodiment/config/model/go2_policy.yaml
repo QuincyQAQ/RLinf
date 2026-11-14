@@ -1,0 +1,11 @@
+model_type: go2_policy
+model_path: ""
+initial_checkpoint: null
+policy_setup: locomotion
+obs_dim: 45
+critic_obs_dim: 60
+action_dim: 12
+num_action_chunks: 1
+precision: "32"
+add_value_head: true
+is_lora: false

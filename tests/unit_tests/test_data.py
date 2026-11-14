@@ -4292,3 +4292,17 @@ def test_trajectory_packing_keeps_a_one_token_overlap_separate(monkeypatch):
         "loss_scales",
     ):
         torch.testing.assert_close(packed[key], batch[key])
+
+
+def test_env_output_preserves_privileged_critic_observations():
+    from rlinf.data.schema.embodied_types import EnvOutput
+
+    observations = {"states": torch.randn(3, 45), "critic_states": torch.randn(3, 60)}
+    final = {key: value + 1 for key, value in observations.items()}
+    output = EnvOutput(obs=observations, final_obs=final).to_dict()
+    torch.testing.assert_close(
+        output["obs"]["critic_states"], observations["critic_states"]
+    )
+    torch.testing.assert_close(
+        output["final_obs"]["critic_states"], final["critic_states"]
+    )
