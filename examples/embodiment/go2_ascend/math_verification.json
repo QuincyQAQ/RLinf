@@ -1,0 +1,8 @@
+{
+  "seed42_initialization_max_error": 0.0,
+  "large_error_squared_value_loss": 400.0,
+  "squared_value_gradient_checked": true,
+  "gaussian_kl_checked": true,
+  "adaptive_learning_rate_bounds_checked": true,
+  "independent_intervals_checked": true
+}

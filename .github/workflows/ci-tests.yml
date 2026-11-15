@@ -193,6 +193,7 @@ jobs:
               - 'rlinf/robotics/**'
               - 'rlinf/models/embodiment/openpi/**'
               - 'rlinf/models/embodiment/go2_policy/**'
+              - 'examples/embodiment/go2_ascend/**'
               # Unit tests import env modules directly (robot task envs, the
               # real-world compatibility suite, maniskill offload, delay
               # sampler), so env changes have to trigger this job.
@@ -210,6 +211,7 @@ jobs:
               # test_data.py loads this script to test reward split preprocessing.
               - 'examples/reward/preprocess_reward_dataset.py'
               - 'tests/unit_tests/**'
+              - 'tests/robot_mocks/unitree_go2.py'
               - 'tests/conftest.py'
               - '.github/workflows/unit-tests.yml'
               - '.github/scripts/ascend_ci_workspace.sh'

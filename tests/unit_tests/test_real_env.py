@@ -6026,3 +6026,30 @@ def test_arx5_collection_preserves_pico_control_and_calibration_defaults(monkeyp
         assert reader.calibration_threshold == 0.5
         np.testing.assert_array_equal(reader.head_forward_axis, [0, 0, -1])
         np.testing.assert_array_equal(reader.base_position, [0, 0, 0])
+
+
+@pytest.mark.parametrize("with_camera", [False, True])
+def test_state_only_real_env_preserves_state_and_optional_images(with_camera):
+    from rlinf.envs.real.env import RealWorldEnv
+    from rlinf.envs.real.go2 import Go2DriveEnv
+
+    drive = Go2DriveEnv({"is_dummy": True})
+    try:
+        raw, _ = drive.reset()
+        batched = {"state": {k: v[None] for k, v in raw["state"].items()}}
+        if with_camera:
+            batched["frames"] = {"front": np.zeros((1, 4, 4, 3), dtype=np.uint8)}
+        env = RealWorldEnv.__new__(RealWorldEnv)
+        env.main_image_key = "front"
+        env.task_descriptions = [drive.task_description]
+        obs = env._wrap_obs(batched)
+        assert obs["states"].shape == (1, 35)
+        assert ("main_images" in obs) == with_camera
+        assert obs["task_descriptions"] == ["drive the Go2 mobile base"]
+        if with_camera:
+            assert obs["main_images"].shape == (1, 4, 4, 3)
+            batched["frames"] = {}
+            with pytest.raises(KeyError, match="main_image_key"):
+                env._wrap_obs(batched)
+    finally:
+        drive.close()

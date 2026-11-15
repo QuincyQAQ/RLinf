@@ -136,3 +136,48 @@ def test_go2_generic_rollout_sampling():
     torch.testing.assert_close(deterministic, repeated, rtol=0, atol=0)
     sampled, _ = policy.predict_action_batch(obs, do_sample=True)
     assert not torch.equal(sampled, mean)
+
+
+def test_go2_ascend_launch_is_independent_of_working_directory(tmp_path, monkeypatch):
+    import runpy
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[2]
+    launcher = repo / "examples/embodiment/go2_ascend/launch_training.py"
+    build = runpy.run_path(str(launcher))["build_launch"]
+    monkeypatch.chdir(tmp_path)
+    output, command, metadata = build("from_scratch")
+    assert output == repo / "outputs/go2_ascend/from_scratch"
+    assert metadata["repo"] == str(repo)
+    assert metadata["simulation_threads"] == 160
+    assert metadata["component_placement"]["actor,rollout"] == "8-11"
+    assert metadata["global_envs"] == 4096
+    assert metadata["resume"] is None
+    assert str(repo / "examples/embodiment/go2_ascend/run_stage.sh") in command
+    assert not (tmp_path / "outputs").exists()
+
+
+def test_go2_ascend_resume_selects_latest_complete_checkpoint(tmp_path):
+    import runpy
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[2]
+    build = runpy.run_path(
+        str(repo / "examples/embodiment/go2_ascend/launch_training.py")
+    )["build_launch"]
+    checkpoints = tmp_path / "from_scratch/checkpoints"
+    for step in (100, 200, 300):
+        path = checkpoints / f"global_step_{step}"
+        path.mkdir(parents=True)
+        if step != 300:
+            (path / "environment_curriculum.json").write_text("{}")
+    output, command, metadata = build("from_scratch", tmp_path, resume=True)
+    expected = checkpoints / "global_step_200"
+    assert output == tmp_path
+    assert metadata["resume"] == str(expected)
+    assert f"runner.resume_dir={expected}" in command
+    # An incomplete newer save must not displace the latest complete checkpoint.
+    (checkpoints / "global_step_50000").mkdir()
+    (checkpoints / "global_step_50000/environment_curriculum.json").write_text("{}")
+    with pytest.raises(RuntimeError, match="already reached"):
+        build("from_scratch", tmp_path, resume=True)

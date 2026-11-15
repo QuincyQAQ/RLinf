@@ -38,6 +38,7 @@ _ROBOT_PACKAGES = (
     ".franka",
     ".gim_arm",
     ".lekiwi",
+    ".go2",
     ".piper",
     ".so101",
     ".xsquare",
