@@ -28,3 +28,5 @@ The full run writes to `outputs/go2_native/from_scratch`. Use `--output-dir` for
 Built-in evaluation uses deterministic actions, forward .4m/s, 16 environments, 20 seconds and no observation noise or physical randomization. Training retains noise, randomization and pushes. No task-success metric is currently defined; episode length and return must not be presented as success rate.
 
 The small return increase between updates 1000 and 34000 can reflect early acquisition of the basic task or limited further improvement. A single command and two checkpoints do not distinguish these explanations. Evaluate untrained/early and later models with the same commands, seeds and success criteria. Native PPO does not guarantee a larger improvement. Actual validation results and deployment commit are recorded with the experiment; this document describes the procedure rather than claiming execution.
+
+Use the official evaluation entry for an independent randomly initialized policy baseline: `bash examples/embodiment/go2_ascend/run_native.sh --eval`. This is not claimed to be the exact step-zero parameter state of the separate training process.

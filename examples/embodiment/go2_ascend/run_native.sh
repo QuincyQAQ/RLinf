@@ -12,7 +12,14 @@ export OMP_WAIT_POLICY=PASSIVE GOMP_SPINCOUNT=0
 export HCCL_HOST_SOCKET_PORT_RANGE=auto HCCL_NPU_SOCKET_PORT_RANGE=auto
 export RAY_enable_worker_prestart=0 RAY_prestart_worker_first_driver=0
 cd "$repo_root"
-config=${1:-go2_mujoco_ppo_ascend}
+entry="$repo_root/examples/embodiment/train_embodied_agent.py"
+default_config=go2_mujoco_ppo_ascend
+if [[ ${1:-} == --eval ]]; then
+    entry="$repo_root/evaluations/eval_embodied_agent.py"
+    default_config=go2_mujoco_ppo_ascend_eval
+    shift
+fi
+config=${1:-$default_config}
 if [[ $# -gt 0 ]]; then shift; fi
-exec "$python_bin" "$repo_root/examples/embodiment/train_embodied_agent.py" \
-    --config-name "$config" "$@"
+exec "$python_bin" "$entry" \
+    --config-path "$repo_root/examples/embodiment/config" --config-name "$config" "$@"

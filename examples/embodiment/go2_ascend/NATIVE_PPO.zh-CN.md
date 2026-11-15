@@ -45,3 +45,5 @@ bash examples/embodiment/go2_ascend/run_native.sh go2_mujoco_ppo_ascend_four_smo
 第1000次与第34000次之间奖励增幅小，既可能因早期已经学会基础任务，也可能是后续提升有限；单一指令和两点比较不能区分。需要保存未训练模型/早期模型的固定评估，再对后续检查点使用相同指令、种子和成功标准。不能预先保证改成原生 PPO 会获得更大提升。
 
 本文件描述配置与验收流程；实际运行的验证结果及部署提交另记在实验目录，不将计划描述为已完成。
+
+独立随机初始化策略的评估使用官方评估入口：`bash examples/embodiment/go2_ascend/run_native.sh --eval`。它是独立随机策略基线，不声称与正式训练第0次的参数逐位相同。
