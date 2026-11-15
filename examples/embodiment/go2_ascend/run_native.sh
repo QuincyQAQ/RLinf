@@ -19,7 +19,10 @@ if [[ ${1:-} == --eval ]]; then
     default_config=go2_mujoco_ppo_ascend_eval
     shift
 fi
-config=${1:-$default_config}
-if [[ $# -gt 0 ]]; then shift; fi
+config=$default_config
+if [[ $# -gt 0 && $1 != --* ]]; then
+    config=$1
+    shift
+fi
 exec "$python_bin" "$entry" \
     --config-path "$repo_root/examples/embodiment/config" --config-name "$config" "$@"

@@ -216,3 +216,25 @@ def test_go2_native_launch_uses_standard_entry_and_dcp_resume(tmp_path, monkeypa
     assert f"runner.resume_dir={checkpoint}" in command
     with pytest.raises(FileNotFoundError, match="No complete checkpoints"):
         build("from_scratch", tmp_path, resume=True)
+
+
+def test_go2_native_eval_cli_resolves_default_config(tmp_path):
+    import os
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[2]
+    script = repo / "examples/embodiment/go2_ascend/run_native.sh"
+    result = subprocess.run(
+        ["bash", str(script), "--eval", "--cfg", "job", "--resolve"],
+        cwd=tmp_path,
+        env={**os.environ, "GO2_PYTHON": sys.executable},
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    cfg = OmegaConf.create(result.stdout)
+    assert cfg.runner.only_eval
+    assert cfg.rollout.model.model_type == "go2_policy"
+    assert cfg.algorithm.loss_type == "actor_critic"
