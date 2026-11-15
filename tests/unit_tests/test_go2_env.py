@@ -171,6 +171,8 @@ def test_go2_ascend_resume_selects_latest_complete_checkpoint(tmp_path):
         path.mkdir(parents=True)
         if step != 300:
             (path / "environment_curriculum.json").write_text("{}")
+            (path / "actor/dcp_checkpoint").mkdir(parents=True)
+            (path / "actor/dcp_checkpoint/.metadata").write_text("metadata")
     output, command, metadata = build("from_scratch", tmp_path, resume=True)
     expected = checkpoints / "global_step_200"
     assert output == tmp_path
@@ -179,5 +181,38 @@ def test_go2_ascend_resume_selects_latest_complete_checkpoint(tmp_path):
     # An incomplete newer save must not displace the latest complete checkpoint.
     (checkpoints / "global_step_50000").mkdir()
     (checkpoints / "global_step_50000/environment_curriculum.json").write_text("{}")
+    (checkpoints / "global_step_50000/actor/dcp_checkpoint").mkdir(parents=True)
+    (checkpoints / "global_step_50000/actor/dcp_checkpoint/.metadata").write_text(
+        "metadata"
+    )
     with pytest.raises(RuntimeError, match="already reached"):
+        build("from_scratch", tmp_path, resume=True)
+
+
+def test_go2_native_launch_uses_standard_entry_and_dcp_resume(tmp_path, monkeypatch):
+    import runpy
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[2]
+    build = runpy.run_path(
+        str(repo / "examples/embodiment/go2_ascend/launch_training.py")
+    )["build_launch"]
+    monkeypatch.chdir(tmp_path)
+    output, command, metadata = build("go2_mujoco_ppo_ascend", tmp_path, native=True)
+    assert output == tmp_path
+    assert command[1].endswith("run_native.sh")
+    assert metadata["algorithm_loss"] == "actor_critic"
+    assert metadata["model_type"] == "go2_policy"
+    assert metadata["extension_sha256"] is None
+    assert metadata["resume"] is None
+    checkpoint = tmp_path / "from_scratch/checkpoints/global_step_1000"
+    (checkpoint / "actor/dcp_checkpoint").mkdir(parents=True)
+    (checkpoint / "actor/dcp_checkpoint/.metadata").write_text("metadata")
+    # Native checkpoints do not contain the compatibility worker's curriculum file.
+    _, command, metadata = build(
+        "go2_mujoco_ppo_ascend", tmp_path, resume=True, native=True
+    )
+    assert metadata["resume"] == str(checkpoint)
+    assert f"runner.resume_dir={checkpoint}" in command
+    with pytest.raises(FileNotFoundError, match="No complete checkpoints"):
         build("from_scratch", tmp_path, resume=True)

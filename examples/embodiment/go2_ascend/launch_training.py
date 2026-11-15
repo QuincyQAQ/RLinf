@@ -25,11 +25,12 @@ from pathlib import Path
 from omegaconf import OmegaConf
 
 
-def build_launch(config_name, output_dir=None, resume=False):
+def build_launch(config_name, output_dir=None, resume=False, native=False):
     """Resolve one configuration and prepare a persistent training command."""
     scripts = Path(__file__).resolve().parent
     repo = scripts.parents[2]
-    config_path = scripts / f"{config_name}.yaml"
+    config_dir = repo / "examples/embodiment/config" if native else scripts
+    config_path = config_dir / f"{config_name}.yaml"
     cfg = OmegaConf.load(config_path)
     output = Path(output_dir or cfg.runner.logger.log_path).expanduser()
     if not output.is_absolute():
@@ -37,7 +38,7 @@ def build_launch(config_name, output_dir=None, resume=False):
     output = output.resolve()
     command = [
         "bash",
-        str(scripts / "run_stage.sh"),
+        str(scripts / ("run_native.sh" if native else "run_stage.sh")),
         config_name,
         f"runner.logger.log_path={output}",
     ]
@@ -47,7 +48,8 @@ def build_launch(config_name, output_dir=None, resume=False):
         candidates = [
             p
             for p in checkpoints.glob("global_step_*")
-            if (p / "environment_curriculum.json").is_file()
+            if (p / "actor/dcp_checkpoint/.metadata").is_file()
+            and (native or (p / "environment_curriculum.json").is_file())
         ]
         if not candidates:
             raise FileNotFoundError(f"No complete checkpoints in {checkpoints}")
@@ -73,13 +75,22 @@ def build_launch(config_name, output_dir=None, resume=False):
         "simulation_threads": int(cfg.env.train.threads),
         "target_updates": int(cfg.runner.max_steps),
         "experiment_name": str(cfg.runner.logger.experiment_name),
+        "native_ppo": native,
+        "algorithm_loss": str(cfg.algorithm.loss_type),
+        "model_type": str(cfg.actor.model.model_type),
         "component_placement": OmegaConf.to_container(cfg.cluster.component_placement),
         "config_sha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
-        "extension_sha256": hashlib.sha256(
+        "extension_sha256": None
+        if native
+        else hashlib.sha256(
             (scripts / "go2_rsl_extension.py").read_bytes()
         ).hexdigest(),
         "entry_sha256": hashlib.sha256(
-            (scripts / "train_go2.py").read_bytes()
+            (
+                repo / "examples/embodiment/train_embodied_agent.py"
+                if native
+                else scripts / "train_go2.py"
+            ).read_bytes()
         ).hexdigest(),
     }
     return output, command, metadata
@@ -87,12 +98,20 @@ def build_launch(config_name, output_dir=None, resume=False):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", default="from_scratch")
+    parser.add_argument("--config")
+    parser.add_argument(
+        "--native",
+        action="store_true",
+        help="Use the standard RLinf PPO entry and workers",
+    )
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
-    output, command, metadata = build_launch(args.config, args.output_dir, args.resume)
+    config = args.config or ("go2_mujoco_ppo_ascend" if args.native else "from_scratch")
+    output, command, metadata = build_launch(
+        config, args.output_dir, args.resume, args.native
+    )
     if args.dry_run:
         print(json.dumps(metadata, indent=2))
         return
@@ -100,7 +119,10 @@ def main():
     if pid_file.exists():
         pid = int(pid_file.read_text())
         cmdline = Path(f"/proc/{pid}/cmdline")
-        if cmdline.exists() and b"train_go2.py" in cmdline.read_bytes():
+        if cmdline.exists() and any(
+            name in cmdline.read_bytes()
+            for name in (b"train_go2.py", b"train_embodied_agent.py")
+        ):
             raise RuntimeError(f"Go2 training driver {pid} is already running")
     if not args.resume and output.exists() and any(output.iterdir()):
         raise FileExistsError(f"Refusing to overwrite experiment {output}")

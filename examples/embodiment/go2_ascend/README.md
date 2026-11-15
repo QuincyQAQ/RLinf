@@ -1,3 +1,5 @@
+> [Native RLinf PPO](NATIVE_PPO.md) — the compatibility run is paused at update 37600; use the native entry for the new experiment.
+
 # Go2 training on Ascend
 
 Train Go2 with CPU MuJoCo simulation and RLinf sampling, PPO updates, FSDP/HCCL synchronization and native checkpoints on Ascend. This repository contains the complete training implementation. The server is a deployment of a pinned source version, not a second implementation.

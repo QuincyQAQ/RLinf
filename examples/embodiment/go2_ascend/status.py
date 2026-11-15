@@ -32,7 +32,10 @@ def main():
     run = args.output_dir.expanduser().resolve()
     launch = json.loads((run / "launch.json").read_text())
     command = Path(f"/proc/{launch['pid']}/cmdline")
-    alive = command.exists() and b"train_go2.py" in command.read_bytes()
+    alive = command.exists() and any(
+        name in command.read_bytes()
+        for name in (b"train_go2.py", b"train_embodied_agent.py")
+    )
     report = {
         "driver_pid": launch["pid"],
         "running": alive,
