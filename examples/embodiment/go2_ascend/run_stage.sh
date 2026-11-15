@@ -9,7 +9,7 @@ python_bin=${GO2_PYTHON:-$repo_root/.venv/bin/python}
 export PYTHONPATH="$repo_root:$script_dir${PYTHONPATH:+:$PYTHONPATH}"
 export EMBODIED_PATH="$repo_root/examples/embodiment"
 export RLINF_EXT_MODULE=go2_rsl_extension
-export OMP_NUM_THREADS=${OMP_NUM_THREADS:-4} OPENBLAS_NUM_THREADS=${OPENBLAS_NUM_THREADS:-1}
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=1
 export OMP_WAIT_POLICY=PASSIVE GOMP_SPINCOUNT=0
 export HCCL_HOST_SOCKET_PORT_RANGE=auto HCCL_NPU_SOCKET_PORT_RANGE=auto
 export RAY_enable_worker_prestart=0 RAY_prestart_worker_first_driver=0
