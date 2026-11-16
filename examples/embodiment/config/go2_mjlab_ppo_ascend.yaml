@@ -1,0 +1,36 @@
+defaults:
+  - go2_mujoco_ppo_ascend_eight
+  - _self_
+
+env:
+  train:
+    env_type: go2_mjlab
+    threads: 2
+    randomize_initial_episode_length: true
+  eval: null
+
+actor:
+  model:
+    obs_dim: 47
+    critic_obs_dim: 74
+    obs_normalization: true
+  optim:
+    lr_scheduler: torch_constant
+
+algorithm:
+  value_loss_type: mse
+  desired_kl: 0.01
+
+cluster:
+  component_placement:
+    actor,rollout: 8-15
+    env: 8-15:0-63
+
+runner:
+  max_epochs: 10001
+  max_steps: 10001
+  save_interval: 100
+  val_check_interval: -1
+  logger:
+    log_path: outputs/go2_mjlab/native_ascend
+    experiment_name: go2_mjlab

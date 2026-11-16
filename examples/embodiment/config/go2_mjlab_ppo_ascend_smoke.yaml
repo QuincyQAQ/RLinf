@@ -1,0 +1,25 @@
+defaults:
+  - go2_mjlab_ppo_ascend
+  - _self_
+
+env:
+  train:
+    total_num_envs: 16
+    threads: 2
+
+actor:
+  micro_batch_size: 96
+  global_batch_size: 96
+
+cluster:
+  component_placement:
+    actor,rollout: '8'
+    env: 8
+
+runner:
+  max_epochs: 3
+  max_steps: 3
+  save_interval: 1
+  logger:
+    log_path: outputs/go2_mjlab/native_single_smoke
+    experiment_name: native_single_smoke

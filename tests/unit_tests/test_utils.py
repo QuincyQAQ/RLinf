@@ -32,6 +32,7 @@ import pytest
 import torch
 from omegaconf import OmegaConf
 
+from rlinf.algorithms.losses import compute_ppo_critic_loss
 from rlinf.algorithms.registry import calculate_adv_and_returns, policy_loss
 from rlinf.algorithms.utils import (
     apply_importance_sampling_correction,
@@ -48,6 +49,34 @@ from rlinf.utils.metric_utils import (
 )
 from rlinf.utils.utils import masked_mean
 from rlinf.workers.actor.embodied_fsdp_actor_worker import EmbodiedFSDPActor
+
+
+@pytest.mark.parametrize("loss_type, expected", [("mse", 10.345), ("huber", 2.65)])
+def test_ppo_value_loss_matches_configured_objective(loss_type, expected):
+    values = torch.tensor([[-0.5], [1.0]], requires_grad=True)
+    loss, _ = compute_ppo_critic_loss(
+        values=values,
+        returns=torch.tensor([[2.0], [4.0]]),
+        prev_values=torch.zeros(2, 1),
+        value_clip=0.2,
+        huber_delta=1.0,
+        value_loss_type=loss_type,
+    )
+    torch.testing.assert_close(loss, torch.tensor(expected))
+    loss.backward()
+    assert torch.isfinite(values.grad).all()
+
+
+def test_torch_constant_scheduler_preserves_adaptive_learning_rate():
+    from rlinf.hybrid_engines.fsdp.utils import get_lr_scheduler
+
+    parameter = torch.nn.Parameter(torch.ones(1))
+    optimizer = torch.optim.Adam([parameter], lr=0.001)
+    scheduler = get_lr_scheduler("torch_constant", optimizer, 0, 10001)
+    optimizer.param_groups[0]["lr"] /= 1.5
+    optimizer.step()
+    scheduler.step()
+    assert optimizer.param_groups[0]["lr"] == pytest.approx(0.001 / 1.5)
 
 
 def test_compute_evaluate_metrics_reports_interact_delay_wait_time_stats():

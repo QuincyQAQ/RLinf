@@ -430,6 +430,7 @@ def compute_ppo_critic_loss(
     loss_mask: Optional[torch.Tensor] = None,
     max_episode_steps: Optional[int] = None,
     loss_mask_sum: Optional[torch.Tensor] = None,
+    value_loss_type: str = "huber",
     **kwargs,
 ) -> tuple[torch.Tensor, dict]:
     """
@@ -441,6 +442,7 @@ def compute_ppo_critic_loss(
         prev_values (torch.Tensor): Previous value predictions.
         value_clip (float): Value clipping threshold.
         huber_delta (float): Huber loss delta parameter.
+        value_loss_type (str): ``huber`` or squared-error ``mse``.
 
     Returns:
         Tuple[torch.Tensor, Dict]: (critic_loss, metrics_dict)
@@ -460,12 +462,14 @@ def compute_ppo_critic_loss(
         -value_clip, value_clip
     )  # [bsz, ] | [bsz, chunk-step]
 
-    value_loss_original = huber_loss(
-        returns - values, huber_delta
-    )  # [bsz, ] | [bsz, chunk-step]
-    value_loss_clipped = huber_loss(
-        returns - value_pred_clipped, huber_delta
-    )  # [bsz, ] | [bsz, chunk-step]
+    if value_loss_type == "mse":
+        value_loss_original = (returns - values).square()
+        value_loss_clipped = (returns - value_pred_clipped).square()
+    elif value_loss_type == "huber":
+        value_loss_original = huber_loss(returns - values, huber_delta)
+        value_loss_clipped = huber_loss(returns - value_pred_clipped, huber_delta)
+    else:
+        raise ValueError(f"Expected huber or mse value loss, got {value_loss_type!r}.")
     value_loss = torch.max(value_loss_original, value_loss_clipped)
     value_loss = loss_agg_func(value_loss, loss_mask, loss_mask_ratio)
 

@@ -1193,6 +1193,18 @@ def validate_embodied_cfg(cfg):
         validate_only_eval_rollout_model(cfg.rollout.model)
     model_cfg = cfg.rollout.model if only_eval else cfg.actor.model
     algorithm_cfg = cfg.get("algorithm", {}) or {}
+    if not only_eval:
+        value_loss_type = algorithm_cfg.get("value_loss_type", "huber")
+        assert value_loss_type in ("huber", "mse"), (
+            f"Expected algorithm.value_loss_type to be huber or mse, got {value_loss_type!r}."
+        )
+        desired_kl = algorithm_cfg.get("desired_kl", None)
+        if desired_kl is not None:
+            assert desired_kl > 0, "algorithm.desired_kl must be positive."
+            assert cfg.actor.optim.lr_scheduler == "torch_constant", (
+                "Adaptive KL learning rates require actor.optim.lr_scheduler=torch_constant "
+                "to preserve minibatch learning-rate changes."
+            )
     model_type = SupportedModel(model_cfg.model_type)
     assert model_type in EMBODIED_MODEL or model_type in DIFFUSION_MODELS, (
         f"Model type: '{model_cfg.model_type}' is not supported by the embodied runner. "

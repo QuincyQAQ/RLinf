@@ -1,0 +1,16 @@
+defaults:
+  - go2_mujoco_ppo_ascend
+  - _self_
+
+cluster:
+  component_placement:
+    actor,rollout: 8-15
+    env: 8
+
+actor:
+  micro_batch_size: 3072
+
+runner:
+  logger:
+    log_path: outputs/go2_native/eight
+    experiment_name: eight

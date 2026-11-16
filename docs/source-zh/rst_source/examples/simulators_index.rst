@@ -225,6 +225,14 @@
 
       CPU 仿真、非对称运动控制策略与 PPO。
 
+.. grid:: 1
+
+   .. grid-item-card:: Go2 Mjlab
+      :link: embodied/go2_mjlab
+      :link-type: doc
+
+      官方宇树任务、CPU 仿真和原生 PPO。
+
 .. toctree::
    :hidden:
    :maxdepth: 2
@@ -248,4 +256,5 @@
    GenieSim <embodied/geniesim>
    MuJoCo Warp <embodied/mujoco_warp>
    Go2 MuJoCo <embodied/go2_mujoco>
+   Go2 Mjlab <embodied/go2_mjlab>
    真机仿真器 <embodied/real_simulator>

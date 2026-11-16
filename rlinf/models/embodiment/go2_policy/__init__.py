@@ -20,10 +20,13 @@ def get_model(cfg: DictConfig, torch_dtype: torch.dtype) -> torch.nn.Module:
     """Build the Go2 actor/critic, optionally initialized from an RSL-RL model."""
     from .go2_policy import Go2Policy
 
-    if cfg.num_action_chunks != 1 or cfg.obs_dim != 45 or cfg.action_dim != 12:
-        raise ValueError(
-            "Go2 requires obs_dim=45, action_dim=12 and num_action_chunks=1."
-        )
+    if cfg.num_action_chunks != 1 or cfg.action_dim != 12:
+        raise ValueError("Go2 requires action_dim=12 and num_action_chunks=1.")
     if torch_dtype != torch.float32:
         raise ValueError("Go2's validated PPO configuration requires float32.")
-    return Go2Policy(cfg.get("initial_checkpoint"))
+    return Go2Policy(
+        cfg.get("initial_checkpoint"),
+        obs_dim=int(cfg.obs_dim),
+        critic_obs_dim=int(cfg.get("critic_obs_dim", 60)),
+        obs_normalization=bool(cfg.get("obs_normalization", False)),
+    )

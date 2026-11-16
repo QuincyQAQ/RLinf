@@ -47,3 +47,18 @@ bash examples/embodiment/go2_ascend/run_native.sh go2_mujoco_ppo_ascend_four_smo
 本文件描述配置与验收流程；实际运行的验证结果及部署提交另记在实验目录，不将计划描述为已完成。
 
 独立随机初始化策略的评估使用官方评估入口：`bash examples/embodiment/go2_ascend/run_native.sh --eval`。它是独立随机策略基线，不声称与正式训练第0次的参数逐位相同。
+
+## 使用八个 NPU
+
+八设备配置使用 8–15 号设备，保留 4096 个环境、160 个仿真线程和 24576 的全局 minibatch。每个 actor 每个 minibatch 处理 3072 个样本，每轮 PPO 共四个全局 minibatch。恢复前先确认设备可用，并停止原训练进程。
+
+将 `checkpoint` 设为已保存的 `global_step_*` 目录，然后从仓库根目录运行：
+
+```bash
+checkpoint=/path/to/global_step_15000
+bash examples/embodiment/go2_ascend/run_native.sh go2_mujoco_ppo_ascend_eight \
+  runner.resume_dir="$checkpoint" \
+  runner.logger.log_path="$PWD/outputs/go2_native/eight"
+```
+
+使用上述命令启动八设备配置。后台启动辅助脚本只读取独立 YAML，不解析 Hydra defaults。改变 actor 数量后，分布式 checkpoint 必须同时恢复权重、优化器和调度器。将短程恢复测试与长期训练分别记录；设备启动成功不代表训练指标正常。

@@ -30,3 +30,18 @@ Built-in evaluation uses deterministic actions, forward .4m/s, 16 environments, 
 The small return increase between updates 1000 and 34000 can reflect early acquisition of the basic task or limited further improvement. A single command and two checkpoints do not distinguish these explanations. Evaluate untrained/early and later models with the same commands, seeds and success criteria. Native PPO does not guarantee a larger improvement. Actual validation results and deployment commit are recorded with the experiment; this document describes the procedure rather than claiming execution.
 
 Use the official evaluation entry for an independent randomly initialized policy baseline: `bash examples/embodiment/go2_ascend/run_native.sh --eval`. This is not claimed to be the exact step-zero parameter state of the separate training process.
+
+## Run on Eight NPUs
+
+The eight-device configuration uses devices 8–15 and keeps 4096 environments, 160 simulation threads, and a global minibatch of 24576. Each actor processes 3072 samples per minibatch. Each PPO epoch has four global minibatches. Check that those devices are available and stop the previous training process before resuming.
+
+Set `checkpoint` to the saved `global_step_*` directory, then run from the repository root:
+
+```bash
+checkpoint=/path/to/global_step_15000
+bash examples/embodiment/go2_ascend/run_native.sh go2_mujoco_ppo_ascend_eight \
+  runner.resume_dir="$checkpoint" \
+  runner.logger.log_path="$PWD/outputs/go2_native/eight"
+```
+
+Start the eight-device configuration with the command above. The background launch helper reads standalone YAML files and does not compose Hydra defaults. Distributed checkpoint loading must restore the optimizer and scheduler as well as weights when changing the actor count. Record a short restore test separately from a long training run; successful device initialization does not verify training metrics.

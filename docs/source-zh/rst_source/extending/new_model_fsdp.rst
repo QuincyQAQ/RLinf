@@ -373,3 +373,10 @@ FSDP CPU 参数 offload 使用计算 dtype 准备梯度（``param_dtype``，未�
 wrapper 保留梯度。优化器沿用参数分组和优化器配置，在更新时将梯度转为 FP32，
 并保持 FP32 优化器状态。原始 BF16/FP16 参数还会有一份 FP32 master weights。
 使用原生 AdamW 时，保持默认的 ``keep_low_precision_grads: false``。
+
+PPO 的观测统计
+--------------
+
+Policy 可以覆写 ``prepare_ppo_update(forward_inputs)``，更新需要保存的观测统计。同步具身 actor 在 minibatch 优化前，用完整 rollout 调用一次该方法；默认实现不修改统计。跨 actor 汇总统计时，各 rank 必须调用匹配的通信操作。统计量应注册为 buffer，使 checkpoint 和权重同步包含这些数据。
+
+支持 ``algorithm.desired_kl`` 时，``default_forward`` 需返回每个样本的解析 KL 张量 ``kl_divergence``。将 rollout 时的分布参数复制到 ``forward_inputs``，避免后续参数更新改变缓存内容。该 KL 比较行为 policy 与当前 policy。学习率调整规则见 :doc:`../reference/algorithms/ppo`。

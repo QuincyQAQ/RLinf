@@ -66,6 +66,38 @@ def test_go2_timeout_preserves_terminal_observation(env):
     assert all(torch.isfinite(x).all() for x in obs[0].values())
 
 
+def test_mjlab_timeout_preserves_terminal_observation():
+    pytest.importorskip("mjlab")
+    pytest.importorskip("src.tasks")
+    cfg = OmegaConf.create(
+        {
+            "seed": 42,
+            "group_size": 1,
+            "threads": 2,
+            "auto_reset": True,
+            "ignore_terminations": False,
+            "max_episode_steps": 2,
+            "max_steps_per_rollout_epoch": 24,
+            "video_cfg": {"save_video": False},
+        }
+    )
+    instance = get_env_cls("go2_mjlab")(cfg, num_envs=4)
+    try:
+        obs, _ = instance.reset()
+        assert obs["states"].shape == (4, 47)
+        assert obs["critic_states"].shape == (4, 74)
+        instance.chunk_step(torch.zeros(4, 1, 12))
+        obs, _, terms, truncs, infos = instance.chunk_step(torch.zeros(4, 1, 12))
+        assert truncs.all() and not terms.any()
+        assert not torch.equal(
+            infos[0]["final_observation"]["critic_states"], obs[0]["critic_states"]
+        )
+        instance.set_global_step(5001)
+        assert instance.task.common_step_counter == 5001 * 24
+    finally:
+        instance.close()
+
+
 def test_go2_partial_reset_and_action_passthrough(env):
     env.reset()
     env.step(np.zeros((4, 12)))
@@ -125,6 +157,33 @@ def test_go2_rsl_checkpoint_import(tmp_path):
     torch.testing.assert_close(old["prev_values"], new["prev_values"], rtol=0, atol=0)
 
 
+def test_go2_normalized_mjlab_observations_and_resume(tmp_path):
+    policy = Go2Policy(obs_dim=47, critic_obs_dim=74, obs_normalization=True)
+    obs = {"states": torch.randn(16, 47) * 3 + 2, "critic_states": torch.randn(16, 74)}
+    policy.prepare_ppo_update(obs)
+    torch.testing.assert_close(
+        policy.actor_normalizer.mean, obs["states"].mean(0, keepdim=True)
+    )
+    torch.testing.assert_close(
+        policy.actor_normalizer.variance,
+        obs["states"].var(0, unbiased=False, keepdim=True),
+    )
+    assert policy.actor_normalizer.count == 16
+    actions, rollout = policy.predict_action_batch(obs)
+    output = policy(forward_inputs=rollout["forward_inputs"])
+    torch.testing.assert_close(output["logprobs"], rollout["prev_logprobs"])
+    torch.testing.assert_close(output["values"], rollout["prev_values"])
+    assert output["kl_divergence"].abs().max() < 2e-4
+    path = tmp_path / "policy.pt"
+    torch.save(policy.state_dict(), path)
+    restored = Go2Policy(obs_dim=47, critic_obs_dim=74, obs_normalization=True)
+    restored.load_state_dict(torch.load(path, weights_only=True))
+    expected, _ = policy.predict_action_batch(obs, mode="eval")
+    actual, _ = restored.predict_action_batch(obs, mode="eval")
+    torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    assert actions.shape == (16, 1, 12)
+
+
 def test_go2_generic_rollout_sampling():
     policy = Go2Policy()
     obs = {"states": torch.randn(4, 45), "critic_states": torch.randn(4, 60)}
@@ -136,6 +195,23 @@ def test_go2_generic_rollout_sampling():
     torch.testing.assert_close(deterministic, repeated, rtol=0, atol=0)
     sampled, _ = policy.predict_action_batch(obs, do_sample=True)
     assert not torch.equal(sampled, mean)
+
+
+def test_go2_analytic_kl_preserves_old_distribution():
+    policy = Go2Policy()
+    obs = {"states": torch.randn(4, 45), "critic_states": torch.randn(4, 60)}
+    _, sampled = policy.predict_action_batch(obs)
+    inputs = sampled["forward_inputs"]
+    before = policy(forward_inputs=inputs)["kl_divergence"]
+    torch.testing.assert_close(before, torch.zeros(4), rtol=0, atol=0)
+    with torch.no_grad():
+        policy.std.add_(0.2)
+    torch.testing.assert_close(inputs["old_std"], torch.ones(4, 12))
+    expected = torch.distributions.kl_divergence(
+        torch.distributions.Normal(inputs["old_mean"], inputs["old_std"]),
+        torch.distributions.Normal(inputs["old_mean"], torch.full((4, 12), 1.2)),
+    ).sum(-1)
+    torch.testing.assert_close(policy(forward_inputs=inputs)["kl_divergence"], expected)
 
 
 def test_go2_ascend_launch_is_independent_of_working_directory(tmp_path, monkeypatch):

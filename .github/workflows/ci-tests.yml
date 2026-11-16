@@ -112,6 +112,8 @@ jobs:
               - 'rlinf/runners/*reward*.py'
               - 'examples/embodiment/*'
               - 'examples/embodiment/config/*/**'
+              - 'examples/embodiment/config/go2_mujoco_ppo_ascend_eight.yaml'
+              - 'examples/embodiment/config/go2_mjlab_ppo_ascend*.yaml'
               - 'examples/diffusion/**'
               - 'examples/reward/**'
               - 'tests/e2e_tests/embodied/**'
@@ -194,6 +196,7 @@ jobs:
               - 'rlinf/models/embodiment/openpi/**'
               - 'rlinf/models/embodiment/go2_policy/**'
               - 'examples/embodiment/go2_ascend/**'
+              - 'examples/embodiment/go2_mjlab/**'
               # Unit tests import env modules directly (robot task envs, the
               # real-world compatibility suite, maniskill offload, delay
               # sampler), so env changes have to trigger this job.

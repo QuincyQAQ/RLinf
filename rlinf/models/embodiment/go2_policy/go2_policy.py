@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Asymmetric 45/60-observation Go2 policy retaining RSL-RL parameter names."""
+"""Asymmetric Go2 policy retaining RSL-RL parameter names."""
 
 from typing import Any
 
@@ -26,16 +26,39 @@ from rlinf.models.embodiment.base_policy import BasePolicy, ForwardType
 class Go2Policy(nn.Module, BasePolicy):
     """Use the validated ELU actor and privileged critic in RLinf PPO."""
 
-    def __init__(self, initial_checkpoint: str | None = None) -> None:
+    def __init__(
+        self,
+        initial_checkpoint: str | None = None,
+        obs_dim: int = 45,
+        critic_obs_dim: int = 60,
+        obs_normalization: bool = False,
+    ) -> None:
         super().__init__()
-        self.actor = self._network(45, 12)
-        self.critic = self._network(60, 1)
+        from .normalization import EmpiricalNormalization
+
+        self.actor = self._network(obs_dim, 12)
+        self.critic = self._network(critic_obs_dim, 1)
         self.std = nn.Parameter(torch.ones(12))
+        self.obs_normalization = obs_normalization
+        self.actor_normalizer = (
+            EmpiricalNormalization(obs_dim) if obs_normalization else nn.Identity()
+        )
+        self.critic_normalizer = (
+            EmpiricalNormalization(critic_obs_dim)
+            if obs_normalization
+            else nn.Identity()
+        )
         if initial_checkpoint:
             state = torch.load(
                 initial_checkpoint, map_location="cpu", weights_only=False
             )
             self.load_state_dict(state["model_state_dict"], strict=True)
+
+    def prepare_ppo_update(self, forward_inputs: dict) -> None:
+        """Merge rollout moments across actor ranks before PPO optimization."""
+        if self.obs_normalization:
+            self.actor_normalizer.update(forward_inputs["states"])
+            self.critic_normalizer.update(forward_inputs["critic_states"])
 
     @staticmethod
     def _network(inputs: int, outputs: int) -> nn.Sequential:
@@ -70,14 +93,24 @@ class Go2Policy(nn.Module, BasePolicy):
         **kwargs: Any,
     ) -> dict:
         """Recompute the per-joint log probabilities and privileged value."""
-        distribution = Normal(self.actor(forward_inputs["states"]), self.std)
+        distribution = Normal(
+            self.actor(self.actor_normalizer(forward_inputs["states"])), self.std
+        )
         result = {}
         if compute_logprobs:
             result["logprobs"] = distribution.log_prob(forward_inputs["action"])
         if compute_entropy:
             result["entropy"] = distribution.entropy()
         if compute_values:
-            result["values"] = self.critic(forward_inputs["critic_states"])
+            result["values"] = self.critic(
+                self.critic_normalizer(forward_inputs["critic_states"])
+            )
+        if "old_mean" in forward_inputs:
+            old_mean, old_std = forward_inputs["old_mean"], forward_inputs["old_std"]
+            with torch.no_grad():
+                result["kl_divergence"] = torch.distributions.kl_divergence(
+                    Normal(old_mean, old_std), distribution
+                ).sum(-1)
         return result
 
     @torch.inference_mode()
@@ -93,16 +126,22 @@ class Go2Policy(nn.Module, BasePolicy):
     ) -> tuple:
         """Return actions; explicit do_sample overrides train/eval sampling."""
         obs = self.preprocess_env_obs(env_obs)
-        mean = self.actor(obs["states"])
+        mean = self.actor(self.actor_normalizer(obs["states"]))
         distribution = Normal(mean, self.std)
         if mode not in ("train", "eval"):
             raise ValueError(f"Expected train or eval mode, got {mode!r}.")
         sample = mode == "train" if do_sample is None else do_sample
         action = distribution.sample() if sample else mean
-        forward_inputs = {**obs, "action": action, "model_action": action}
+        forward_inputs = {
+            **obs,
+            "action": action,
+            "model_action": action,
+            "old_mean": mean.clone(),
+            "old_std": distribution.scale.clone(),
+        }
         result = {
             "prev_logprobs": distribution.log_prob(action),
-            "prev_values": self.critic(obs["critic_states"])
+            "prev_values": self.critic(self.critic_normalizer(obs["critic_states"]))
             if calculate_values
             else torch.zeros_like(action[:, :1]),
             "forward_inputs": forward_inputs,

@@ -84,6 +84,7 @@ FROM base-image-platform-${PLATFORM} AS base-image-embodied-embodichain
 FROM base-image-platform-${PLATFORM} AS base-image-embodied-roboverse
 FROM base-image-platform-${PLATFORM} AS base-image-embodied-polaris
 FROM base-image-platform-${PLATFORM} AS base-image-embodied-genesis
+FROM base-image-platform-${PLATFORM} AS base-image-embodied-go2_mjlab
 FROM base-image-platform-${PLATFORM} AS base-image-embodied-go2_mujoco
 FROM base-image-platform-${PLATFORM} AS base-image-embodied-mujoco_warp
 FROM base-image-platform-${PLATFORM} AS base-image-embodied-geniesim
@@ -538,6 +539,13 @@ RUN echo "source ${UV_PATH}/genesis/bin/activate" >> ~/.bashrc
 ##################################################################################################
 # Embodied: MuJoCo Warp
 ##################################################################################################
+FROM embodied-common-image AS embodied-go2_mjlab-image
+
+RUN bash requirements/install.sh ${INSTALL_MIRROR_OPTION} --platform ${RLINF_PLATFORM} \
+        embodied --venv go2_mjlab --env go2_mjlab
+
+RUN echo "source ${UV_PATH}/go2_mjlab/bin/activate" >> ~/.bashrc
+
 FROM embodied-common-image AS embodied-go2_mujoco-image
 
 RUN bash requirements/install.sh ${INSTALL_MIRROR_OPTION} --platform ${RLINF_PLATFORM} \

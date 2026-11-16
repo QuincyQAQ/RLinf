@@ -4,6 +4,26 @@ on:
   workflow_call:
 
 jobs:
+  embodied-ppo-go2-mjlab-test:
+    runs-on: embodied
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Install Go2 Mjlab
+        run: |
+          unset UV_DEFAULT_INDEX
+          bash requirements/install.sh embodied --env go2_mjlab
+      - name: Run Go2 Mjlab PPO
+        timeout-minutes: 20
+        run: |
+          unset PYTHONPATH
+          export REPO_PATH=$(pwd)
+          source .venv/bin/activate
+          bash tests/e2e_tests/embodied/run.sh go2_mjlab_ppo
+      - name: Clean up
+        if: always()
+        run: rm -rf .venv
+
   embodied-mlp-sac-maniskill-test:
     runs-on: embodied
     steps:

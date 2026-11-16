@@ -224,3 +224,12 @@ Launch PPO with the Search-R1 training script:
 - Use reward normalization to stabilize training.  
 - Monitor KL divergence to detect policy over-updates.  
 - For large LLMs, increase batch size to reduce variance.
+
+Embodied Value Loss and Adaptive Learning Rates
+------------------------------------------------
+
+Embodied PPO selects its clipped value objective with ``algorithm.value_loss_type``: ``huber`` preserves the default objective, and ``mse`` uses squared error. Both compare the original and clipped predictions and optimize the larger error.
+
+Set ``algorithm.desired_kl`` to a positive target to adapt learning rate from the policy's analytic KL. The policy must return per-sample ``kl_divergence`` from its training forward. Actor ranks average KL across the global minibatch before each optimizer step. Learning rate decreases by a factor of 1.5 above twice the target and increases by 1.5 below half the target when KL is positive, with bounds of 0.00001 and 0.01.
+
+This mode requires ``actor.optim.lr_scheduler: torch_constant`` so epoch scheduling preserves minibatch LR changes. Omitting ``algorithm.desired_kl`` preserves the configured scheduler without analytic-KL adaptation.
