@@ -121,13 +121,61 @@ def main() -> None:
         raise FileExistsError(f"Refusing to replace prior evaluation: {destination}")
     env = Go2MjlabEnv(cfg, num_envs=a.num_envs)
     episodes = []
+    traversal = None
+    if a.eval_task == "B2_stairs":
+        terrain = env.task.cfg.scene.terrain.terrain_generator
+        stairs = terrain.sub_terrains["B2_stairs"]
+        goal_x = terrain.size[0] / 2 - stairs.border_width + 0.3
+        corridor_y = terrain.size[1] / 2 - stairs.border_width - 0.3
+        traversal = {
+            "crossed": torch.zeros(a.num_envs, dtype=torch.bool),
+            "max_forward": torch.full((a.num_envs,), -torch.inf),
+            "inside_corridor": torch.ones(a.num_envs, dtype=torch.bool),
+            "goal_x": goal_x,
+            "corridor_y": corridor_y,
+        }
     try:
         obs, _ = env.reset()
         with torch.inference_mode():
             for _ in range(50000):
+                if traversal is not None:
+                    # Observe before stepping so automatic resets cannot fake progress.
+                    relative = (
+                        env.task.scene["robot"].data.root_link_pos_w
+                        - env.task.scene.env_origins
+                    )
+                    traversal["max_forward"] = torch.maximum(
+                        traversal["max_forward"], relative[:, 0]
+                    )
+                    traversal["inside_corridor"] &= (
+                        relative[:, 1].abs() <= traversal["corridor_y"]
+                    )
+                    traversal["crossed"] |= (
+                        (relative[:, 0] >= traversal["goal_x"])
+                        & traversal["inside_corridor"]
+                        & (env.task.episode_length_buf > 0)
+                    )
                 actions = policy(obs["states"])
-                obs, _, _, _, info = env.step(actions)
-                episodes.extend(info["benchmark_episodes"])
+                obs, _, terminated, truncated, info = env.step(actions)
+                rows = info["benchmark_episodes"]
+                if traversal is not None:
+                    ids = torch.nonzero(terminated | truncated).flatten().tolist()
+                    for i, row in zip(ids, rows, strict=True):
+                        row["stairs_crossed"] = bool(traversal["crossed"][i])
+                        row["stairs_pass_success"] = (
+                            row["stairs_crossed"]
+                            and row["termination_reason"] == "time_out"
+                        )
+                        row["stairs_tracking_and_pass_success"] = (
+                            row["stairs_pass_success"] and row["episode_success"]
+                        )
+                        row["max_forward_from_terrain_origin_m"] = float(
+                            traversal["max_forward"][i]
+                        )
+                    traversal["crossed"][ids] = False
+                    traversal["inside_corridor"][ids] = True
+                    traversal["max_forward"][ids] = -torch.inf
+                episodes.extend(rows)
                 if len(episodes) >= a.num_episodes:
                     break
         if len(episodes) < a.num_episodes:
@@ -137,6 +185,9 @@ def main() -> None:
     finally:
         env.close()
     metrics = summarize(episodes)
+    if traversal is not None:
+        for name in ("stairs_pass_success", "stairs_tracking_and_pass_success"):
+            metrics[name + "_rate"] = sum(e[name] for e in episodes) / len(episodes)
     protocol = {
         "variant": "rlinf-mjlab-cross-task-v1",
         "evaluation_scope": "smoke" if a.num_episodes < 1024 else "benchmark",
@@ -161,6 +212,15 @@ def main() -> None:
         "metrics_timing": "post-step/current state, including reset state as in reference evaluator",
         "hardware_access": False,
     }
+    if traversal is not None:
+        protocol["stairs_traversal"] = {
+            "goal_x_from_terrain_origin_m": traversal["goal_x"],
+            "corridor_abs_y_max_m": traversal["corridor_y"],
+            "definition": "Reach +x outer landing with 0.3m root clearance, without leaving staircase corridor before crossing, and survive full episode",
+            "combined_success": "stairs_pass_success AND original benchmark tracking success",
+            "timing": "pre-action positions; reset positions excluded; crossing on final action conservatively not counted",
+            "reference_metric": False,
+        }
     destination.write_text(
         json.dumps(
             {"summary": metrics, "episodes": episodes, "protocol": protocol}, indent=2
