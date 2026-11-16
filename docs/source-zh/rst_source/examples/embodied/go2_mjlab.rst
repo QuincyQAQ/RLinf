@@ -123,3 +123,12 @@
 单 NPU 与八 NPU 短测验证了采样、PPO 更新和保存。这些检查不代表已经收敛、取得任务成功率或通过真机部署验证。
 
 RLinf 每批 rollout 汇总一次各 actor 的观测统计，上游 RSL-RL 每个环境步后更新本地统计。RLinf 用终止前观测计算超时回合的 bootstrap 值，上游 RSL 包装器使用保存的 transition value。任务与上述参数对齐上游，但执行方式存在这些差异，不宣称数值等价。原生 PPO 配置见 :doc:`../../reference/algorithms/ppo`。
+
+跨任务评估
+----------
+
+独立的 ``rlinf-mjlab-cross-task-v1`` 版本提供平地前进、平地全向、粗糙地形、阶梯和跨沟五个任务。Actor 和 Critic 均使用 235 维观测，其中高度扫描为 187 维。新任务需要重新初始化 policy；原有 47/74 维 Flat 配置保留原接口。
+
+平地前进配置为 ``go2_mjlab_benchmark_a1_ascend``，将 ``a1`` 换成 ``a2``、``b1``、``b2`` 或 ``c2`` 可选择其他任务。短验证配置 ``go2_mjlab_benchmark_a1_smoke`` 使用 16 个环境、3 次更新。CPU 任务检查已通过，加速器验证需要空闲设备，应等原训练释放 8 号卡后再运行。
+
+对每个训练好的 policy，分别启动独立进程评估五项任务，每个单元格至少收集 1024 个回合。评估和矩阵导出入口为 ``examples/embodiment/go2_mjlab/evaluate_benchmark.py`` 和 ``examples/embodiment/go2_mjlab/export_benchmark_matrix.py``，完整命令、门槛和仿真差异见 ``examples/embodiment/go2_mjlab/BENCHMARK.zh-CN.md``。未测单元格保留空值，短测默认不进入正式矩阵。本版沿用参考项目的成功判据，物理、奖励和启动随机化仍使用 Mjlab，不能将结果当作原 Isaac Lab 数值的直接复现。

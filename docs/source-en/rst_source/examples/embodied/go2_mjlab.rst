@@ -123,3 +123,12 @@ The full run writes TensorBoard events under ``outputs/go2_mjlab/native_ascend/t
 Single-NPU and eight-NPU short runs validate sampling, PPO updates and saving. These checks do not establish convergence, a success rate or real-robot deployment.
 
 RLinf merges observation moments across actors once per rollout; upstream RSL-RL updates local moments after each environment step. RLinf bootstraps timeouts from terminal observations, while the upstream RSL wrapper uses its stored transition value. The task and listed settings follow upstream, with these execution differences documented rather than a claim of numerical equivalence. See :doc:`../../reference/algorithms/ppo` for native PPO settings.
+
+Cross-Task Benchmark
+--------------------
+
+The separate ``rlinf-mjlab-cross-task-v1`` variant provides forward walking, omnidirectional walking, rough terrain, stairs and gap tasks. Each actor and critic receives a 235-dimensional observation, including a 187-ray height scan. Initialize new policies for these tasks; the existing 47/74-observation Flat configuration retains its interface.
+
+Use ``go2_mjlab_benchmark_a1_ascend`` for forward walking, replacing ``a1`` with ``a2``, ``b1``, ``b2`` or ``c2`` for the other tasks. The 16-environment, three-update short configuration is ``go2_mjlab_benchmark_a1_smoke``. Its accelerator validation requires an available device; CPU task checks have passed. Schedule it after the original job releases device 8.
+
+Evaluate each trained policy in a separate process for every task, with at least 1024 episodes per cell. The evaluator and matrix exporter are ``examples/embodiment/go2_mjlab/evaluate_benchmark.py`` and ``examples/embodiment/go2_mjlab/export_benchmark_matrix.py``. The complete commands, thresholds and simulator differences are documented in ``examples/embodiment/go2_mjlab/BENCHMARK.md``. Missing cells remain empty and short tests are excluded by default. This Mjlab variant uses the reference success criteria but retains Mjlab rewards, startup randomization and physics; it is not a numerical reproduction of the reference Isaac Lab results.

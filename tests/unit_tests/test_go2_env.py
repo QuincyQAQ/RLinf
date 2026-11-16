@@ -314,3 +314,102 @@ def test_go2_native_eval_cli_resolves_default_config(tmp_path):
     assert cfg.runner.only_eval
     assert cfg.rollout.model.model_type == "go2_policy"
     assert cfg.algorithm.loss_type == "actor_critic"
+
+
+@pytest.mark.parametrize(
+    "task", ["A1_forward", "A2_omni", "B1_rough", "B2_stairs", "C2_gap"]
+)
+def test_benchmark_failure_overrides_tracking(task):
+    from rlinf.envs.sim.go2_mjlab.benchmark_metrics import Tracker, summarize
+
+    tracker = Tracker(task, 2, 0.02)
+    tracker.update([0, 0], [0, 0], [False, False], [False, False])
+    rows = tracker.update([0, 0], [0, 0], [True, False], [True, True])
+    assert [r["episode_success"] for r in rows] == [False, True]
+    assert rows[0]["termination_reason"] == "failure"
+    assert summarize(rows)["success_rate"] == 0.5
+    assert summarize(rows)["failure_rate"] == 0.5
+    assert not tracker.count.any()
+
+
+def test_benchmark_partial_reset_keeps_other_episode():
+    from rlinf.envs.sim.go2_mjlab.benchmark_metrics import Tracker
+
+    tracker = Tracker("A1_forward", 2, 0.02)
+    tracker.update([0, 0], [0, 0], [False, False], [False, False])
+    tracker.reset_buffers([1])
+    assert tracker.count.tolist() == [1, 0]
+    rows = tracker.update([0, 0], [0, 0], [False, False], [True, True])
+    assert [r["alive_time_s"] for r in rows] == [0.04, 0.02]
+
+
+def test_benchmark_missing_results_are_not_zero_success():
+    from rlinf.envs.sim.go2_mjlab.benchmark_metrics import summarize
+    from rlinf.envs.sim.go2_mjlab.benchmark_protocol import validate_policy_interface
+
+    with pytest.raises(ValueError, match="No completed episodes"):
+        summarize([])
+    with pytest.raises(ValueError, match="235"):
+        validate_policy_interface(47, 12)
+
+
+def _benchmark_example_module(filename):
+    import importlib.util
+    from pathlib import Path
+
+    path = (
+        Path(__file__).resolve().parents[2] / "examples/embodiment/go2_mjlab" / filename
+    )
+    spec = importlib.util.spec_from_file_location(path.stem, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_benchmark_frozen_actor_preserves_policy_normalization():
+    frozen = _benchmark_example_module("evaluate_benchmark.py").FrozenActor
+    policy = Go2Policy(obs_dim=235, critic_obs_dim=235, obs_normalization=True)
+    states = torch.randn(8, 235)
+    policy.actor_normalizer.update(states)
+    actor = frozen(policy.state_dict()).eval()
+    with torch.no_grad():
+        expected = policy.actor(policy.actor_normalizer(states))
+        torch.testing.assert_close(actor(states), expected)
+    with pytest.raises(ValueError, match="235"):
+        frozen(Go2Policy(obs_dim=47).state_dict())
+
+
+def test_benchmark_matrix_excludes_smoke_and_preserves_missing(tmp_path):
+    import json
+
+    module = _benchmark_example_module("export_benchmark_matrix.py")
+    for seed, value in [(0, 0.5), (1, 1.0)]:
+        root = tmp_path / f"A1_forward_s{seed}"
+        root.mkdir()
+        (root / "policy_manifest.json").write_text(
+            json.dumps(
+                {
+                    "train_task": "A1_forward",
+                    "train_seed": seed,
+                    "checkpoint_sha256": "same",
+                }
+            )
+        )
+        (root / "A1_forward.json").write_text(
+            json.dumps(
+                {
+                    "protocol": {
+                        "checkpoint_sha256": "same",
+                        "evaluation_scope": "smoke",
+                    },
+                    "summary": {"success_rate": value},
+                }
+            )
+        )
+    result = module.aggregate(tmp_path)
+    assert result["mean"][0]["A1_forward"] is None
+    result = module.aggregate(tmp_path, include_smoke=True)
+    assert result["mean"][0]["A1_forward"] == 0.75
+    assert result["mean"][0]["A2_omni"] is None
+    assert result["std"][0]["A1_forward"] == pytest.approx(0.35355339)
+    assert result["std"][0]["mean_over_eval_tasks"] is None

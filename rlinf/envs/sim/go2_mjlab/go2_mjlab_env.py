@@ -45,6 +45,7 @@ class Go2MjlabEnv(gym.Env):
             )
         if cfg.video_cfg.save_video:
             raise ValueError("Mjlab CPU adapter requires video_cfg.save_video=false.")
+        self.benchmark_tracker = None
         self.cfg = cfg
         self.num_envs = num_envs
         self.auto_reset = True
@@ -52,7 +53,22 @@ class Go2MjlabEnv(gym.Env):
         self.num_group = num_envs
         self.is_start = True
         torch.set_num_threads(int(cfg.threads))
-        task_cfg = load_env_cfg("Unitree-Go2-Flat")
+        benchmark_task = cfg.get("benchmark_task")
+        if benchmark_task is None:
+            task_cfg = load_env_cfg("Unitree-Go2-Flat")
+            actor_dim, critic_dim = 47, 74
+        else:
+            from .benchmark import make_benchmark_cfg
+
+            task_cfg = make_benchmark_cfg(benchmark_task, evaluation=bool(cfg.is_eval))
+            actor_dim, critic_dim = 235, 235
+            from .benchmark_metrics import Tracker
+
+            self.benchmark_tracker = Tracker(
+                benchmark_task,
+                num_envs,
+                task_cfg.sim.mujoco.timestep * task_cfg.decimation,
+            )
         task_cfg.scene.num_envs = num_envs
         task_cfg.seed = int(cfg.seed) + seed_offset
         task_cfg.episode_length_s = int(cfg.max_episode_steps) * (
@@ -61,8 +77,10 @@ class Go2MjlabEnv(gym.Env):
         self.task = TerminalObservationEnv(task_cfg, device="cpu")
         self.observation_space = gym.spaces.Dict(
             {
-                "states": gym.spaces.Box(-np.inf, np.inf, (47,), np.float32),
-                "critic_states": gym.spaces.Box(-np.inf, np.inf, (74,), np.float32),
+                "states": gym.spaces.Box(-np.inf, np.inf, (actor_dim,), np.float32),
+                "critic_states": gym.spaces.Box(
+                    -np.inf, np.inf, (critic_dim,), np.float32
+                ),
             }
         )
         self.action_space = gym.spaces.Box(-np.inf, np.inf, (12,), np.float32)
@@ -111,6 +129,8 @@ class Go2MjlabEnv(gym.Env):
             self._initialized_episode_lengths = True
         self.returns[ids if ids is not None else slice(None)] = 0
         self.lengths[ids if ids is not None else slice(None)] = 0
+        if self.benchmark_tracker is not None:
+            self.benchmark_tracker.reset_buffers(env_idx)
         self.is_start = True
         return self._wrap_obs(obs), {}
 
@@ -130,6 +150,19 @@ class Go2MjlabEnv(gym.Env):
             "episode_len": torch.where(done, self.lengths, 0).clone(),
         }
         info = {"episode": episode}
+        if self.benchmark_tracker is not None:
+            robot = self.task.scene["robot"]
+            command = self.task.command_manager.get_command("twist")
+            lin_error = torch.linalg.vector_norm(
+                command[:, :2] - robot.data.root_link_lin_vel_b[:, :2], dim=1
+            )
+            ang_error = torch.abs(command[:, 2] - robot.data.root_link_ang_vel_b[:, 2])
+            info["benchmark_episodes"] = self.benchmark_tracker.update(
+                lin_error.numpy(),
+                ang_error.numpy(),
+                terminated.numpy(),
+                truncated.numpy(),
+            )
         if done.any():
             info.update(
                 final_observation=self.task.final_observation,

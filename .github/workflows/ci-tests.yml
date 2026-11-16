@@ -114,6 +114,7 @@ jobs:
               - 'examples/embodiment/config/*/**'
               - 'examples/embodiment/config/go2_mujoco_ppo_ascend_eight.yaml'
               - 'examples/embodiment/config/go2_mjlab_ppo_ascend*.yaml'
+              - 'examples/embodiment/config/go2_mjlab_benchmark*.yaml'
               - 'examples/diffusion/**'
               - 'examples/reward/**'
               - 'tests/e2e_tests/embodied/**'

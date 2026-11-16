@@ -1,0 +1,24 @@
+defaults:
+  - go2_mjlab_benchmark_a1_ascend
+  - _self_
+
+env:
+  train:
+    total_num_envs: 16
+
+actor:
+  micro_batch_size: 96
+  global_batch_size: 96
+
+cluster:
+  component_placement:
+    actor,rollout: '8'
+    env: 8
+
+runner:
+  max_epochs: 3
+  max_steps: 3
+  save_interval: 1
+  logger:
+    log_path: outputs/go2_cross_task/smoke
+    experiment_name: benchmark_smoke

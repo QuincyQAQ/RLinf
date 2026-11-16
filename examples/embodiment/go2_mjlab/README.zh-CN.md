@@ -88,3 +88,7 @@ ASCEND_RT_VISIBLE_DEVICES=8 "$GO2_PYTHON" examples/embodiment/go2_mjlab/validate
 ```
 
 工具保存解析后的任务配置、算法配置和 `result.json`。可选学习器属于 RSL-RL 对照，不是原生 RLinf PPO。`run_upstream.sh` 保留了固定版本的 NVIDIA 官方基线入口，默认解释器为 `.venv-mjlab/bin/python`，启动前会检查依赖版本。
+
+## 跨任务评估
+
+独立的五任务版本使用 235 维观测，操作步骤见[评估说明](BENCHMARK.zh-CN.md)。上面的 Flat 训练保留原配置。

@@ -88,3 +88,7 @@ ASCEND_RT_VISIBLE_DEVICES=8 "$GO2_PYTHON" examples/embodiment/go2_mjlab/validate
 ```
 
 The tool writes resolved task and agent YAML plus `result.json`. The optional learner is explicitly an RSL-RL reference, not native RLinf PPO. `run_upstream.sh` retains the pinned NVIDIA upstream baseline launcher; its default interpreter is `.venv-mjlab/bin/python` and its dependencies are checked before launch.
+
+## Cross-task benchmark
+
+For the separate five-task, 235-observation variant, follow [the benchmark guide](BENCHMARK.md). The Flat recipe above retains its original configuration.
