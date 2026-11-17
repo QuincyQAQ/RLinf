@@ -432,6 +432,8 @@ def prepare_actions(
             raw_chunk_actions=raw_chunk_actions,
             model_type=model_type,
         )
+    elif env_type == SupportedEnvType.GO2_MUJOCO:
+        chunk_actions = raw_chunk_actions
     elif env_type == SupportedEnvType.FRANKASIM:
         chunk_actions = prepare_actions_for_mujoco(
             raw_chunk_actions=raw_chunk_actions,

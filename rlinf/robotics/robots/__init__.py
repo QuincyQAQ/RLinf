@@ -27,8 +27,11 @@ from .lekiwi import LeKiwiConfig, LeKiwiRobot
 from .piper import PiperConfig, PiperRobot
 from .so101 import SO101Config, SO101Robot
 from .turtle2 import Turtle2Config, Turtle2Robot
+from .unitree_go2 import Go2Config, Go2Robot
 
 __all__ = [
+    "Go2Config",
+    "Go2Robot",
     "DOSW1Robot",
     "DOSW1RobotConfig",
     "DualARX5Config",

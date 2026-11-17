@@ -421,3 +421,10 @@ gradients for specific wrappers. The optimizer preserves parameter groups and
 optimizer settings, converts gradients to FP32 during updates, and keeps FP32
 optimizer states. BF16/FP16 original parameters also have an FP32 master copy.
 Use the default ``keep_low_precision_grads: false`` with native AdamW.
+
+Rollout Statistics for PPO
+--------------------------
+
+A policy may override ``prepare_ppo_update(forward_inputs)`` to update checkpointed observation statistics. The synchronous embodied actor calls this hook once with the complete rollout before minibatch optimization. The default implementation leaves statistics unchanged. Policies that aggregate across actor ranks must use matching collectives on every rank and retain statistics as registered buffers so checkpointing and weight synchronization include them.
+
+To support ``algorithm.desired_kl``, return a ``kl_divergence`` tensor containing one analytic KL value per sample from ``default_forward``. Store immutable rollout distribution parameters in ``forward_inputs`` so this KL compares the behavior policy with the current policy. See :doc:`../reference/algorithms/ppo` for learning-rate adaptation.

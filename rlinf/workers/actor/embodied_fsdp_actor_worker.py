@@ -644,6 +644,7 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
                 )
 
         self.model.train()
+        self.model.prepare_ppo_update(self.rollout_batch["forward_inputs"])
         rollout_size = (
             self.rollout_batch["prev_logprobs"].shape[0]
             * self.rollout_batch["prev_logprobs"].shape[1]
@@ -691,6 +692,7 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
                 )
 
                 self.optimizer.zero_grad()
+                self._ppo_kl_sum = torch.zeros(2, device=self.device)
                 for idx, batch in enumerate(train_micro_batch):
                     self.train_micro_batch(
                         micro_batch=batch,
@@ -703,6 +705,16 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
 
                 self.torch_platform.empty_cache()
 
+                desired_kl = self.cfg.algorithm.get("desired_kl", None)
+                if desired_kl is not None:
+                    torch.distributed.all_reduce(self._ppo_kl_sum)
+                    kl = (self._ppo_kl_sum[0] / self._ppo_kl_sum[1]).item()
+                    for group in self.optimizer.param_groups:
+                        if kl > 2 * desired_kl:
+                            group["lr"] = max(1e-5, group["lr"] / 1.5)
+                        elif 0 < kl < desired_kl / 2:
+                            group["lr"] = min(1e-2, group["lr"] * 1.5)
+                    append_to_dict(metrics, {"actor/analytic_kl": kl})
                 grad_norm, lr_list = self.optimizer_step()
                 data = {
                     "actor/grad_norm": grad_norm,
@@ -785,6 +797,11 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
                 **kwargs,
             )
 
+        if self.cfg.algorithm.get("desired_kl", None) is not None:
+            kl = output_dict["kl_divergence"].detach()
+            self._ppo_kl_sum[0] += kl.sum()
+            self._ppo_kl_sum[1] += kl.numel()
+
         if SupportedModel(self.cfg.actor.model.model_type) in [
             SupportedModel.GR00T,
             SupportedModel.GR00T_N1D6,
@@ -808,6 +825,7 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
             "clip_ratio_low": self.cfg.algorithm.clip_ratio_low,
             "value_clip": self.cfg.algorithm.get("value_clip", None),
             "huber_delta": self.cfg.algorithm.get("huber_delta", None),
+            "value_loss_type": self.cfg.algorithm.get("value_loss_type", "huber"),
             "loss_mask": loss_mask,
             "loss_mask_sum": loss_mask_sum,
             "max_episode_steps": self.cfg.env.train.max_episode_steps,

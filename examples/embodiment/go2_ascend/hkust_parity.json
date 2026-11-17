@@ -1,0 +1,52 @@
+{
+  "config_differences": [
+    {
+      "field": "runner.logger.log_path",
+      "hkust": "/data1/qli736/go2_rlinf/experiments/from_scratch",
+      "repository": "outputs/go2_ascend/from_scratch"
+    }
+  ],
+  "extension_functions_and_classes": 9,
+  "extension_ast_equal": true,
+  "runner_ast_equal": true,
+  "progress_flags_ast_equal": true,
+  "changed_entry_definitions": [
+    "main"
+  ],
+  "server_core_files_checked": 903,
+  "different_existing_core_files": [
+    "rlinf/robotics/__init__.py",
+    "rlinf/robotics/robots/__init__.py",
+    "rlinf/robotics/parts/mobility/__init__.py",
+    "rlinf/envs/real/__init__.py",
+    "rlinf/envs/real/env.py"
+  ],
+  "audit_date": "2026-11-15",
+  "reference": "Files fetched from the active hkust Go2 job; no changes made to that job.",
+  "runtime_environment_checked": {
+    "OMP_NUM_THREADS": "4",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_WAIT_POLICY": "PASSIVE",
+    "GOMP_SPINCOUNT": "0",
+    "HCCL_HOST_SOCKET_PORT_RANGE": "auto",
+    "HCCL_NPU_SOCKET_PORT_RANGE": "auto",
+    "RAY_enable_worker_prestart": "0",
+    "RAY_prestart_worker_first_driver": "0",
+    "RLINF_EXT_MODULE": "go2_rsl_extension"
+  },
+  "physical_npus": [
+    8,
+    9,
+    10,
+    11
+  ],
+  "simulation_threads": 160,
+  "startup_environment_fix": "Pin OMP_NUM_THREADS=4 and OPENBLAS_NUM_THREADS=1, matching hkust even when the parent shell has other values.",
+  "startup_probe": "With both parent variables set to 128, run_stage.sh exported 4 and 1. bash -n and repository route check passed.",
+  "remaining_deployment_differences": [
+    "CANN initialization is supplied by the deployment environment or CANN_ENV_FILE rather than a hardcoded toolkit path.",
+    "Python defaults to the checked-out repository venv or GO2_PYTHON rather than the original server path.",
+    "Persistent launcher and monitor resolve paths from the repository and selected output directory."
+  ],
+  "limits": "The relocated entry has local tests and source/config parity checks; it has not replaced the active NPU run. Different world sizes, RNG trajectories, simulator restarts and software/hardware environments prevent a bitwise-equivalence claim."
+}

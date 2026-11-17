@@ -290,17 +290,18 @@ class RealWorldEnv(gym.Env):
         full_states = np.concatenate([state[k] for k in sorted(state)], axis=-1)
         obs["states"] = full_states
 
-        frames = raw_obs["frames"]
-        if self.main_image_key not in frames:
-            raise KeyError(
-                f"main_image_key {self.main_image_key!r} not in {list(frames)}"
-            )
-        obs["main_images"] = frames[self.main_image_key]
-        raw_images = OrderedDict(sorted(frames.items()))
-        raw_images.pop(self.main_image_key)
+        frames = raw_obs.get("frames")
+        if frames is not None:
+            if self.main_image_key not in frames:
+                raise KeyError(
+                    f"main_image_key {self.main_image_key!r} not in {list(frames)}"
+                )
+            obs["main_images"] = frames[self.main_image_key]
+            raw_images = OrderedDict(sorted(frames.items()))
+            raw_images.pop(self.main_image_key)
 
-        if raw_images:
-            obs["extra_view_images"] = np.stack(list(raw_images.values()), axis=1)
+            if raw_images:
+                obs["extra_view_images"] = np.stack(list(raw_images.values()), axis=1)
 
         raw_depths = raw_obs.get("depths")
         if raw_depths:

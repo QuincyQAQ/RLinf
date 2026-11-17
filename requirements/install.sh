@@ -130,7 +130,7 @@ NO_INSTALL_RLINF_CMD="--no-install-project"
 SUPPORTED_TARGETS=("embodied" "agentic" "docs")
 SUPPORTED_ENGINES=("sglang" "vllm" "phyai")
 SUPPORTED_MODELS=("openvla" "openvla-oft" "openpi" "psi0" "pi0_fast" "gr00t" "gr00t_n1d6" "gr00t_n1d7" "dexbotic" "starvla" "lingbotvla" "lingbotvlav2" "dreamzero" "fastwam" "cosmos3" "qwen3_vl" "abot_m0" "molmoact2" "evo1" "diffusion" "sglang")
-SUPPORTED_ENVS=("behavior" "maniskill_libero" "libero" "metaworld" "calvin" "isaaclab" "robocasa" "robocasa365" "franka" "franka-ros" "frankasim" "robotwin" "robodojo" "habitat" "opensora" "wan" "genesis" "geniesim" "xsquare_turtle2" "liberopro" "liberoplus" "roboverse" "embodichain" "d4rl" "mujoco_warp" "dosw1" "gim_arm" "so101" "lekiwi" "piper" "arx5" "yam" "dummy" "polaris" "simple" "robolab")
+SUPPORTED_ENVS=("behavior" "maniskill_libero" "libero" "metaworld" "calvin" "isaaclab" "robocasa" "robocasa365" "franka" "franka-ros" "frankasim" "robotwin" "robodojo" "habitat" "opensora" "wan" "genesis" "geniesim" "xsquare_turtle2" "liberopro" "liberoplus" "roboverse" "embodichain" "d4rl" "mujoco_warp" "go2_mujoco" "go2_mjlab" "dosw1" "gim_arm" "so101" "lekiwi" "piper" "arx5" "yam" "dummy" "polaris" "simple" "robolab")
 
 #=======================Utility Functions=======================
 
@@ -3542,6 +3542,14 @@ install_env_only() {
         d4rl)
             install_d4rl_env
             ;;
+        go2_mjlab)
+            install_common_embodied_deps
+            install_go2_mjlab_env
+            ;;
+        go2_mujoco)
+            install_common_embodied_deps
+            install_go2_mujoco_env
+            ;;
         mujoco_warp)
             install_common_embodied_deps
             install_mujoco_warp_env
@@ -3762,6 +3770,23 @@ EOF
 install_maniskill_libero_env() {
     install_libero_env
     install_maniskill_libero_extras
+}
+
+install_go2_mjlab_env() {
+    if [ "$PLATFORM" != "nvidia" ]; then
+        echo "Go2 Mjlab on Ascend requires the CPU Warp environment documented in examples/embodiment/go2_mjlab/README.zh-CN.md." >&2
+        return 1
+    fi
+    uv pip install -r "$SCRIPT_DIR/embodied/envs/go2_mjlab.txt"
+    local mjlab_dir
+    mjlab_dir=$(clone_or_reuse_repo UNITREE_MJLAB_PATH "$VENV_DIR/unitree_rl_mjlab" https://github.com/unitreerobotics/unitree_rl_mjlab.git) # Pinned below @1425b15f73bd4095f0df53709d7c389c3eb9e790
+    git -C "$mjlab_dir" checkout 1425b15f73bd4095f0df53709d7c389c3eb9e790
+    uv pip install --no-deps -e "$mjlab_dir"
+}
+
+install_go2_mujoco_env() {
+    uv pip install "mujoco==3.3.7" "pybind11==2.13.6"
+    python "$SCRIPT_DIR/../rlinf/envs/sim/go2_mujoco/build.py"
 }
 
 install_mujoco_warp_env() {

@@ -212,6 +212,10 @@ class EnvWorker(Worker):
     def set_global_step(self, global_step: int) -> None:
         """Set the trajectory step used to correlate distributed events."""
         self._trajectory_step = global_step
+        for env in self.env_list:
+            update = get_env_attr(env, "set_global_step")
+            if update is not None:
+                update(global_step)
 
     def init_worker(self):
         # This is a barrier to ensure all envs' initial setup upon import is done

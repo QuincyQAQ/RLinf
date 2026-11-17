@@ -229,6 +229,22 @@ If you are starting from "I want to train on benchmark *X*", this is the right e
 
    </div>
 
+.. grid:: 1
+
+   .. grid-item-card:: Go2 MuJoCo
+      :link: embodied/go2_mujoco
+      :link-type: doc
+
+      CPU simulation with an asymmetric locomotion policy and PPO.
+
+.. grid:: 1
+
+   .. grid-item-card:: Go2 Mjlab
+      :link: embodied/go2_mjlab
+      :link-type: doc
+
+      Official Unitree task with CPU physics and native PPO.
+
 .. toctree::
    :hidden:
    :maxdepth: 2
@@ -252,4 +268,6 @@ If you are starting from "I want to train on benchmark *X*", this is the right e
    Genesis <embodied/genesis>
    GenieSim <embodied/geniesim>
    MuJoCo Warp <embodied/mujoco_warp>
+   Go2 MuJoCo <embodied/go2_mujoco>
+   Go2 Mjlab <embodied/go2_mjlab>
    Real-World Simulator <embodied/real_simulator>

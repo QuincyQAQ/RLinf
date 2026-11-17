@@ -78,6 +78,9 @@ class BasePolicy(ABC):
     def prepare_nft_reference_model(self) -> None:
         """Release state unused by NFT forward on a cached reference model."""
 
+    def prepare_ppo_update(self, forward_inputs: dict) -> None:
+        """Update policy-owned statistics once from a complete PPO rollout."""
+
     @abstractmethod
     def default_forward(self, **kwargs): ...
 

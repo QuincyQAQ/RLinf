@@ -1,0 +1,17 @@
+defaults:
+  - go2_mjlab_ppo_ascend_smoke
+  - _self_
+
+hydra:
+  searchpath:
+    - file://${oc.env:REPO_PATH}/examples/embodiment/config
+
+cluster:
+  component_placement:
+    actor,rollout: '0'
+    env: 0
+
+runner:
+  logger:
+    log_path: /workspace/results/go2_mjlab_ppo
+    experiment_name: go2_mjlab_smoke

@@ -112,6 +112,9 @@ jobs:
               - 'rlinf/runners/*reward*.py'
               - 'examples/embodiment/*'
               - 'examples/embodiment/config/*/**'
+              - 'examples/embodiment/config/go2_mujoco_ppo_ascend_eight.yaml'
+              - 'examples/embodiment/config/go2_mjlab_ppo_ascend*.yaml'
+              - 'examples/embodiment/config/go2_mjlab_benchmark*.yaml'
               - 'examples/diffusion/**'
               - 'examples/reward/**'
               - 'tests/e2e_tests/embodied/**'
@@ -192,6 +195,9 @@ jobs:
               - *shared
               - 'rlinf/robotics/**'
               - 'rlinf/models/embodiment/openpi/**'
+              - 'rlinf/models/embodiment/go2_policy/**'
+              - 'examples/embodiment/go2_ascend/**'
+              - 'examples/embodiment/go2_mjlab/**'
               # Unit tests import env modules directly (robot task envs, the
               # real-world compatibility suite, maniskill offload, delay
               # sampler), so env changes have to trigger this job.
@@ -209,6 +215,7 @@ jobs:
               # test_data.py loads this script to test reward split preprocessing.
               - 'examples/reward/preprocess_reward_dataset.py'
               - 'tests/unit_tests/**'
+              - 'tests/robot_mocks/unitree_go2.py'
               - 'tests/conftest.py'
               - '.github/workflows/unit-tests.yml'
               - '.github/scripts/ascend_ci_workspace.sh'

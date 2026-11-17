@@ -1,0 +1,25 @@
+defaults:
+  - go2_mjlab_benchmark_b2_posture_ascend
+  - _self_
+
+# A functional check on one local CUDA device; not the reproduction budget.
+cluster:
+  component_placement:
+    actor,rollout: '0'
+    env: '0'
+
+env:
+  train:
+    total_num_envs: 16
+    threads: 1
+
+actor:
+  micro_batch_size: 96
+  global_batch_size: 96
+
+runner:
+  max_epochs: 3
+  max_steps: 3
+  save_interval: 3
+  logger:
+    experiment_name: B2_migrated_smoke

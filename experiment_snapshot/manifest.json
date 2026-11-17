@@ -1,0 +1,12 @@
+{
+  "full_benchmark_queue.py": "18365b25d0204b658b681c9d816bd46b13690d7ed3968ff5192eae68585c2647",
+  "overnight_stairs.py": "aefdd37ebfaaa9fd672171a6dc50e3ffbcf1b2b08f3fe48cfc4ae6c5eff82047",
+  "stairs_eval_watch.py": "0f1aaf7da719310276cb00998fd89293e0651d1dfe012659d95388e144d1a59b",
+  "status.json": "d86d7b7d1f53bd0d353852e81be087a49896d2711741d3faee332552b58f4a6f",
+  "README.md": "43a0df119153c240aee6d129d2336129dde3f85acb4e948b5c62a28a745e0ec0",
+  "artifacts/plan.json": "1ce5a17eceeba8e70265a293a9defe1bac7939963887d27a93c687d508edd914",
+  "artifacts/full_benchmark_launch_seed_barrier.json": "0a2b1571abcb40920d41c699bb33a096b00cad988e775a2fbad5ecbdafd3fbd4",
+  "artifacts/stairs_ppo_launch.json": "b3f8621c54dec18f9771e1e2f45f514fa0c93632b73cd1bef6c6b05bd4aedac8",
+  "artifacts/manifest.json": "f34c18ba64816d7d2c6e59f1b822610eb242177db4ce7ac5aa6afc2bc1a94d13",
+  "artifacts/perf_cpu_result.json": "cbab9284101c630816ea60f59e6643ba67599e5d211277e682ff240e6d7e941c"
+}

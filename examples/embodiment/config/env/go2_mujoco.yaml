@@ -1,0 +1,21 @@
+env_type: go2_mujoco
+seed: 42
+total_num_envs: null
+group_size: 1
+max_steps_per_rollout_epoch: 24
+max_episode_steps: 1000
+auto_reset: true
+ignore_terminations: false
+use_rel_reward: false
+reward_scale: 1.0
+use_fixed_reset_state_ids: false
+use_ordered_reset_state_ids: false
+is_eval: false
+threads: 4
+randomize: true
+noise: true
+fixed_command: null
+xml_path: null
+video_cfg:
+  save_video: false
+  video_base_dir: null

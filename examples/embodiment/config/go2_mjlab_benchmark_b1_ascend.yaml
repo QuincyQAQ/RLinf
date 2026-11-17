@@ -1,0 +1,18 @@
+defaults:
+  - go2_mjlab_ppo_ascend
+  - _self_
+
+env:
+  train:
+    randomize_initial_episode_length: false
+    benchmark_task: B1_rough
+
+actor:
+  model:
+    obs_dim: 235
+    critic_obs_dim: 235
+
+runner:
+  logger:
+    log_path: outputs/go2_cross_task/B1_rough
+    experiment_name: B1_rough

@@ -210,3 +210,12 @@ LLM 推理任务的配置与具身任务的配置有相似之处。
 - 使用奖励归一化来稳定训练。  
 - 监控 KL 散度以检测策略是否更新过度。  
 - 对于大型 LLM，增加 batch size 可以减少方差。  
+
+具身 PPO 的价值损失与自适应学习率
+---------------------------------
+
+具身 PPO 通过 ``algorithm.value_loss_type`` 选择裁剪价值损失：``huber`` 保留默认目标，``mse`` 使用平方误差。两者都比较原始预测与裁剪预测的误差，并优化其中较大的值。
+
+将 ``algorithm.desired_kl`` 设为正数，可按 policy 的解析 KL 自适应调整学习率。模型训练前向需返回每个样本的 ``kl_divergence``。每次优化器更新前，actor 汇总全局 minibatch 的平均 KL。KL 大于目标值两倍时，学习率除以 1.5；KL 大于零且小于目标值一半时，学习率乘以 1.5，范围限制为 0.00001–0.01。
+
+此模式要求 ``actor.optim.lr_scheduler: torch_constant``，以保留每个 minibatch 更新时调整的学习率。省略 ``algorithm.desired_kl`` 时，保留原调度器行为，不启用解析 KL 自适应调整。

@@ -139,6 +139,49 @@ class MjWarpWorld:
         """
         return cls(mj_model, num_envs, device)
 
+    @classmethod
+    def from_existing(
+        cls,
+        mj_model: object,
+        model: object,
+        data: object,
+        device: Union[torch.device, str],
+    ) -> "MjWarpWorld":
+        """Borrow an initialized Warp model and data without allocating physics.
+
+        The caller owns the arrays and their lifetime. Changes to the borrowed
+        state are visible to both callers. Model-array replacement requires a
+        new view; solver options and per-world randomization are preserved.
+        """
+        import mujoco_warp as mjw
+        import warp as wp
+
+        world = cls.__new__(cls)
+        world.device = torch.device(device)
+        if world.device.type not in ("cpu", "cuda"):
+            raise ValueError(
+                f"MjWarpWorld supports only CPU and CUDA devices, got {world.device}."
+            )
+        world._wp, world._mjw = wp, mjw
+        world._wp_device = str(world.device)
+        world.mj_model, world.model, world.data = mj_model, model, data
+        world._qpos = wp.to_torch(data.qpos)
+        world._qvel = wp.to_torch(data.qvel)
+        world._ctrl = wp.to_torch(data.ctrl)
+        world.num_envs = world._qpos.shape[0]
+        world.nq, world.nv, world.nu = mj_model.nq, mj_model.nv, mj_model.nu
+        world.timestep = float(mj_model.opt.timestep)
+        world.qpos0 = torch.as_tensor(
+            np.array(mj_model.qpos0), dtype=torch.float32, device=world.device
+        )
+        ctrl_range = torch.as_tensor(
+            np.array(mj_model.actuator_ctrlrange),
+            dtype=torch.float32,
+            device=world.device,
+        )
+        world.ctrl_low, world.ctrl_high = ctrl_range[:, 0], ctrl_range[:, 1]
+        return world
+
     @property
     def qpos(self) -> torch.Tensor:
         """Writable generalized positions, shape ``(num_envs, nq)``."""

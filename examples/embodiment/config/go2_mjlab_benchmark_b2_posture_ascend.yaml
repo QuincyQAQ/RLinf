@@ -1,0 +1,36 @@
+defaults:
+  - go2_mjlab_benchmark_b2_reference_ascend
+  - _self_
+
+env:
+  group_name: E
+  train:
+    total_num_envs: 1024
+    seed: 42
+    posture_reward_schedule:
+      total_updates: 2200
+      interval: 25
+      start_fraction: 0.0
+      end_fraction: 0.35
+      height_early: -10.0
+      height_late: -3.5
+      orientation_early: -5.0
+      orientation_late: -2.0
+
+actor:
+  seed: 42
+  micro_batch_size: 768
+  global_batch_size: 6144
+  model:
+    distribution_safety_patch: true
+
+cluster:
+  component_placement:
+    env: 8-15:0-63
+
+runner:
+  max_epochs: 2200
+  max_steps: 2200
+  logger:
+    log_path: outputs/go2_b2_posture
+    experiment_name: B2_stairs_posture

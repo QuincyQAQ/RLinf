@@ -1,0 +1,32 @@
+defaults:
+  - go2_mjlab_benchmark_b2_ascend
+  - _self_
+
+env:
+  train:
+    benchmark_recipe: b2_reference_v2
+    total_num_envs: 2048
+    seed: 0
+    threads: 1
+    randomize_initial_episode_length: true
+
+actor:
+  seed: 0
+  micro_batch_size: 1536
+  global_batch_size: 12288
+  model:
+    initial_checkpoint: null
+    obs_normalization: false
+
+cluster:
+  component_placement:
+    env: 8-15:0-127
+
+runner:
+  resume_dir: null
+  max_epochs: 8000
+  max_steps: 8000
+  save_interval: 50
+  logger:
+    log_path: outputs/go2_b2_reference_v2
+    experiment_name: B2_stairs_reference

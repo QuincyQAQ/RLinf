@@ -37,6 +37,7 @@ RLinf is a flexible and scalable open-source RL infrastructure designed for Embo
 
 - [2026/11] 🎉 NVIDIA [Isaac RL Post-Training](https://github.com/nvidia-isaac/isaac-rlpt) adopts RLinf as a distributed rollout and training runtime and integrates [demonstration co-training](https://rlinf.readthedocs.io/en/latest/rst_source/examples/embodied/co_training.html) for VLA RL post-training.
 - [2026/11] 🎉 The [RLinf website](https://rlinf.org/) is live. Read our [blog posts](https://rlinf.org/en/blog/) and browse [community events](https://rlinf.org/en/events/).
+- [2026/11] Go2 Mjlab flat-ground velocity tracking runs with native PPO and a verified Ascend CPU-physics recipe. [Go2 Mjlab](docs/source-en/rst_source/examples/embodied/go2_mjlab.rst).
 - [2026/11] 🔥 RLinf supports MuJoCo Warp for batched GPU simulation on five classic locomotion tasks with an MLP + PPO recipe. Doc: [MuJoCo Warp](https://rlinf.readthedocs.io/en/latest/rst_source/examples/embodied/mujoco_warp.html).
 - [2026/11] 🔥 RLinf supports LeKiwi, a three-wheel omnidirectional mobile base, with per-part bring-up tools and a registered real-world drive environment. Doc: [LeKiwi](https://rlinf.readthedocs.io/en/latest/rst_source/examples/embodied/lekiwi.html).
 - [2026/11] 🔥 RLinf supports dual-arm ARX X5 data collection with Pico teleoperation. Doc: [ARX X5](https://rlinf.readthedocs.io/en/latest/rst_source/examples/embodied/arx5.html).
