@@ -54,8 +54,9 @@ class Go2MjlabEnv(gym.Env):
         self.is_start = True
         torch.set_num_threads(int(cfg.threads))
         benchmark_task = cfg.get("benchmark_task")
-        self.shared_policy_observation = (
-            cfg.get("benchmark_recipe") == "b2_reference_v2"
+        self.shared_policy_observation = cfg.get("benchmark_recipe") in (
+            "b2_reference_v2",
+            "specialist_reference_v1",
         )
         if benchmark_task is None:
             task_cfg = load_env_cfg("Unitree-Go2-Flat")

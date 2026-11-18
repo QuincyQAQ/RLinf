@@ -1,0 +1,11 @@
+defaults:
+  - go2_mjlab_benchmark_b2_posture_ascend
+  - _self_
+
+actor:
+  micro_batch_size: 1536
+
+cluster:
+  component_placement:
+    actor,rollout: 12-15
+    env: 12-15:0-63

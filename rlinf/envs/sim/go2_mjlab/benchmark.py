@@ -31,7 +31,7 @@ def make_benchmark_cfg(
 
     if task not in TASKS:
         raise ValueError(f"Expected benchmark task in {tuple(TASKS)}, got {task!r}")
-    if recipe not in ("mjlab_v1", "b2_reference_v2"):
+    if recipe not in ("mjlab_v1", "b2_reference_v2", "specialist_reference_v1"):
         raise ValueError(f"Unknown Go2 benchmark recipe: {recipe!r}")
     if recipe == "b2_reference_v2" and task != "B2_stairs":
         raise ValueError("b2_reference_v2 supports only B2_stairs")
@@ -140,4 +140,8 @@ def make_benchmark_cfg(
         from .b2_reference import apply_b2_reference
 
         cfg = apply_b2_reference(cfg)
+    elif recipe == "specialist_reference_v1":
+        from .specialist_reference import apply_specialist_reference
+
+        cfg = apply_specialist_reference(cfg, task)
     return cfg

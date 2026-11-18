@@ -735,3 +735,61 @@ def test_benchmark_frozen_actor_supports_reference_unnormalized_policy():
     state["actor.0.weight"][0, 0] = float("nan")
     with pytest.raises(ValueError, match="nonfinite"):
         frozen(state)
+
+
+@pytest.mark.parametrize(
+    "task,tracking,airtime,orientation,height",
+    [
+        ("A1_forward", 1.5, 0.25, -2.5, None),
+        ("A2_omni", 1.5, 0.25, -2.5, -4.0),
+        ("B1_rough", 2.0, 0.25, -5.0, -10.0),
+        ("B2_stairs", 1.5, 0.04, -2.0, -3.5),
+        ("C2_gap", 2.0, 0.08, -5.0, -10.0),
+    ],
+)
+def test_specialist_reference_uses_each_tasks_reward_recipe(
+    task, tracking, airtime, orientation, height
+):
+    pytest.importorskip("mjlab")
+    pytest.importorskip("src.tasks")
+    from rlinf.envs.sim.go2_mjlab.benchmark import make_benchmark_cfg
+
+    cfg = make_benchmark_cfg(task, recipe="specialist_reference_v1")
+    rw = cfg.rewards
+    assert rw["track_lin_vel_xy_exp"].weight == tracking
+    assert rw["feet_air_time"].weight == airtime
+    assert rw["flat_orientation_l2"].weight == orientation
+    if height is None:
+        assert "base_height" not in rw
+        assert rw["stand_still"].weight == -0.15
+    else:
+        assert rw["base_height"].weight == height
+    if task.startswith("A"):
+        assert "undesired_contacts" not in rw
+        assert cfg.scene.terrain.terrain_generator is None
+
+
+def test_specialist_gap_height_ignores_missed_rays():
+    from types import SimpleNamespace
+
+    from rlinf.envs.sim.go2_mjlab.specialist_reference import safe_base_height
+
+    hits = torch.tensor(
+        [
+            [[0.0, 0.0, 0.1], [0.0, 0.0, float("inf")]],
+            [[0.0, 0.0, float("nan")], [0.0, 0.0, float("inf")]],
+        ]
+    )
+    env = SimpleNamespace(
+        scene={
+            "scan": SimpleNamespace(data=SimpleNamespace(hit_pos_w=hits)),
+            "robot": SimpleNamespace(
+                data=SimpleNamespace(
+                    root_link_pos_w=torch.tensor([[0.0, 0.0, 0.5], [0.0, 0.0, 0.5]])
+                )
+            ),
+        }
+    )
+    torch.testing.assert_close(
+        safe_base_height(env, 0.37, "scan"), torch.tensor([0.0009, 0.0])
+    )

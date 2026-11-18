@@ -20,6 +20,7 @@ import os
 import resource
 import subprocess
 import time
+import uuid
 from pathlib import Path
 
 from hydra import compose, initialize_config_dir
@@ -36,6 +37,9 @@ def main():
     parser.add_argument("--save-interval", type=int, default=50)
     parser.add_argument("--resume", type=Path)
     parser.add_argument("--cann-env", type=Path)
+    parser.add_argument(
+        "--override", action="append", default=[], help="Additional Hydra override"
+    )
     args = parser.parse_args()
     root, output = args.root.resolve(), args.output.resolve()
     repo = root / "RLinf"
@@ -46,6 +50,7 @@ def main():
     if args.resume and not (args.resume / "actor/dcp_checkpoint/.metadata").is_file():
         parser.error("Resume needs a complete distributed checkpoint directory")
     overrides = [
+        *args.override,
         f"runner.logger.log_path={output}",
         f"runner.max_steps={args.max_steps}",
         f"runner.max_epochs={args.max_steps}",
@@ -65,7 +70,7 @@ def main():
         GO2_PYTHON=str(args.python.absolute()),
         PYTHONPATH=str(repo) + ":" + str(root / "unitree_rl_mjlab"),
         RAY_ADDRESS="local",
-        RAY_TMPDIR=f"/tmp/go2up_{int(time.time())}",
+        RAY_TMPDIR=f"/tmp/go2up_{uuid.uuid4().hex[:12]}",
         MPLCONFIGDIR="/tmp/go2_migration_mpl",
         OPENBLAS_NUM_THREADS="1",
     )

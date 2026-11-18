@@ -1,0 +1,28 @@
+defaults:
+  - go2_mjlab_benchmark_b1_ascend
+  - _self_
+
+env:
+  train:
+    total_num_envs: 1024
+    seed: 42
+    threads: 1
+    benchmark_recipe: specialist_reference_v1
+    randomize_initial_episode_length: true
+
+actor:
+  seed: 42
+  micro_batch_size: 6144
+  global_batch_size: 6144
+  model:
+    obs_normalization: false
+
+cluster:
+  component_placement:
+    actor,rollout: 10
+    env: 10:0-63
+
+runner:
+  max_epochs: 2200
+  max_steps: 2200
+  save_interval: 50

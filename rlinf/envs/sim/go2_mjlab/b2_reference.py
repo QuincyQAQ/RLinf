@@ -174,5 +174,6 @@ def apply_b2_reference(cfg: Any) -> Any:
     cfg.events["reset_base"].params["velocity_range"] = dict.fromkeys(
         ("x", "y", "z", "roll", "pitch", "yaw"), (0.0, 0.0)
     )
-    cfg.scene.terrain.terrain_generator.num_cols = 20
+    if cfg.scene.terrain.terrain_generator is not None:
+        cfg.scene.terrain.terrain_generator.num_cols = 20
     return cfg
