@@ -517,6 +517,69 @@ def _benchmark_example_module(filename):
     return module
 
 
+def test_rsl_export_preserves_normalized_actor_and_critic():
+    models = pytest.importorskip("rsl_rl.models")
+    from tensordict import TensorDict
+
+    exporter = _benchmark_example_module("rsl_baseline.py").canonical_weights
+    batch = TensorDict(
+        {"states": torch.randn(32, 235), "critic_states": torch.randn(32, 235)},
+        batch_size=[32],
+    )
+    groups = {"actor": ["states"], "critic": ["critic_states"]}
+    actor = models.MLPModel(
+        batch,
+        groups,
+        "actor",
+        12,
+        hidden_dims=[512, 256, 128],
+        activation="elu",
+        obs_normalization=True,
+        distribution_cfg={
+            "class_name": "GaussianDistribution",
+            "init_std": 1.0,
+            "std_type": "scalar",
+        },
+    )
+    critic = models.MLPModel(
+        batch,
+        groups,
+        "critic",
+        1,
+        hidden_dims=[512, 256, 128],
+        activation="elu",
+        obs_normalization=True,
+    )
+    actor.update_normalization(batch)
+    critic.update_normalization(batch)
+    actor.eval()
+    critic.eval()
+    policy = Go2Policy(obs_dim=235, critic_obs_dim=235, obs_normalization=False)
+    policy.load_state_dict(exporter(actor, critic), strict=True)
+    with torch.no_grad():
+        torch.testing.assert_close(
+            policy.actor(batch["states"]), actor(batch), atol=2e-6, rtol=2e-5
+        )
+        torch.testing.assert_close(
+            policy.critic(batch["critic_states"]), critic(batch), atol=2e-6, rtol=2e-5
+        )
+    assert not any("normalizer" in key for key in policy.state_dict())
+
+
+def test_rsl_b2_distribution_bounds_invalid_scalar_std():
+    pytest.importorskip("rsl_rl.modules.distribution")
+    cls = _benchmark_example_module("rsl_distribution.py").BoundedGaussianDistribution
+    distribution = cls(12, init_std=1.0, std_type="scalar")
+    with torch.no_grad():
+        distribution.std_param[0] = -1.0
+        distribution.std_param[1] = float("nan")
+        distribution.std_param[2] = 10.0
+    distribution.update(torch.zeros(4, 12))
+    assert torch.isfinite(distribution.log_prob(torch.zeros(4, 12))).all()
+    assert (distribution.std_param >= 1e-6).all()
+    assert (distribution.std_param <= 5.0).all()
+
+
 def test_benchmark_frozen_actor_preserves_policy_normalization():
     frozen = _benchmark_example_module("evaluate_benchmark.py").FrozenActor
     policy = Go2Policy(obs_dim=235, critic_obs_dim=235, obs_normalization=True)

@@ -105,3 +105,25 @@ The tool writes resolved task and agent YAML plus `result.json`. The optional le
 ## Cross-task benchmark
 
 For the separate five-task, 235-observation variant, follow [the benchmark guide](BENCHMARK.md). The Flat recipe above retains its original configuration.
+
+
+## Five-Task RSL-RL Baseline
+
+Run one independently initialized specialist per task with upstream RSL-RL 5.0.1 PPO. This experiment uses the five existing MuJoCo/Mjlab task recipes, CPU simulation processes, and one accelerator per task. It does not use RLinf PPO workers. The B2 specialist retains the 2200-update posture reward schedule and bounded Gaussian distribution; the other four specialists use their existing task recipes. All five use 1024 environments, 24 rollout steps, five PPO epochs, four minibatches, and training seed 42.
+
+Activate the Ascend runtime described above, then choose five available devices and an unused output directory:
+
+```bash
+source "$CANN_ENV_FILE"
+export PYTHONPATH="$PWD:$PWD/../unitree_rl_mjlab${PYTHONPATH:+:$PYTHONPATH}"
+TORCH_DEVICE_BACKEND_AUTOLOAD=0 "$GO2_PYTHON" \
+  examples/embodiment/go2_mjlab/run_rsl_baselines.py \
+  --python "$GO2_PYTHON" --output outputs/go2_rsl_baselines \
+  --devices 8 9 10 11 12 --updates 2200 --num-envs 1024 --workers 32
+```
+
+Each specialist has 32 CPU processes with one Torch thread each. Checkpoints are saved every 100 completed updates. Each model is evaluated only on its own task at 1200, 1500, 1800, and 2200 updates. Intermediate checks collect at least 64 full episodes; the final check collects at least 256. All checks use evaluation seed 43, separate from training seed 42. Evaluation runs in parallel across tasks, with one evaluation seed per model. These checks are single-seed results and do not reproduce the reference project's complete matrix.
+
+Read `suite_status.json` for per-task training and evaluation status. Each task has `metrics.jsonl`, TensorBoard events, and `checkpoints/global_step_<count>/model.pt` with upstream model and optimizer states. The adjacent `full_weights.pt` folds frozen observation normalization into the first actor and critic layers for the existing evaluator; it is an export, not a replacement for the resumable upstream checkpoint. Simulation state resets on resume. To resume one stopped specialist, use `rsl_baseline.py --resume <model.pt>` with its original task, output, environment count, worker count, seed, and device.
+
+This baseline already uses PPO. A later switch to RLinf PPO measures continued training with a different implementation, not the effect of introducing PPO. The baseline uses the installed RSL-RL 5 model layout and MuJoCo physics; it is not a numerical reproduction of the original Isaac Lab experiment.

@@ -100,3 +100,25 @@ ASCEND_RT_VISIBLE_DEVICES=8 "$GO2_PYTHON" examples/embodiment/go2_mjlab/validate
 ## 跨任务评估
 
 独立的五任务版本使用 235 维观测，操作步骤见[评估说明](BENCHMARK.zh-CN.md)。上面的 Flat 训练保留原配置。
+
+
+## 五任务 RSL-RL baseline
+
+使用 RSL-RL 5.0.1 的 PPO，为五个任务分别从随机初始化训练一个专项模型。任务和奖励沿用已有 MuJoCo/Mjlab 配方，CPU 进程负责仿真，每个任务使用一张加速卡。本实验不调用 RLinf PPO worker。B2 保留 2200 次更新的姿态奖励调度和有界高斯分布；其余四项使用各自已有的任务配方。五项均使用 1024 个环境，每次采样 24 步，每批数据优化 5 遍、分为 4 个 minibatch，训练种子统一为 42。
+
+先按上文激活昇腾运行环境，再选择五张空闲卡和一个尚不存在的输出目录：
+
+```bash
+source "$CANN_ENV_FILE"
+export PYTHONPATH="$PWD:$PWD/../unitree_rl_mjlab${PYTHONPATH:+:$PYTHONPATH}"
+TORCH_DEVICE_BACKEND_AUTOLOAD=0 "$GO2_PYTHON" \
+  examples/embodiment/go2_mjlab/run_rsl_baselines.py \
+  --python "$GO2_PYTHON" --output outputs/go2_rsl_baselines \
+  --devices 8 9 10 11 12 --updates 2200 --num-envs 1024 --workers 32
+```
+
+每个任务使用 32 个 CPU 进程，每进程 1 个 Torch 线程；每完成 100 次更新保存一次 checkpoint。在 1200、1500、1800、2200 次更新时，各模型只评估对应任务。中途每次至少收集 64 个完整回合，最终至少 256 个。评测统一使用种子 43，与训练种子 42 分开。评测按任务并行，每个模型只使用一个评测种子。这些检查只提供单种子结果，不代表原项目完整的交叉评测矩阵。
+
+通过 `suite_status.json` 查看每个任务的训练和评测状态。每个任务分别保存 `metrics.jsonl`、TensorBoard 事件和 `checkpoints/global_step_<count>/model.pt`；后者包含 RSL-RL 模型及优化器状态，可用于恢复训练。旁边的 `full_weights.pt` 将冻结的观测归一化合入 actor 和 critic 的第一层，供已有评测器使用；它是导出文件，不能替代原生恢复 checkpoint。恢复时物理状态会重置。单独恢复已停止的专项模型时，向 `rsl_baseline.py` 传入 `--resume <model.pt>`，并保持原任务、输出目录、环境数、进程数、种子和设备设置。
+
+baseline 本身已经使用 PPO，后续切换到 RLinf PPO 比较的是不同实现下继续训练的效果，不能称为“首次加入 PPO”的收益。此实验采用已安装的 RSL-RL 5 模型结构和 MuJoCo 物理引擎，不宣称原 Isaac Lab 实验的数值复现。
