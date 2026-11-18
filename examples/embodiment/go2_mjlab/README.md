@@ -84,6 +84,8 @@ With `physics_backend=rlinf_mujoco_warp`, an eight-NPU B2 stairs run with 1024 e
 
 The operational helpers `launch_native.py`, `inspect_checkpoint.py` and `watch_main_task.py` in this directory save resolved configurations, inspect B2 checkpoint counters, and evaluate B2 checkpoints separately from training. Their CLI help lists the required paths. The B2 watcher targets 100, 500, 1000 and 2200 updates, skips checkpoints preceding the resume point, and evaluates only the main task; it does not populate the cross-task matrix.
 
+Restarting the watcher reuses completed cells with matching checkpoint, configuration and seed. Episode quotas are minimum counts: all episodes completed in the final parallel batch contribute to the summary. Each evaluation process has a two-hour timeout, adjustable with `--evaluation-timeout` in seconds.
+
 The task and listed PPO settings follow upstream, while RLinf owns rollout collection, GAE, optimization, and checkpointing. RLinf merges normalization moments across actors once per rollout before optimization; RSL-RL updates local moments after each environment step. RLinf bootstraps timeouts from terminal observations; the upstream RSL wrapper uses its stored transition value. Distributed shuffling and environment seeds also differ. These differences preclude a claim of step-by-step numerical equivalence.
 
 ## Run an Upstream Reference

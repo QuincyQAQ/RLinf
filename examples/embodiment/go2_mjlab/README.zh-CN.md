@@ -79,6 +79,8 @@ bash examples/embodiment/go2_ascend/run_native.sh go2_mjlab_ppo_ascend runner.re
 
 本目录的 `launch_native.py`、`inspect_checkpoint.py`、`watch_main_task.py` 分别保存解析后的启动配置、核对 B2 checkpoint 计数和独立评估 B2 checkpoint，所需路径见各脚本的 CLI 帮助。B2 watcher 检查 100、500、1000、2200 次更新，跳过恢复点之前的 checkpoint，只评估主任务，不填充跨任务矩阵。
 
+重启 watcher 会复用 checkpoint、配置和种子匹配的已完成评测。回合配额是最小数量，最后一个并行批次完成的所有回合均计入汇总。每个评测进程的超时为两小时，可用 `--evaluation-timeout` 按秒调整。
+
 任务和上述 PPO 参数对齐上游，采样、GAE、优化与保存由 RLinf 执行。RLinf 在每批 rollout 优化前汇总各 actor 的归一化统计；RSL-RL 在每个环境步后更新本地统计。RLinf 使用终止前观测计算超时回合的 bootstrap 值，上游 RSL 包装器使用保存的 transition value。分布式打乱顺序和环境种子也有差异，因此不宣称与官方训练逐步数值一致。
 
 ## 官方对照验证

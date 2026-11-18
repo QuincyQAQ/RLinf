@@ -15,6 +15,7 @@
 """Evaluate only B2 checkpoints without changing the active training run."""
 
 import argparse
+import hashlib
 import json
 import os
 import signal
@@ -25,11 +26,46 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 
+def read_saved_cell(
+    directory: Path,
+    checkpoint: Path,
+    training_config: Path,
+    seed: int,
+    minimum_episodes: int,
+) -> dict:
+    """Read a completed B2 cell, retaining all episodes from its last batch."""
+    files = list(directory.rglob("B2_stairs.json"))
+    if len(files) != 1:
+        raise ValueError(f"Expected one B2 result in {directory}, found {len(files)}")
+    result = json.loads(files[0].read_text())
+    expected = {
+        "checkpoint_sha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+        "training_config_sha256": hashlib.sha256(
+            training_config.read_bytes()
+        ).hexdigest(),
+        "eval_seed": seed,
+        "eval_task": "B2_stairs",
+        "requested_episodes": minimum_episodes,
+    }
+    for key, value in expected.items():
+        if result["protocol"].get(key) != value:
+            raise ValueError(f"Saved evaluation {key} does not match {directory}")
+    count = len(result["episodes"])
+    if count < minimum_episodes:
+        raise ValueError(
+            f"Expected at least {minimum_episodes} episodes, found {count}"
+        )
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--evaluation-timeout", type=float, default=7200)
     args = parser.parse_args()
+    if args.evaluation_timeout <= 0:
+        parser.error("Evaluation timeout must be positive")
     root, output = args.root.resolve(), args.output.resolve()
     sys.path.insert(0, str(root / "RLinf"))
     import torch
@@ -61,7 +97,12 @@ def main():
 
     def cell(step, checkpoint, seed, episodes):
         destination = output / "evaluations" / f"step_{step}_seed_{seed}"
-        destination.mkdir(parents=True)
+        training_config = output / "launch_config.yaml"
+        if list(destination.rglob("B2_stairs.json")):
+            return read_saved_cell(
+                destination, checkpoint, training_config, seed, episodes
+            )
+        destination.mkdir(parents=True, exist_ok=True)
         command = [
             python,
             str(root / "RLinf/examples/embodiment/go2_mjlab/evaluate_benchmark.py"),
@@ -82,7 +123,7 @@ def main():
             "--output",
             str(destination),
         ]
-        with (destination / "console.log").open("w") as log:
+        with (destination / "console.log").open("a") as log:
             process = subprocess.Popen(
                 command,
                 cwd=root / "RLinf",
@@ -93,7 +134,7 @@ def main():
                 start_new_session=True,
             )
             try:
-                returncode = process.wait(timeout=2700)
+                returncode = process.wait(timeout=args.evaluation_timeout)
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGTERM)
                 try:
@@ -104,11 +145,7 @@ def main():
                 raise RuntimeError(f"Evaluation timed out: {step}, seed {seed}")
         if returncode:
             raise RuntimeError(f"Evaluation exited {returncode}: {destination}")
-        files = list(destination.rglob("B2_stairs.json"))
-        assert len(files) == 1
-        result = json.loads(files[0].read_text())
-        assert len(result["episodes"]) == episodes
-        return result
+        return read_saved_cell(destination, checkpoint, training_config, seed, episodes)
 
     note(
         "started",

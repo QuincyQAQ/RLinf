@@ -530,6 +530,37 @@ def test_benchmark_frozen_actor_preserves_policy_normalization():
         frozen(Go2Policy(obs_dim=47).state_dict())
 
 
+@pytest.mark.parametrize(
+    "count,saved_seed,error",
+    [(16, 42, None), (17, 42, None), (15, 42, "at least"), (16, 43, "eval_seed")],
+)
+def test_benchmark_watcher_reuses_complete_batches(tmp_path, count, saved_seed, error):
+    import hashlib
+    import json
+
+    module = _benchmark_example_module("watch_main_task.py")
+    checkpoint = tmp_path / "weights.pt"
+    config = tmp_path / "config.yaml"
+    checkpoint.write_bytes(b"checkpoint identity")
+    config.write_bytes(b"evaluation configuration")
+    result = {
+        "episodes": [{"episode_success": False}] * count,
+        "protocol": {
+            "checkpoint_sha256": hashlib.sha256(checkpoint.read_bytes()).hexdigest(),
+            "training_config_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
+            "eval_seed": saved_seed,
+            "eval_task": "B2_stairs",
+            "requested_episodes": 16,
+        },
+    }
+    (tmp_path / "B2_stairs.json").write_text(json.dumps(result))
+    if error:
+        with pytest.raises(ValueError, match=error):
+            module.read_saved_cell(tmp_path, checkpoint, config, 42, 16)
+    else:
+        assert module.read_saved_cell(tmp_path, checkpoint, config, 42, 16) == result
+
+
 def test_benchmark_matrix_excludes_smoke_and_preserves_missing(tmp_path):
     import json
 
