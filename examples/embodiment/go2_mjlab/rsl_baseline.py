@@ -38,27 +38,32 @@ from rlinf.utils.logging import get_logger
 logger = get_logger()
 
 
-def compose_task(task: str, environments: int, seed: int):
-    """Resolve the existing task recipe independently of the PPO implementation."""
+def compose_task(task: str, environments: int, seed: int, config: str | None = None):
+    """Resolve a task recipe shared with native RLinf or the legacy baseline."""
     directory = Path(__file__).resolve().parents[1] / "config"
     short = task.split("_")[0].lower()
-    name = (
+    name = config or (
         "go2_mjlab_benchmark_b2_posture_ascend"
         if task == "B2_stairs"
         else f"go2_mjlab_benchmark_{short}_ascend"
     )
     with initialize_config_dir(version_base="1.1", config_dir=str(directory)):
-        return compose(
+        cfg = compose(
             config_name=name,
             overrides=[
                 f"env.train.total_num_envs={environments}",
                 f"env.train.seed={seed}",
                 f"actor.seed={seed}",
                 "env.train.threads=1",
-                "env.train.physics_backend=mjlab",
+                *([] if config else ["env.train.physics_backend=mjlab"]),
                 "env.train.randomize_initial_episode_length=true",
             ],
         )
+    if cfg.env.train.benchmark_task != task:
+        raise ValueError(
+            f"Config {name!r} selects {cfg.env.train.benchmark_task!r}, expected {task!r}"
+        )
+    return cfg
 
 
 @torch.no_grad()
@@ -102,6 +107,9 @@ def main() -> None:
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--save-interval", type=int, default=100)
     parser.add_argument("--resume", type=Path)
+    parser.add_argument(
+        "--config", help="Hydra config name shared with the native RLinf experiment"
+    )
     args = parser.parse_args()
     if min(args.updates, args.num_envs, args.workers, args.save_interval) < 1:
         parser.error("Training budgets must be positive")
@@ -124,7 +132,7 @@ def main() -> None:
     torch.manual_seed(args.seed)
     random.seed(args.seed)
     np.random.seed(args.seed)
-    task_cfg = compose_task(args.task, args.num_envs, args.seed)
+    task_cfg = compose_task(args.task, args.num_envs, args.seed, args.config)
     OmegaConf.save(task_cfg, args.output / "training_config.yaml")
     agent = asdict(load_rl_cfg("Unitree-Go2-Flat"))
     agent["obs_groups"] = {"actor": ["states"], "critic": ["critic_states"]}
@@ -145,6 +153,7 @@ def main() -> None:
         "task": args.task,
         "learner": "rsl_rl.algorithms.PPO",
         "native_rlinf_ppo": False,
+        "config": args.config,
         "physics": "CPU MuJoCo/Mjlab port; not an Isaac Lab reproduction",
         "num_envs": args.num_envs,
         "cpu_workers": args.workers,

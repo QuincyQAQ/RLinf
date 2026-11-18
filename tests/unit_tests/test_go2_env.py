@@ -517,6 +517,39 @@ def _benchmark_example_module(filename):
     return module
 
 
+@pytest.mark.parametrize(
+    "task,short",
+    [
+        ("A1_forward", "a1"),
+        ("A2_omni", "a2"),
+        ("B1_rough", "b1"),
+        ("B2_stairs", "b2"),
+        ("C2_gap", "c2"),
+    ],
+)
+def test_rsl_baseline_accepts_native_task_config(task, short):
+    module = _benchmark_example_module("rsl_baseline.py")
+    cfg = module.compose_task(
+        task, 1024, 42, f"go2_mjlab_benchmark_{short}_native_2200_ascend"
+    )
+    assert cfg.env.train.benchmark_task == task
+    assert cfg.env.train.benchmark_recipe == (
+        "b2_reference_v2" if short == "b2" else "specialist_reference_v1"
+    )
+    assert cfg.env.train.physics_backend == "rlinf_mujoco_warp"
+    assert cfg.actor.model.obs_normalization is False
+    assert cfg.env.train.total_num_envs == 1024
+    assert cfg.env.train.seed == cfg.actor.seed == 42
+
+
+def test_rsl_baseline_rejects_mismatched_task_config():
+    module = _benchmark_example_module("rsl_baseline.py")
+    with pytest.raises(ValueError, match="expected 'A1_forward'"):
+        module.compose_task(
+            "A1_forward", 1024, 42, "go2_mjlab_benchmark_a2_native_2200_ascend"
+        )
+
+
 def test_rsl_export_preserves_normalized_actor_and_critic():
     models = pytest.importorskip("rsl_rl.models")
     from tensordict import TensorDict
