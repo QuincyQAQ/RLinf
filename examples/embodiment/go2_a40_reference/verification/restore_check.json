@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "workspace": "empty local directory",
+  "pinned_repository_files_verified": 6937,
+  "canonical_source_files": 113,
+  "source_tests": {
+    "passed": 32,
+    "seconds": 1.94
+  },
+  "archive_tests": {
+    "passed": 7
+  },
+  "gpu_allocations": 0,
+  "new_simulation_runs": 0,
+  "new_training_runs": 0,
+  "note": "Local-only extra tests are excluded from the authoritative A40 archive."
+}

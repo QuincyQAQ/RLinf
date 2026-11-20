@@ -1,0 +1,82 @@
+{
+  "status": "verified",
+  "protocol": {
+    "task": "A1",
+    "training_seed": 0,
+    "new_evaluation_seed": 45678,
+    "all_lanes_same_seed": true,
+    "episodes_per_lane_minimum": 1024,
+    "models": {
+      "baseline": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_a1_legacy_2048_seeds/2026-11-19_20-17-27_A1_forward_legacy_2048_s0/model_2999.pt",
+      "rlinf_huber": "/workspace/go2/outputs/fullppo_huber_A1_14029742/rlinf_huber/training/policy.pt",
+      "rsl_control": "/workspace/go2/benchmark/logs/rsl_rl/a1_postbaseline_14029742_rsl_control_training/2026-11-20_11-33-00_A1_forward_legacy_2048_s0/model_999.pt"
+    },
+    "original_result": "/workspace/go2/outputs/fullppo_huber_A1_14029742/result.json",
+    "selection": "all new results retained; original results retained; no winner-dependent reruns",
+    "scope": "evaluation-only; no training/config/checkpoint tuning"
+  },
+  "sha256": {
+    "baseline": "00ba890e96eb1ebd345e4add375b6f9cc8cdbdde0727c32eb724d3f93a09103c",
+    "rlinf_huber": "98e0912b08477e188360cbfe058f953b13f14b9439373af8e2bbe8e8755148b9",
+    "rsl_control": "d2506c6da938f655e46ba2ec4c0d1610077f33e9f0faf67e055500d31dd523de"
+  },
+  "new_seed_results": {
+    "baseline": {
+      "num_episodes": 1024,
+      "success_rate": 0.9990234375,
+      "mean_success_step_ratio": 0.9884484750103522,
+      "mean_lin_vel_error": 0.036231953935981366,
+      "mean_ang_vel_error": 0.04827411432623474,
+      "mean_alive_time_s": 19.992265625,
+      "failure_rate": 0.0009765625,
+      "train_task": "A1_forward_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+    },
+    "rlinf_huber": {
+      "num_episodes": 1024,
+      "success_rate": 0.9990234375,
+      "mean_success_step_ratio": 0.9892620401503215,
+      "mean_lin_vel_error": 0.033159948685689764,
+      "mean_ang_vel_error": 0.04061030038144394,
+      "mean_alive_time_s": 19.9958984375,
+      "failure_rate": 0.0009765625,
+      "train_task": "A1_forward_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+    },
+    "rsl_control": {
+      "num_episodes": 1024,
+      "success_rate": 1.0,
+      "mean_success_step_ratio": 0.9881513671875043,
+      "mean_lin_vel_error": 0.032974107017740596,
+      "mean_ang_vel_error": 0.044653323266655276,
+      "mean_alive_time_s": 20.0,
+      "failure_rate": 0.0,
+      "train_task": "A1_forward_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+    }
+  },
+  "pooled_original_and_new": {
+    "baseline": {
+      "episodes": 3072,
+      "successes": 3067,
+      "tracking_rate": 0.9983723958333334,
+      "mean_lin_vel_error": 0.0360000520893923,
+      "mean_ang_vel_error": 0.04822212211076412
+    },
+    "rlinf_huber": {
+      "episodes": 3072,
+      "successes": 3069,
+      "tracking_rate": 0.9990234375,
+      "mean_lin_vel_error": 0.03308815490026941,
+      "mean_ang_vel_error": 0.04056114571777269
+    },
+    "rsl_control": {
+      "episodes": 3072,
+      "successes": 3072,
+      "tracking_rate": 1.0,
+      "mean_lin_vel_error": 0.0328285891295721,
+      "mean_ang_vel_error": 0.04463415836046141
+    }
+  },
+  "caveat": "one training seed, near-ceiling tracking metric; no guaranteed RLinf ranking"
+}

@@ -198,6 +198,7 @@ jobs:
               - 'rlinf/models/embodiment/go2_policy/**'
               - 'examples/embodiment/go2_ascend/**'
               - 'examples/embodiment/go2_mjlab/**'
+              - 'examples/embodiment/go2_a40_reference/**'
               # Unit tests import env modules directly (robot task envs, the
               # real-world compatibility suite, maniskill offload, delay
               # sampler), so env changes have to trigger this job.

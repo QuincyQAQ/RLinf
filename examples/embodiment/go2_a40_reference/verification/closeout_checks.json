@@ -1,0 +1,23 @@
+{
+  "status": "passed",
+  "ruff_version": "0.14.3",
+  "ruff_lint": "passed (preview enabled)",
+  "ruff_format": "3 files already formatted",
+  "archive_contract_tests": 7,
+  "restored_authoritative_source_tests": 32,
+  "existing_container_policy_tests": 4,
+  "route_check": {
+    "critical": 0,
+    "major": 0,
+    "minor": 1,
+    "note": "New archive component has its own test file; pre-commit unavailable, matching Ruff version checked directly."
+  },
+  "source_sync": {
+    "canonical_files_matched": 113,
+    "dependency_files_matched": 6937
+  },
+  "credential_marker_scan": "passed",
+  "gpu_allocations": 0,
+  "new_training_runs": 0,
+  "new_simulation_runs": 0
+}

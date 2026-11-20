@@ -1,0 +1,225 @@
+{
+  "status": "passed",
+  "source_authority": "/hpc2hdd/home/qli736/Unitree_GO2_A40_reference_20261118",
+  "source_capture_time": "2026-11-21T02:15:51.921899+08:00",
+  "source_files": 113,
+  "integrity_files": 42,
+  "evaluations": 55,
+  "episodes": 59419,
+  "csv_rows": 29,
+  "checkpoints": [
+    {
+      "path": "benchmark/logs/rsl_rl/a1_postbaseline_14029742_rsl_control_training/2026-11-20_11-33-00_A1_forward_legacy_2048_s0/model_999.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 999
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/a1_postbaseline_14034565_rsl_matched_training/2026-11-20_17-43-05_A1_forward_legacy_2048_s0/model_499.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 499
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_training/2026-11-20_11-32-33_A2_omni_2048_s0/model_999.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 999
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/b1_diagnostic_14031449/2026-11-20_13-15-36_B1_rough_2048_s0/model_2850.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 2850
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/model_2999.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 2999
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_training/2026-11-20_15-38-00_B1_rough_2048_s0/model_999.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 999
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/b2_postbaseline_14025574_rsl_control_training/2026-11-20_02-21-33_B2_stairs_posture_apr15_refined_1024_s0/model_960.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 960
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/c2_postbaseline_14029748_rsl_control_training/2026-11-20_11-54-59_C2_gap_from_a2_1024_s0/model_999.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 999
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/unitree_go2_a1_legacy_2048_seeds/2026-11-19_20-17-27_A1_forward_legacy_2048_s0/model_2999.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 2999
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/model_1499.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 1499
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_1272.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 1272
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_1680.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 1680
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_2112.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 2112
+    },
+    {
+      "path": "benchmark/logs/rsl_rl/unitree_go2_c2_from_a2_1024_seeds/2026-11-20_03-17-48_C2_gap_from_a2_1024_s0/model_2999.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 2999
+    },
+    {
+      "path": "outputs/a1_policy_tune_14034565/low_entropy/training/isaaclab_A1_s0/checkpoints/global_step_500/actor/model_state_dict/full_weights.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": null
+    },
+    {
+      "path": "outputs/a1_policy_tune_14034565/low_entropy/training/policy.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 500
+    },
+    {
+      "path": "outputs/a1_policy_tune_14034565/zero_entropy/training/isaaclab_A1_s0/checkpoints/global_step_500/actor/model_state_dict/full_weights.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": null
+    },
+    {
+      "path": "outputs/a1_policy_tune_14034565/zero_entropy/training/policy.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 500
+    },
+    {
+      "path": "outputs/b2_postbaseline_14025574/rlinf_conservative_huber/training/isaaclab_B2_s0/checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": null
+    },
+    {
+      "path": "outputs/b2_postbaseline_14025574/rlinf_conservative_huber/training/policy.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 1000
+    },
+    {
+      "path": "outputs/b2_postbaseline_14025574/rlinf_conservative_mse/training/isaaclab_B2_s0/checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": null
+    },
+    {
+      "path": "outputs/b2_postbaseline_14025574/rlinf_conservative_mse/training/policy.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 1000
+    },
+    {
+      "path": "outputs/fullppo_huber_A1_14029742/rlinf_huber/training/isaaclab_A1_s0/checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": null
+    },
+    {
+      "path": "outputs/fullppo_huber_A1_14029742/rlinf_huber/training/policy.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 1000
+    },
+    {
+      "path": "outputs/fullppo_huber_A2_14029743/rlinf_huber/training/isaaclab_A2_s0/checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": null
+    },
+    {
+      "path": "outputs/fullppo_huber_A2_14029743/rlinf_huber/training/policy.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 1000
+    },
+    {
+      "path": "outputs/fullppo_huber_B1_14032301/rlinf_huber/training/isaaclab_B1_s0/checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": null
+    },
+    {
+      "path": "outputs/fullppo_huber_B1_14032301/rlinf_huber/training/policy.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 1000
+    },
+    {
+      "path": "outputs/fullppo_huber_C2_14029748/rlinf_huber/training/isaaclab_C2_s0/checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": null
+    },
+    {
+      "path": "outputs/fullppo_huber_C2_14029748/rlinf_huber/training/policy.pt",
+      "finite": true,
+      "strict_schema": true,
+      "positive_std": true,
+      "saved_iteration": 1000
+    }
+  ],
+  "gpu_allocations": 0,
+  "new_simulation_runs": 0,
+  "new_training_runs": 0
+}

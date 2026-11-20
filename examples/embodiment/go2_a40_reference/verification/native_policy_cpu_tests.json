@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "environment": "existing A40 container, CPU only",
+  "command": "bash a40/hpc_environment.sh python-rlinf-cpu -m pytest -q RLinf/tests/unit_tests/test_go2_env.py -k \"rsl_checkpoint_import or generic_rollout_sampling or analytic_kl_preserves_old_distribution or benchmark_frozen_actor_supports_reference_unnormalized_policy\"",
+  "selected": 4,
+  "passed": 4,
+  "deselected": 47,
+  "test_seconds": 15.54,
+  "new_gpu_allocations": 0
+}

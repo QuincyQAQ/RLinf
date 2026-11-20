@@ -1,0 +1,10 @@
+{
+  "authority": "A40 read-only snapshot",
+  "changed_local_files": [
+    "a40/split_independent.py",
+    "tests/test_passage.py",
+    "tests/test_reference.py"
+  ],
+  "source_file_count": 113,
+  "backups": "local_before_sync"
+}

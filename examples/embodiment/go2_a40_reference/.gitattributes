@@ -1,0 +1,2 @@
+# Preserve Excel CSV bytes and its standard CRLF row endings.
+reports/*.csv -text whitespace=cr-at-eol

@@ -1,0 +1,229 @@
+{
+  "status": "verified",
+  "protocol": {
+    "task": "A1",
+    "training_seed": 0,
+    "source_updates": 4000,
+    "additional_updates": 500,
+    "total_updates_per_trained_lane": 4500,
+    "num_envs": 2048,
+    "rollout_steps": 24,
+    "additional_transitions_per_trained_lane": 24576000,
+    "sources": {
+      "rlinf": "/workspace/go2/outputs/fullppo_huber_A1_14029742/rlinf_huber/training/policy.pt",
+      "rsl": "/workspace/go2/benchmark/logs/rsl_rl/a1_postbaseline_14029742_rsl_control_training/2026-11-20_11-33-00_A1_forward_legacy_2048_s0/model_999.pt"
+    },
+    "recipes": {
+      "low_entropy": {
+        "lr": 0.0001,
+        "entropy_bonus": 0.001,
+        "value_loss_type": "huber",
+        "desired_kl": 0.003
+      },
+      "zero_entropy": {
+        "lr": 0.0001,
+        "entropy_bonus": 0.0,
+        "value_loss_type": "huber",
+        "desired_kl": 0.003
+      }
+    },
+    "optimizer": "fresh per lane",
+    "environment": "fresh per lane",
+    "validation_seed": 56789,
+    "holdout_seeds": [
+      67890,
+      78901
+    ],
+    "selection": "best validation tracking rate, then linear error, then angular error; untuned eligible; fixed tie order",
+    "stopping": "two fixed RLinf candidates only; no holdout-based retuning",
+    "evaluation_minimum_episodes_per_seed": 1024,
+    "task_reward_network_changes": false,
+    "ordinary_control": "own completed4000-update PPO checkpoint plus500 original PPO updates",
+    "caveat": "tuned method with extra selection compute; one training seed; no framework-only causal claim; 100% not guaranteed"
+  },
+  "selection": {
+    "selected": "zero_entropy",
+    "model": "/workspace/go2/outputs/a1_policy_tune_14034565/zero_entropy/training/policy.pt",
+    "validation_seed": 56789,
+    "validation_metrics": {
+      "num_episodes": 1024,
+      "success_rate": 1.0,
+      "mean_success_step_ratio": 0.9894375000000039,
+      "mean_lin_vel_error": 0.03128458940610293,
+      "mean_ang_vel_error": 0.03816580536402769,
+      "mean_alive_time_s": 20.0,
+      "failure_rate": 0.0,
+      "train_task": "A1_forward_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+    },
+    "frozen_before_holdout": true
+  },
+  "all_validation_results": {
+    "untuned": {
+      "num_episodes": 1024,
+      "success_rate": 0.9990234375,
+      "mean_success_step_ratio": 0.9891934287167198,
+      "mean_lin_vel_error": 0.03305919700705571,
+      "mean_ang_vel_error": 0.04048515332838488,
+      "mean_alive_time_s": 19.993671875,
+      "failure_rate": 0.0009765625,
+      "train_task": "A1_forward_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+    },
+    "low_entropy": {
+      "num_episodes": 1024,
+      "success_rate": 0.9990234375,
+      "mean_success_step_ratio": 0.9892462471869942,
+      "mean_lin_vel_error": 0.03218210983893541,
+      "mean_ang_vel_error": 0.03734546574680731,
+      "mean_alive_time_s": 19.99240234375,
+      "failure_rate": 0.0009765625,
+      "train_task": "A1_forward_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+    },
+    "zero_entropy": {
+      "num_episodes": 1024,
+      "success_rate": 1.0,
+      "mean_success_step_ratio": 0.9894375000000039,
+      "mean_lin_vel_error": 0.03128458940610293,
+      "mean_ang_vel_error": 0.03816580536402769,
+      "mean_alive_time_s": 20.0,
+      "failure_rate": 0.0,
+      "train_task": "A1_forward_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+    }
+  },
+  "failed_candidates": {},
+  "holdout_results": {
+    "untuned_rlinf_4000": {
+      "67890": {
+        "num_episodes": 1024,
+        "success_rate": 0.9990234375,
+        "mean_success_step_ratio": 0.9888828356334652,
+        "mean_lin_vel_error": 0.03326227997582529,
+        "mean_ang_vel_error": 0.04055838070018458,
+        "mean_alive_time_s": 19.99201171875,
+        "failure_rate": 0.0009765625,
+        "train_task": "A1_forward_s0",
+        "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+      },
+      "78901": {
+        "num_episodes": 1024,
+        "success_rate": 1.0,
+        "mean_success_step_ratio": 0.9891923828125043,
+        "mean_lin_vel_error": 0.0331495492719114,
+        "mean_ang_vel_error": 0.04048866457864642,
+        "mean_alive_time_s": 20.0,
+        "failure_rate": 0.0,
+        "train_task": "A1_forward_s0",
+        "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+      }
+    },
+    "ordinary_ppo_4000": {
+      "67890": {
+        "num_episodes": 1024,
+        "success_rate": 1.0,
+        "mean_success_step_ratio": 0.9881904296875047,
+        "mean_lin_vel_error": 0.03259718866273763,
+        "mean_ang_vel_error": 0.04438581333309412,
+        "mean_alive_time_s": 20.0,
+        "failure_rate": 0.0,
+        "train_task": "A1_forward_s0",
+        "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+      },
+      "78901": {
+        "num_episodes": 1024,
+        "success_rate": 1.0,
+        "mean_success_step_ratio": 0.9881523437500037,
+        "mean_lin_vel_error": 0.0329233898483217,
+        "mean_ang_vel_error": 0.0446938387863338,
+        "mean_alive_time_s": 20.0,
+        "failure_rate": 0.0,
+        "train_task": "A1_forward_s0",
+        "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+      }
+    },
+    "ordinary_ppo_4500": {
+      "67890": {
+        "num_episodes": 1024,
+        "success_rate": 0.994140625,
+        "mean_success_step_ratio": 0.965740962549085,
+        "mean_lin_vel_error": 0.07878002713910678,
+        "mean_ang_vel_error": 0.10825156813909176,
+        "mean_alive_time_s": 19.934726562499996,
+        "failure_rate": 0.005859375,
+        "train_task": "A1_forward_s0",
+        "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+      },
+      "78901": {
+        "num_episodes": 1024,
+        "success_rate": 0.9931640625,
+        "mean_success_step_ratio": 0.96572039270122,
+        "mean_lin_vel_error": 0.07875614878549948,
+        "mean_ang_vel_error": 0.10765099817715659,
+        "mean_alive_time_s": 19.92443359375,
+        "failure_rate": 0.005859375,
+        "train_task": "A1_forward_s0",
+        "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+      }
+    },
+    "selected_rlinf": {
+      "67890": {
+        "num_episodes": 1024,
+        "success_rate": 0.9990234375,
+        "mean_success_step_ratio": 0.989181552399732,
+        "mean_lin_vel_error": 0.03151662261187276,
+        "mean_ang_vel_error": 0.038471571581821115,
+        "mean_alive_time_s": 19.9930078125,
+        "failure_rate": 0.0009765625,
+        "train_task": "A1_forward_s0",
+        "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+      },
+      "78901": {
+        "num_episodes": 1024,
+        "success_rate": 1.0,
+        "mean_success_step_ratio": 0.9893417968750049,
+        "mean_lin_vel_error": 0.03134607652388517,
+        "mean_ang_vel_error": 0.0380988685321063,
+        "mean_alive_time_s": 20.0,
+        "failure_rate": 0.0,
+        "train_task": "A1_forward_s0",
+        "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A1-Forward-v0"
+      }
+    }
+  },
+  "pooled_holdout": {
+    "untuned_rlinf_4000": {
+      "episodes": 2048,
+      "successes": 2047,
+      "tracking_rate": 0.99951171875,
+      "mean_lin_vel_error": 0.03320591462386834,
+      "mean_ang_vel_error": 0.0405235226394155
+    },
+    "ordinary_ppo_4000": {
+      "episodes": 2048,
+      "successes": 2048,
+      "tracking_rate": 1.0,
+      "mean_lin_vel_error": 0.032760289255529665,
+      "mean_ang_vel_error": 0.04453982605971396
+    },
+    "ordinary_ppo_4500": {
+      "episodes": 2048,
+      "successes": 2035,
+      "tracking_rate": 0.99365234375,
+      "mean_lin_vel_error": 0.07876808796230314,
+      "mean_ang_vel_error": 0.10795128315812418
+    },
+    "selected_rlinf": {
+      "episodes": 2048,
+      "successes": 2047,
+      "tracking_rate": 0.99951171875,
+      "mean_lin_vel_error": 0.03143134956787896,
+      "mean_ang_vel_error": 0.038285220056963706
+    }
+  },
+  "original_sha256": {
+    "/workspace/go2/outputs/fullppo_huber_A1_14029742/rlinf_huber/training/policy.pt": "98e0912b08477e188360cbfe058f953b13f14b9439373af8e2bbe8e8755148b9",
+    "/workspace/go2/benchmark/logs/rsl_rl/a1_postbaseline_14029742_rsl_control_training/2026-11-20_11-33-00_A1_forward_legacy_2048_s0/model_999.pt": "d2506c6da938f655e46ba2ec4c0d1610077f33e9f0faf67e055500d31dd523de"
+  }
+}
