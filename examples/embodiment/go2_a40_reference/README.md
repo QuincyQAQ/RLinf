@@ -82,7 +82,15 @@ B1 固定 policy 补测使用 seed 45678，各 2048 回合，三组均为 2044/2
 
 ## 离线复算
 
-在独立分支的 RLinf 仓库根目录，用 Python 3.11 运行归档核验。这个命令只读取现有文件，检查源码和数据哈希、逐回合统计、最终汇总及 CSV。
+先获取独立分支，再进入 RLinf 仓库根目录。
+
+```bash
+git clone --single-branch --branch experiment/go2-a40-repro-20261121 \
+  https://github.com/QuincyQAQ/RLinf.git RLinf-a40-repro
+cd RLinf-a40-repro
+```
+
+用 Python 3.11 运行归档核验。这个命令只读取现有文件，检查源码和数据哈希、逐回合统计、最终汇总及 CSV。
 
 ```bash
 python3.11 examples/embodiment/go2_a40_reference/reproduce.py audit \
