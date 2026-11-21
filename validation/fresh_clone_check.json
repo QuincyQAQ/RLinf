@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "tasks": [
+    "A2",
+    "B1",
+    "B2"
+  ],
+  "csv_rows": 13,
+  "raw_evaluations": 28,
+  "episodes": 31771,
+  "checkpoints": 17,
+  "files_hashed": 467,
+  "new_gpu_allocations": 0,
+  "new_simulation_runs": 0,
+  "new_training_runs": 0,
+  "fresh_clone": true,
+  "dependency_transport": "offline local Git URLs; published .gitmodules retains public HTTPS URLs",
+  "restore_idempotent": true,
+  "tracked_files_unchanged": true,
+  "commit": "4a9961c1ec221bda636d1bc5a31a3921bb38b306"
+}
