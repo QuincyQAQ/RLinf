@@ -1,4 +1,5 @@
-# Preserve captured evidence, Excel row endings and model bytes.
-*.csv -text whitespace=cr-at-eol
-*.pt -text
-*.gz -text
+# Preserve source and captured evidence bytes on every checkout.
+* -text
+*.csv whitespace=cr-at-eol
+# Captured terminal logs retain their original ANSI output and whitespace.
+*.log -diff
