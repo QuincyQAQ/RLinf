@@ -36,7 +36,7 @@ import pytest
 import torch
 from omegaconf import OmegaConf
 
-from rlinf.algorithms.losses import compute_ppo_critic_loss
+from rlinf.algorithms.losses import compute_ppo_actor_loss, compute_ppo_critic_loss
 from rlinf.algorithms.refl_scorers import build_refl_scorer, register_refl_scorer
 from rlinf.config import SupportedModel, validate_embodied_cfg
 from rlinf.hybrid_engines.fsdp.utils import get_fsdp_wrap_policy
@@ -70,6 +70,51 @@ from rlinf.utils.env_helpers.delay_sampler import (
 )
 from rlinf.workers.rollout.phyai import phyai_rollout_worker
 from rlinf.workers.rollout.phyai.phyai_rollout_worker import PhyAIRolloutWorker
+
+
+def test_go2_checkpoint_supports_ppo_update_and_analytical_kl(tmp_path):
+    from examples.embodiment.go2_abc.policy import Go2Policy
+
+    policy = Go2Policy()
+    checkpoint = tmp_path / "policy.pt"
+    torch.save({"model_state_dict": policy.state_dict()}, checkpoint)
+    restored = Go2Policy(str(checkpoint))
+    for actual, expected in zip(
+        restored.parameters(), policy.parameters(), strict=True
+    ):
+        torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    observations = torch.randn(8, 235)
+    _, rollout = restored.predict_action_batch({"states": observations})
+    batch = {key: value.clone() for key, value in rollout["forward_inputs"].items()}
+    output = restored(forward_inputs=batch)
+    torch.testing.assert_close(output["kl_divergence"], torch.zeros(8))
+    actor_loss, _ = compute_ppo_actor_loss(
+        output["logprobs"].sum(-1),
+        rollout["prev_logprobs"].clone().sum(-1),
+        0.2,
+        0.2,
+        torch.ones(8),
+    )
+    previous = rollout["prev_values"].clone()
+    critic_loss, _ = compute_ppo_critic_loss(
+        output["values"], previous + 1, previous, 0.2, 10.0
+    )
+    optimizer = torch.optim.Adam(restored.parameters(), lr=3e-4)
+    (actor_loss + critic_loss).backward()
+    optimizer.step()
+    for actual_component, initial_component in (
+        (restored.actor, policy.actor),
+        (restored.critic, policy.critic),
+    ):
+        assert any(
+            not torch.equal(actual, expected)
+            for actual, expected in zip(
+                actual_component.parameters(),
+                initial_component.parameters(),
+                strict=True,
+            )
+        ), "PPO did not update both actor and critic"
+    assert (restored(forward_inputs=batch)["kl_divergence"] > 0).all()
 
 
 @pytest.mark.parametrize("layout", ["hwc", "chw"])
