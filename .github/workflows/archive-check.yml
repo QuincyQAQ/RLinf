@@ -1,0 +1,36 @@
+name: Check A40 Three-Task Archive
+on:
+  push:
+    branches: [experiment/go2-a40-a2-b1-b2-20261121]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Restore Recorded Runtime Files
+        run: python3 tools/restore_runtime.py
+      - name: Audit Results on CPU
+        run: python3 tools/audit_results.py
+      - name: Check Script Syntax
+        run: |
+          python3 - <<'PY'
+          import ast
+          from pathlib import Path
+          import subprocess
+          for directory in ['a40', 'tools', 'reports']:
+              for path in Path(directory).glob('*.py'):
+                  ast.parse(path.read_text(), filename=str(path))
+          for pattern in ['*.sh', '*.sbatch']:
+              for path in Path('a40').glob(pattern):
+                  subprocess.run(['bash', '-n', str(path)], check=True)
+          PY

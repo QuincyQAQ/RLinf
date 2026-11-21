@@ -1,0 +1,92 @@
+{
+  "profile": "author_slurm_defaults",
+  "seed": 0,
+  "scope": "main",
+  "evaluation_reporting_requirements": {
+    "benchmark_tracking_success_rate": {
+      "required_for": [
+        "A1",
+        "A2",
+        "B1",
+        "B2",
+        "C2"
+      ],
+      "definition": "Unmodified upstream tracking thresholds plus no failure termination"
+    },
+    "physical_obstacle_passage_rate": {
+      "required_for": [
+        "B2",
+        "C2"
+      ],
+      "definition": "From a central-platform start, clear the complete actual stair flight (+x for B2) or gap ring (any exit side for C2), land with all four feet beyond the far edge for 0.2 s and finish without failure; same episodes as original tracking metric",
+      "implementation_status": "collector_implemented_cpu_checked_gpu_validation_pending",
+      "implementation": "a40/evaluate_dual.py and a40/passage_metrics.py",
+      "metric_version": "square_obstacle_v1",
+      "boundary_source": "actual generated or cached per-tile mesh before placement",
+      "primary_denominator": "all collected episodes; starts outside central platform cannot count as success",
+      "zero_width_gap": "unmeasurable; null rather than automatic success",
+      "not_applicable_to": [
+        "A1",
+        "A2",
+        "B1"
+      ]
+    },
+    "joint_tracking_and_passage_success_rate": {
+      "required_for": [
+        "B2",
+        "C2"
+      ],
+      "definition": "Intersection of upstream tracking success and physical passage for the same episode"
+    },
+    "same_checkpoint_and_episodes": true,
+    "missing_physical_metric_is_not_zero_or_completed": true
+  },
+  "asset_source": "mirror",
+  "learner": "RSL-RL PPO",
+  "physics": "Isaac Sim PhysX CUDA",
+  "commands": {
+    "B2": [
+      "/workspace/go2/a40/container_python.sh",
+      "/workspace/go2/benchmark/scripts/train.py",
+      "--task",
+      "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0",
+      "--headless",
+      "--seed",
+      "0",
+      "--num_envs",
+      "1024",
+      "--max_iterations",
+      "2200",
+      "--no-stand_reward_anneal",
+      "--posture_reward_anneal",
+      "--posture_anneal_end_frac",
+      "0.35",
+      "--posture_height_weight_early",
+      "-10.0",
+      "--posture_height_weight_late",
+      "-3.5",
+      "--posture_orientation_weight_early",
+      "-5.0",
+      "--posture_orientation_weight_late",
+      "-2.0",
+      "--distribution_safety_patch",
+      "--plot_learning_curves",
+      "--plot_smoothing",
+      "25",
+      "--experiment_name",
+      "unitree_go2_b2_posture_apr15_refined_1024_seeds",
+      "--run_name",
+      "B2_stairs_posture_apr15_refined_1024_s0",
+      "--kit_args=--/persistent/isaac/asset_root/cloud=/workspace/go2/assets/isaac_sim_5.1"
+    ]
+  },
+  "source_unknowns": [
+    "Author isaac-lab_2.3.2.sif image, digest, full pip freeze and driver are not published. Selected stack follows public Isaac Lab tag and is not proven binary-identical to that image.",
+    "Public results_seeded_1024 evaluated different checkpoint budgets than current task-specific Slurm defaults. Complete per-run env.yaml/agent.yaml and train CLI are not present.",
+    "C2 published model names indicate A2 initialization/refinement; the task Slurm script defaults to scratch. No undocumented refined settings are invented.",
+    "With RSL-RL 3.1.2 the source distribution safety patch may report unavailable and skip; its availability in the original author image is unknown.",
+    "Online USD/MDL asset contents are not vendored or independently fixed by the author; archive resolved assets on A40 for future repeatability.",
+    "A40 compatibility, Vulkan graphics availability, full-count VRAM capacity, smoke PPO and runtime effective config checks have not been executed.",
+    "Changing GPU, platform or PyTorch may change RNG sequences and trajectories despite identical numeric seeds; equal success rates are not guaranteed."
+  ]
+}

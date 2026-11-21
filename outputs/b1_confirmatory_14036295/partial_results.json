@@ -1,0 +1,35 @@
+{
+  "baseline": {
+    "num_episodes": 2048,
+    "success_rate": 0.998046875,
+    "mean_success_step_ratio": 0.9742443981874219,
+    "mean_lin_vel_error": 0.08563293249028932,
+    "mean_ang_vel_error": 0.0803872078372375,
+    "mean_alive_time_s": 19.98001953125,
+    "failure_rate": 0.001953125,
+    "train_task": "B1_rough_s0",
+    "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+  },
+  "rlinf_huber": {
+    "num_episodes": 2048,
+    "success_rate": 0.998046875,
+    "mean_success_step_ratio": 0.9751520191791242,
+    "mean_lin_vel_error": 0.07823912887517807,
+    "mean_ang_vel_error": 0.07317155067073408,
+    "mean_alive_time_s": 19.983544921874998,
+    "failure_rate": 0.001953125,
+    "train_task": "B1_rough_s0",
+    "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+  },
+  "rsl_control": {
+    "num_episodes": 2048,
+    "success_rate": 0.998046875,
+    "mean_success_step_ratio": 0.9751319350942885,
+    "mean_lin_vel_error": 0.08494293079357569,
+    "mean_ang_vel_error": 0.08115285865613157,
+    "mean_alive_time_s": 19.986865234375,
+    "failure_rate": 0.00146484375,
+    "train_task": "B1_rough_s0",
+    "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+  }
+}

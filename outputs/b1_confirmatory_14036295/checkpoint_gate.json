@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "checkpoints": {
+    "baseline": {
+      "status": "passed",
+      "strict_load": true,
+      "finite": true,
+      "positive_std": true,
+      "changed": {},
+      "checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/model_2999.pt"
+    },
+    "rlinf_huber": {
+      "status": "passed",
+      "strict_load": true,
+      "finite": true,
+      "positive_std": true,
+      "changed": {},
+      "checkpoint": "/workspace/go2/outputs/fullppo_huber_B1_14032301/rlinf_huber/training/policy.pt"
+    },
+    "rsl_control": {
+      "status": "passed",
+      "strict_load": true,
+      "finite": true,
+      "positive_std": true,
+      "changed": {},
+      "checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_training/2026-11-20_15-38-00_B1_rough_2048_s0/model_999.pt"
+    }
+  },
+  "sha256": {
+    "baseline": "75ce9c0f82178884444dd40331ecf34905b162e29f45b5a40d54cab3ad8891f3",
+    "rlinf_huber": "83f15a745391a34388b1e3cfcecc2833dcfec9313c7a1a384964855cbf1f65ba",
+    "rsl_control": "6896797e4c2c944357b54e3d48e6ba743108fc72d257fcbdc08a76285ba85012"
+  }
+}

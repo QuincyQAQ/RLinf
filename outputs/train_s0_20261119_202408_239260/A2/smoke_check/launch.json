@@ -1,0 +1,21 @@
+{
+  "argv": [
+    "/workspace/go2/a40/container_python.sh",
+    "/workspace/go2/a40/runtime_probe.py",
+    "--headless",
+    "--task-key",
+    "A2",
+    "--seed",
+    "0",
+    "--mode",
+    "smoke",
+    "--report",
+    "/workspace/go2/outputs/train_s0_20261119_202408_239260/A2/smoke.json",
+    "--kit_args=--/persistent/isaac/asset_root/cloud=/workspace/go2/assets/isaac_sim_5.1"
+  ],
+  "cwd": "/workspace/go2/benchmark",
+  "start": "20261119_202533_871035",
+  "returncode": 0,
+  "asset_source": "mirror",
+  "end": "20261119_202610_028658"
+}

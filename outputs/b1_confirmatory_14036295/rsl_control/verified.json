@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "seed": 45678,
+  "artifact": "/workspace/go2/outputs/b1_confirmatory_14036295/rsl_control/B1_rough_s0/B1_rough.json",
+  "successes": 2044,
+  "summary": {
+    "num_episodes": 2048,
+    "success_rate": 0.998046875,
+    "mean_success_step_ratio": 0.9751319350942885,
+    "mean_lin_vel_error": 0.08494293079357569,
+    "mean_ang_vel_error": 0.08115285865613157,
+    "mean_alive_time_s": 19.986865234375,
+    "failure_rate": 0.00146484375,
+    "train_task": "B1_rough_s0",
+    "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+  }
+}

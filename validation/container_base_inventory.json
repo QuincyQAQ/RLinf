@@ -1,0 +1,38 @@
+{
+  "status": "passed",
+  "errors": [],
+  "packages": {
+    "rsl-rl-lib": "3.1.2",
+    "torch": "2.7.0+cu128",
+    "torchvision": "0.22.0+cu128",
+    "tensordict": "0.8.3",
+    "numpy": "1.26.4",
+    "gymnasium": "1.2.1"
+  },
+  "metadata_missing": [
+    "isaacsim"
+  ],
+  "isaac_sim_standalone_version": "5.1.0-rc.19+release.26219.9c81211b.gl",
+  "python": "3.11.13 (tags/v3.11.13-dirty:498b971, Jun  9 2025, 16:37:36) [GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]",
+  "libc": [
+    "glibc",
+    "2.39"
+  ],
+  "origins": {
+    "isaaclab": "/workspace/go2/IsaacLab/source/isaaclab/isaaclab/__init__.py",
+    "isaaclab_assets": "/workspace/go2/IsaacLab/source/isaaclab_assets/isaaclab_assets/__init__.py",
+    "isaaclab_tasks": "/workspace/go2/IsaacLab/source/isaaclab_tasks/isaaclab_tasks/__init__.py",
+    "isaaclab_rl": "/workspace/go2/IsaacLab/source/isaaclab_rl/isaaclab_rl/__init__.py"
+  },
+  "cpu_checks": {
+    "torch_cpu_sum": 14.0,
+    "tensor_device": "cpu",
+    "numpy_version": "1.26.4",
+    "rsl_runner_import": "OnPolicyRunner",
+    "tensordict_version": "0.8.3"
+  },
+  "cuda_visible_devices": "",
+  "gpu_used": false,
+  "simulation_started": false,
+  "job_submitted": false
+}

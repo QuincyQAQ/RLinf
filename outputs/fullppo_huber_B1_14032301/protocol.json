@@ -1,0 +1,45 @@
+{
+  "task": "B1",
+  "training_seed": 0,
+  "source": "/workspace/go2/benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/model_2999.pt",
+  "training_log": "/workspace/go2/outputs/b1_diagnostic_14032252/training/console.log",
+  "completed_ppo_updates": 3000,
+  "additional_updates": 1000,
+  "total_training_updates": 4000,
+  "num_envs": 2048,
+  "rollout_steps": 24,
+  "additional_transitions_per_lane": 49152000,
+  "recipe": {
+    "lr": 0.0003,
+    "entropy_bonus": 0.003,
+    "value_loss_type": "huber",
+    "desired_kl": 0.005
+  },
+  "recipe_selection": "frozen B2 Huber recipe; no per-task hyperparameter search",
+  "source_selection": "action-history bounded PPO source, restored prefix2851 plus149 updates",
+  "lanes": [
+    "rlinf_huber",
+    "rsl_control"
+  ],
+  "optimizer": "fresh in both lanes",
+  "environment": "fresh in both lanes; terrain RNG/curriculum state not restored",
+  "holdout_seeds": [
+    23456,
+    34567
+  ],
+  "episodes_per_evaluation_minimum": 1024,
+  "metrics": [
+    "tracking",
+    "velocity errors"
+  ],
+  "b1_safety": "requested original finite/std compatibility patch in both learners",
+  "caveat": "one training seed; parameterized framework comparison, not a framework-only causal effect",
+  "numerical_validity_repair": "B1 raw-action history feedback bounded to +/-100 before ActionManager; same in both learners/evaluation; no reward or termination changes",
+  "source_recovery_job": 14032252,
+  "original_invalid_checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_b1_baseline_2048_seeds/2026-11-19_22-18-47_B1_rough_2048_s0/model_2999.pt",
+  "original_training_log": "/workspace/go2/outputs/train_s0_20261119_221656_974275/B1/training/console.log",
+  "restored_completed_prefix": 2851,
+  "recovery_updates": 149,
+  "source_optimizer_restored": true,
+  "recovery_caveat": "finite source recovery is not proof that the intermittent numerical failure root cause is fixed"
+}

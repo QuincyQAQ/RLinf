@@ -1,0 +1,40 @@
+{
+  "profile": "author_slurm_defaults",
+  "seed": 0,
+  "scope": "main",
+  "learner": "RSL-RL PPO",
+  "physics": "Isaac Sim PhysX CUDA",
+  "commands": {
+    "A2": [
+      "/home/quincylee/code/Robotics/Unitree_GO2_A40_reference_20261118/.venv/bin/python",
+      "/home/quincylee/code/Robotics/Unitree_GO2_A40_reference_20261118/benchmark/scripts/train.py",
+      "--task",
+      "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0",
+      "--headless",
+      "--seed",
+      "0",
+      "--num_envs",
+      "2048",
+      "--max_iterations",
+      "1500",
+      "--no-stand_reward_anneal",
+      "--no-posture_reward_anneal",
+      "--plot_learning_curves",
+      "--plot_smoothing",
+      "25",
+      "--experiment_name",
+      "unitree_go2_a2_baseline_2048_seeds",
+      "--run_name",
+      "A2_omni_2048_s0"
+    ]
+  },
+  "source_unknowns": [
+    "Author isaac-lab_2.3.2.sif image, digest, full pip freeze and driver are not published. Selected stack follows public Isaac Lab tag and is not proven binary-identical to that image.",
+    "Public results_seeded_1024 evaluated different checkpoint budgets than current task-specific Slurm defaults. Complete per-run env.yaml/agent.yaml and train CLI are not present.",
+    "C2 published model names indicate A2 initialization/refinement; the task Slurm script defaults to scratch. No undocumented refined settings are invented.",
+    "With RSL-RL 3.1.2 the source distribution safety patch may report unavailable and skip; its availability in the original author image is unknown.",
+    "Online USD/MDL asset contents are not vendored or independently fixed by the author; archive resolved assets on A40 for future repeatability.",
+    "A40 compatibility, Vulkan graphics availability, full-count VRAM capacity, smoke PPO and runtime effective config checks have not been executed.",
+    "Changing GPU, platform or PyTorch may change RNG sequences and trajectories despite identical numeric seeds; equal success rates are not guaranteed."
+  ]
+}

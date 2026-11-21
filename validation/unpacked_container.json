@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "path": "containers/isaac-lab_2.3.2_unpacked",
+  "source": "containers/isaac-lab_2.3.2.sif",
+  "finished_unix": 1795024019.1878524,
+  "source_contents_modified": false,
+  "gpu_used": false,
+  "simulation_started": false
+}

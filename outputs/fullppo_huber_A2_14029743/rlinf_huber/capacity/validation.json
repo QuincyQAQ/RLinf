@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "strict_load": true,
+  "finite": true,
+  "positive_std": true,
+  "changed": {
+    "actor.": true,
+    "critic.": true
+  },
+  "checkpoint": "/workspace/go2/outputs/fullppo_huber_A2_14029743/rlinf_huber/capacity/isaaclab_A2_s0/checkpoints/global_step_2/actor/model_state_dict/full_weights.pt"
+}

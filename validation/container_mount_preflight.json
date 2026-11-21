@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "finished_unix": 1795024857.9806197,
+  "image": "official SIF",
+  "temporary_extraction": "node-local /tmp",
+  "cache_write_verified": true,
+  "kit_started": false,
+  "simulation_started": false,
+  "gpu_used": false,
+  "scope": "login-node container filesystem check; compute-node GPU checks still required"
+}

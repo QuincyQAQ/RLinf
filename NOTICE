@@ -1,0 +1,15 @@
+Go2 A40 A2/B1/B2 experiment archive
+
+This branch packages user-authored experiment orchestration, generated records,
+and trained weights. New project tooling uses the Apache License 2.0.
+Existing source retains its copyright and license notices.
+
+The pinned dependencies are separate Git submodules, with their own terms:
+- RLinf: https://github.com/QuincyQAQ/RLinf
+- Benchmark: https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env
+- Isaac Lab: https://github.com/isaac-sim/IsaacLab
+
+Generated benchmark logs, configuration files and trained weights are in
+artifacts/benchmark_runtime.tar.gz; this archive contains no upstream source.
+Source commits and experiment-specific changes are recorded in provenance.json.
+AI assistance was used to package and verify this archive.

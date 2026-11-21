@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "seed": 34567,
+  "artifact": "/workspace/go2/outputs/fullppo_huber_A2_14029743/baseline/34567/A2_omni_s0/A2_omni.json",
+  "summary": {
+    "num_episodes": 1032,
+    "success_rate": 0.9156976744186046,
+    "mean_success_step_ratio": 0.955499480205711,
+    "mean_lin_vel_error": 0.06954980669837608,
+    "mean_ang_vel_error": 0.10211161897259671,
+    "mean_alive_time_s": 19.37,
+    "failure_rate": 0.06201550387596899,
+    "train_task": "A2_omni_s0",
+    "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0"
+  }
+}

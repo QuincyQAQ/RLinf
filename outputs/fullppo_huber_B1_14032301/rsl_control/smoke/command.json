@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "/workspace/go2/a40/container_python.sh",
+    "/workspace/go2/a40/train_continuation_rsl.py",
+    "--task",
+    "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0",
+    "--headless",
+    "--seed",
+    "0",
+    "--num_envs",
+    "64",
+    "--max_iterations",
+    "2",
+    "--no-stand_reward_anneal",
+    "--no-posture_reward_anneal",
+    "--distribution_safety_patch",
+    "--plot_learning_curves",
+    "--plot_smoothing",
+    "25",
+    "--experiment_name",
+    "b1_postbaseline_14032301_rsl_control_smoke",
+    "--run_name",
+    "B1_rough_2048_s0",
+    "--kit_args=--/app/extensions/excluded/0=omni.kit.telemetry --/persistent/isaac/asset_root/cloud=/workspace/go2/assets/isaac_sim_5.1",
+    "--pretrained_checkpoint",
+    "/workspace/go2/benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/model_2999.pt"
+  ],
+  "overrides": {}
+}

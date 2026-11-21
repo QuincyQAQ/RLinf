@@ -1,0 +1,287 @@
+[INFO][AppLauncher]: Using device: cuda:0
+[INFO][AppLauncher]: Loading experience file: /workspace/go2/IsaacLab/apps/isaaclab.python.headless.kit
+[Info] [carb] Logging to file: /isaac-sim/kit/logs/Kit/Isaac-Sim/5.1/kit_20261120_134258.log
+2026-11-20T05:42:58Z [26ms] [Warning] [omni.ext.plugin] [ext: .asset_tools] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.asset_tools' or '/workspace/go2/.asset_tools/config'
+2026-11-20T05:42:58Z [26ms] [Warning] [omni.ext.plugin] [ext: .cache] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.cache' or '/workspace/go2/.cache/config'
+2026-11-20T05:42:58Z [26ms] [Warning] [omni.ext.plugin] [ext: .container_home] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.container_home' or '/workspace/go2/.container_home/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: .container_homes] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.container_homes' or '/workspace/go2/.container_homes/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: .extra_overlay] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.extra_overlay' or '/workspace/go2/.extra_overlay/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: .extra_overlay_failed_lxml_20261119] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.extra_overlay_failed_lxml_20261119' or '/workspace/go2/.extra_overlay_failed_lxml_20261119/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: .isaacsim_cache] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.isaacsim_cache' or '/workspace/go2/.isaacsim_cache/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: .isaacsim_caches] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.isaacsim_caches' or '/workspace/go2/.isaacsim_caches/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: .rlinf_overlay] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.rlinf_overlay' or '/workspace/go2/.rlinf_overlay/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: .python_overlay] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.python_overlay' or '/workspace/go2/.python_overlay/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: .rlinf_overlay_rejected_auto_upgrade_20261119] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.rlinf_overlay_rejected_auto_upgrade_20261119' or '/workspace/go2/.rlinf_overlay_rejected_auto_upgrade_20261119/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: .usd_converter] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.usd_converter' or '/workspace/go2/.usd_converter/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: IsaacLab] Extensions config 'extension.toml' doesn't exist '/workspace/go2/IsaacLab' or '/workspace/go2/IsaacLab/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: RLinf] Extensions config 'extension.toml' doesn't exist '/workspace/go2/RLinf' or '/workspace/go2/RLinf/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: a40] Extensions config 'extension.toml' doesn't exist '/workspace/go2/a40' or '/workspace/go2/a40/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: assets] Extensions config 'extension.toml' doesn't exist '/workspace/go2/assets' or '/workspace/go2/assets/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: benchmark] Extensions config 'extension.toml' doesn't exist '/workspace/go2/benchmark' or '/workspace/go2/benchmark/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: containers] Extensions config 'extension.toml' doesn't exist '/workspace/go2/containers' or '/workspace/go2/containers/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: docs] Extensions config 'extension.toml' doesn't exist '/workspace/go2/docs' or '/workspace/go2/docs/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: contribution] Extensions config 'extension.toml' doesn't exist '/workspace/go2/contribution' or '/workspace/go2/contribution/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: outputs] Extensions config 'extension.toml' doesn't exist '/workspace/go2/outputs' or '/workspace/go2/outputs/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: reference_archive] Extensions config 'extension.toml' doesn't exist '/workspace/go2/reference_archive' or '/workspace/go2/reference_archive/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: config] Extensions config 'extension.toml' doesn't exist '/workspace/go2/config' or '/workspace/go2/config/config'
+2026-11-20T05:42:58Z [27ms] [Warning] [omni.ext.plugin] [ext: reports] Extensions config 'extension.toml' doesn't exist '/workspace/go2/reports' or '/workspace/go2/reports/config'
+2026-11-20T05:42:58Z [28ms] [Warning] [omni.ext.plugin] [ext: tests] Extensions config 'extension.toml' doesn't exist '/workspace/go2/tests' or '/workspace/go2/tests/config'
+2026-11-20T05:42:58Z [28ms] [Warning] [omni.ext.plugin] [ext: validation] Extensions config 'extension.toml' doesn't exist '/workspace/go2/validation' or '/workspace/go2/validation/config'
+2026-11-20T05:42:59Z [1,186ms] [Warning] [omni.usd_config.extension] Enable omni.materialx.libs extension to use MaterialX
+2026-11-20T05:43:04Z [5,779ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [omni::physx::IPhysxBenchmarks v1.0] (plugin: <default plugin>), by client: omni.physics.physx.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-11-20T05:43:04Z [5,880ms] [Warning] [omni.isaac.dynamic_control] omni.isaac.dynamic_control is deprecated as of Isaac Sim 4.5. No action is needed from end-users.
+2026-11-20T05:43:11Z [13,491ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+2026-11-20T05:43:12Z [13,846ms] [Warning] [carb.cudainterop.plugin] CUDA_VISIBLE_DEVICES environment variable is set.
+2026-11-20T05:43:12Z [13,846ms] [Warning] [carb.cudainterop.plugin] Note CUDA device enumeration and Omniverse device enumeration are different.
+2026-11-20T05:43:12Z [13,846ms] [Warning] [carb.cudainterop.plugin] Setting CUDA_VISIBLE_DEVICES can lead to undesired behavior or crashes.
+
+|---------------------------------------------------------------------------------------------|
+| Driver Version: 575.57.08     | Graphics API: Vulkan
+|=============================================================================================|
+| GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+|     |                                  |        |     |            | Device-ID | UUID       |
+|     |                                  |        |     |            | Bus-ID    |            |
+|---------------------------------------------------------------------------------------------|
+| 0   | NVIDIA A40                       | Yes: 0 |     | 49386   MB | 10de      | 0          |
+|     |                                  |        |     |            | 2235      | c3d47714.. |
+|     |                                  |        |     |            | cf        |            |
+|=============================================================================================|
+| OS: 24.04.2 LTS (Noble Numbat) ubuntu, Version: 24.04.2, Kernel: 5.4.0-162-generic
+| Processor: Intel(R) Xeon(R) Platinum 8358P CPU @ 2.60GHz
+| Cores: 64 | Logical Cores: 64
+|---------------------------------------------------------------------------------------------|
+| Total Memory (MB): 1031723 | Free Memory: 941786
+| Total Page/Swap (MB): 18431 | Free Page/Swap: 18431
+|---------------------------------------------------------------------------------------------|
+2026-11-20T05:43:14Z [15,654ms] [Warning] [gpu.foundation.plugin] CPU performance profile is set to powersave. This profile sets the CPU to the lowest frequency reducing performance.
+[RECOVERY] Applied requested distribution safety to bundled ActorCritic API
+[INFO]: Parsing configuration from: envs.families.rough_velocity.go2_fam_b_env_cfg:Go2B1RoughWalkEnvCfg
+[INFO]: Parsing configuration from: isaaclab_tasks.manager_based.locomotion.velocity.config.go2.agents.rsl_rl_ppo_cfg:UnitreeGo2RoughPPORunnerCfg
+[INFO] Logging root directory: /workspace/go2/benchmark/logs/rsl_rl/b1_boundary_probe_14032253
+[INFO] Saving this run to: /workspace/go2/benchmark/logs/rsl_rl/b1_boundary_probe_14032253/2026-11-20_13-43-20_B1_rough_2048_s0
+[B1_ACTION_BOUND] {"bound": 100.0, "reward_changes": false, "termination_changes": false, "placement": "before ActionManager last-action storage"}
+
+[36m======================================================================================[0m
+[36m[1m[INFO][IsaacLab]: Logging to file: /tmp/isaaclab/logs/isaaclab_2026-11-20_13-43-20.log[0m
+[36m======================================================================================[0m
+
+[33m13:43:20 [simulation_context.py] WARNING: The `enable_external_forces_every_iteration` parameter in the PhysxCfg is set to False. If you are experiencing noisy velocities, consider enabling this flag. You may need to slightly increase the number of velocity iterations (setting it to 1 or 2 rather than 0), together with this flag, to improve the accuracy of velocity updates.[0m
+[INFO]: Base environment:
+	Environment device    : cuda:0
+	Environment seed      : 0
+	Physics step-size     : 0.005
+	Rendering step-size   : 0.02
+	Environment step-size : 0.02
+[INFO] Generating terrains based on curriculum took : 1.155406 seconds
+[INFO]: Time taken for scene creation : 3.887471 seconds
+[INFO]: Scene manager:  <class InteractiveScene>
+	Number of environments: 64
+	Environment spacing   : 2.5
+	Source prim name      : /World/envs/env_0
+	Global prim paths     : ['/World/ground']
+	Replicate physics     : True
+[INFO]: Starting the simulation. This may take a few seconds. Please wait...
+[INFO]: Time taken for simulation start : 13.223469 seconds
+[INFO] Command Manager:  <CommandManager> contains 1 active terms.
++------------------------------------------------+
+|              Active Command Terms              |
++-------+---------------+------------------------+
+| Index | Name          |          Type          |
++-------+---------------+------------------------+
+|   0   | base_velocity | UniformVelocityCommand |
++-------+---------------+------------------------+
+
+[INFO] Event Manager:  <EventManager> contains 2 active terms.
++--------------------------------------+
+| Active Event Terms in Mode: 'startup' |
++----------+---------------------------+
+|  Index   | Name                      |
++----------+---------------------------+
+|    0     | physics_material          |
+|    1     | add_base_mass             |
++----------+---------------------------+
++---------------------------------------+
+|  Active Event Terms in Mode: 'reset'  |
++--------+------------------------------+
+| Index  | Name                         |
++--------+------------------------------+
+|   0    | base_external_force_torque   |
+|   1    | reset_base                   |
+|   2    | reset_robot_joints           |
++--------+------------------------------+
+
+[INFO] Recorder Manager:  <RecorderManager> contains 0 active terms.
++---------------------+
+| Active Recorder Terms |
++-----------+---------+
+|   Index   | Name    |
++-----------+---------+
++-----------+---------+
+
+[INFO] Action Manager:  <ActionManager> contains 1 active terms.
++------------------------------------+
+|  Active Action Terms (shape: 12)   |
++--------+-------------+-------------+
+| Index  | Name        |   Dimension |
++--------+-------------+-------------+
+|   0    | joint_pos   |          12 |
++--------+-------------+-------------+
+
+[INFO] Observation Manager: <ObservationManager> contains 1 groups.
++----------------------------------------------------------+
+| Active Observation Terms in Group: 'policy' (shape: (235,)) |
++-----------+--------------------------------+-------------+
+|   Index   | Name                           |    Shape    |
++-----------+--------------------------------+-------------+
+|     0     | base_lin_vel                   |     (3,)    |
+|     1     | base_ang_vel                   |     (3,)    |
+|     2     | projected_gravity              |     (3,)    |
+|     3     | velocity_commands              |     (3,)    |
+|     4     | joint_pos                      |    (12,)    |
+|     5     | joint_vel                      |    (12,)    |
+|     6     | actions                        |    (12,)    |
+|     7     | height_scan                    |    (187,)   |
++-----------+--------------------------------+-------------+
+
+[INFO] Termination Manager:  <TerminationManager> contains 2 active terms.
++---------------------------------+
+|     Active Termination Terms    |
++-------+--------------+----------+
+| Index | Name         | Time Out |
++-------+--------------+----------+
+|   0   | time_out     |   True   |
+|   1   | base_contact |  False   |
++-------+--------------+----------+
+
+[INFO] Reward Manager:  <RewardManager> contains 12 active terms.
++-----------------------------------------+
+|           Active Reward Terms           |
++-------+----------------------+----------+
+| Index | Name                 |   Weight |
++-------+----------------------+----------+
+|   0   | track_lin_vel_xy_exp |      2.0 |
+|   1   | track_ang_vel_z_exp  |      1.0 |
+|   2   | lin_vel_z_l2         |     -2.0 |
+|   3   | ang_vel_xy_l2        |    -0.05 |
+|   4   | dof_torques_l2       |   -1e-05 |
+|   5   | dof_acc_l2           | -2.5e-07 |
+|   6   | action_rate_l2       |    -0.01 |
+|   7   | feet_air_time        |     0.25 |
+|   8   | undesired_contacts   |     -1.0 |
+|   9   | flat_orientation_l2  |     -5.0 |
+|   10  | dof_pos_limits       |      0.0 |
+|   11  | base_height          |    -10.0 |
++-------+----------------------+----------+
+
+[INFO] Curriculum Manager:  <CurriculumManager> contains 1 active terms.
++---------------------------+
+|  Active Curriculum Terms  |
++--------+------------------+
+| Index  | Name             |
++--------+------------------+
+|   0    | terrain_levels   |
++--------+------------------+
+
+[INFO]: Completed setting up the environment...
+2026-11-20T05:43:40Z [41,968ms] [Warning] [omni.physx.fabric.plugin] FabricManager::initializePointInstancer mismatched prototypes on point instancer: /Visuals/Command/velocity_goal.
+2026-11-20T05:43:40Z [41,968ms] [Warning] [omni.physx.fabric.plugin] FabricManager::initializePointInstancer mismatched prototypes on point instancer: /Visuals/Command/velocity_current.
+[WARN] rsl_rl.modules.distribution unavailable; skipping distribution safety patch.
+/isaac-sim/kit/python/lib/python3.11/site-packages/rsl_rl/utils/utils.py:245: UserWarning: The observation configuration dictionary 'obs_groups' must contain the 'policy' key. As an observation group with the name 'policy' was found, this is assumed to be the observation set. Consider adding the 'policy' key to the 'obs_groups' dictionary for clarity. This behavior will be removed in a future version.
+  warnings.warn(
+/isaac-sim/kit/python/lib/python3.11/site-packages/rsl_rl/utils/utils.py:291: UserWarning: The observation configuration dictionary 'obs_groups' must contain the 'critic' key. As the configuration for 'critic' is missing, the observations from the 'policy' set are used. Consider adding the 'critic' key to the 'obs_groups' dictionary for clarity. This behavior will be removed in a future version.
+  warnings.warn(
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 policy :  ['policy']
+	 critic :  ['policy']
+--------------------------------------------------------------------------------
+Actor MLP: MLP(
+  (0): Linear(in_features=235, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=12, bias=True)
+)
+Critic MLP: MLP(
+  (0): Linear(in_features=235, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=1, bias=True)
+)
+[INFO] Loading pretrained weights from: /workspace/go2/benchmark/logs/rsl_rl/b1_source_repair_14029762_1000_training/2026-11-20_11-11-51_B1_rough_2048_s0/model_2650.pt
+[B1_ACTION_BOUND_TEST] raw=10000 recorded=100.0 history=100.0
+[FINITE_RESUME] Completed prefix updates 2651
+[INFO] Pretrained weights loaded — training starts fresh (iteration 0).
+################################################################################
+                     [1m Learning iteration 2651/2653 [0m                     
+
+                       Computation: 1319 steps/s (collection: 0.722s, learning 0.442s)
+             Mean action noise std: 0.48
+                    value_function: 0.0052
+                         surrogate: -0.0388
+                           entropy: 7.8419
+Episode_Reward/track_lin_vel_xy_exp: 0.0005
+Episode_Reward/track_ang_vel_z_exp: 0.0001
+       Episode_Reward/lin_vel_z_l2: -0.0002
+      Episode_Reward/ang_vel_xy_l2: -0.0153
+     Episode_Reward/dof_torques_l2: -0.0000
+         Episode_Reward/dof_acc_l2: -0.0002
+     Episode_Reward/action_rate_l2: -1.2000
+      Episode_Reward/feet_air_time: 0.0000
+ Episode_Reward/undesired_contacts: 0.0000
+Episode_Reward/flat_orientation_l2: -0.0005
+     Episode_Reward/dof_pos_limits: 0.0000
+        Episode_Reward/base_height: -0.0000
+         Curriculum/terrain_levels: 2.3125
+Metrics/base_velocity/error_vel_xy: 0.0015
+Metrics/base_velocity/error_vel_yaw: 0.0027
+      Episode_Termination/time_out: 0.0000
+  Episode_Termination/base_contact: 0.0000
+--------------------------------------------------------------------------------
+                   Total timesteps: 1536
+                    Iteration time: 1.16s
+                      Time elapsed: 00:00:01
+                               ETA: 00:00:02
+
+Could not find git repository in /isaac-sim/kit/python/lib/python3.11/site-packages/rsl_rl/__init__.py. Skipping.
+Storing git diff for 'benchmark' in: /workspace/go2/benchmark/logs/rsl_rl/b1_boundary_probe_14032253/2026-11-20_13-43-20_B1_rough_2048_s0/git/benchmark.diff
+################################################################################
+                     [1m Learning iteration 2652/2653 [0m                     
+
+                       Computation: 859 steps/s (collection: 1.507s, learning 0.280s)
+             Mean action noise std: 0.48
+          Mean value_function loss: 0.0008
+               Mean surrogate loss: -0.0343
+                 Mean entropy loss: 7.8370
+                       Mean reward: 1.65
+               Mean episode length: 44.50
+Episode_Reward/track_lin_vel_xy_exp: 0.0213
+Episode_Reward/track_ang_vel_z_exp: 0.0114
+       Episode_Reward/lin_vel_z_l2: -0.0014
+      Episode_Reward/ang_vel_xy_l2: -0.0113
+     Episode_Reward/dof_torques_l2: -0.0001
+         Episode_Reward/dof_acc_l2: -0.0027
+     Episode_Reward/action_rate_l2: -0.8012
+      Episode_Reward/feet_air_time: -0.0004
+ Episode_Reward/undesired_contacts: 0.0000
+Episode_Reward/flat_orientation_l2: -0.0005
+     Episode_Reward/dof_pos_limits: 0.0000
+        Episode_Reward/base_height: -0.0003
+         Curriculum/terrain_levels: 2.3118
+Metrics/base_velocity/error_vel_xy: 0.0082
+Metrics/base_velocity/error_vel_yaw: 0.0074
+      Episode_Termination/time_out: 0.0059
+  Episode_Termination/base_contact: 0.0000
+--------------------------------------------------------------------------------
+                   Total timesteps: 3072
+                    Iteration time: 1.79s
+                      Time elapsed: 00:00:02
+                               ETA: 00:00:01
+
+[INFO] Learning curves exported to: /workspace/go2/benchmark/logs/rsl_rl/b1_boundary_probe_14032253/2026-11-20_13-43-20_B1_rough_2048_s0/analysis
+[INFO] Training completed in 6.9s (0.00h), trained_iterations=2/2

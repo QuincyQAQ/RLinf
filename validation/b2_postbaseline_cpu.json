@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "strict_load": true,
+  "finite": true,
+  "positive_std": true,
+  "changed": {},
+  "checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_2112.pt",
+  "protocol": {
+    "task": "B2",
+    "training_seed": 0,
+    "source": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_2112.pt",
+    "source_selection": "latest checkpoint by write time from completed 2200-update baseline; no score cherry-picking",
+    "additional_updates": 1000,
+    "num_envs": 1024,
+    "rollout_steps": 24,
+    "additional_transitions_per_lane": 24576000,
+    "recipes": {
+      "rlinf_conservative_mse": {
+        "lr": 0.0003,
+        "entropy_bonus": 0.003,
+        "value_loss_type": "mse",
+        "desired_kl": 0.005
+      },
+      "rlinf_conservative_huber": {
+        "lr": 0.0003,
+        "entropy_bonus": 0.003,
+        "value_loss_type": "huber",
+        "desired_kl": 0.005
+      }
+    },
+    "control": "original RSL PPO continuing identical weights",
+    "optimizer": "fresh for all three lanes",
+    "environment": "fresh for all three lanes; terrain RNG state not restored",
+    "posture_schedule": "late weights from the first continuation step for all lanes",
+    "curve_seed": 12345,
+    "holdout_seeds": [
+      23456,
+      34567
+    ],
+    "selection": "two predeclared recipes, both fully reported; holdout never used to select or stop training",
+    "primary_metric": "physical_obstacle_passage_rate",
+    "secondary": [
+      "success_rate",
+      "joint_tracking_and_passage_success_rate"
+    ],
+    "caveat": "one training seed; tuned configuration comparison, not isolated framework causal effect",
+    "sources": [
+      "https://rlinf.readthedocs.io/en/latest/rst_source/reference/algorithms/ppo.html",
+      "https://github.com/RLinf/RLinf/blob/main/examples/embodiment/config/maniskill_ppo_mlp.yaml"
+    ]
+  },
+  "cuda_initialized": false
+}

@@ -1,0 +1,58 @@
+[INFO][AppLauncher]: Using device: cuda:0
+[INFO][AppLauncher]: Loading experience file: /workspace/go2/IsaacLab/apps/isaaclab.python.headless.kit
+[Info] [carb] Logging to file: /isaac-sim/kit/logs/Kit/Isaac-Sim/5.1/kit_20261120_135109.log
+2026-11-20T05:51:09Z [36ms] [Warning] [omni.ext.plugin] [ext: .asset_tools] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.asset_tools' or '/workspace/go2/.asset_tools/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .cache] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.cache' or '/workspace/go2/.cache/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .container_home] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.container_home' or '/workspace/go2/.container_home/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .container_homes] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.container_homes' or '/workspace/go2/.container_homes/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .extra_overlay] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.extra_overlay' or '/workspace/go2/.extra_overlay/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .extra_overlay_failed_lxml_20261119] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.extra_overlay_failed_lxml_20261119' or '/workspace/go2/.extra_overlay_failed_lxml_20261119/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .isaacsim_cache] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.isaacsim_cache' or '/workspace/go2/.isaacsim_cache/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .isaacsim_caches] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.isaacsim_caches' or '/workspace/go2/.isaacsim_caches/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .python_overlay] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.python_overlay' or '/workspace/go2/.python_overlay/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .rlinf_overlay] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.rlinf_overlay' or '/workspace/go2/.rlinf_overlay/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .rlinf_overlay_rejected_auto_upgrade_20261119] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.rlinf_overlay_rejected_auto_upgrade_20261119' or '/workspace/go2/.rlinf_overlay_rejected_auto_upgrade_20261119/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: IsaacLab] Extensions config 'extension.toml' doesn't exist '/workspace/go2/IsaacLab' or '/workspace/go2/IsaacLab/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: .usd_converter] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.usd_converter' or '/workspace/go2/.usd_converter/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: RLinf] Extensions config 'extension.toml' doesn't exist '/workspace/go2/RLinf' or '/workspace/go2/RLinf/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: a40] Extensions config 'extension.toml' doesn't exist '/workspace/go2/a40' or '/workspace/go2/a40/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: assets] Extensions config 'extension.toml' doesn't exist '/workspace/go2/assets' or '/workspace/go2/assets/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: benchmark] Extensions config 'extension.toml' doesn't exist '/workspace/go2/benchmark' or '/workspace/go2/benchmark/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: config] Extensions config 'extension.toml' doesn't exist '/workspace/go2/config' or '/workspace/go2/config/config'
+2026-11-20T05:51:09Z [37ms] [Warning] [omni.ext.plugin] [ext: containers] Extensions config 'extension.toml' doesn't exist '/workspace/go2/containers' or '/workspace/go2/containers/config'
+2026-11-20T05:51:09Z [38ms] [Warning] [omni.ext.plugin] [ext: contribution] Extensions config 'extension.toml' doesn't exist '/workspace/go2/contribution' or '/workspace/go2/contribution/config'
+2026-11-20T05:51:09Z [38ms] [Warning] [omni.ext.plugin] [ext: docs] Extensions config 'extension.toml' doesn't exist '/workspace/go2/docs' or '/workspace/go2/docs/config'
+2026-11-20T05:51:09Z [38ms] [Warning] [omni.ext.plugin] [ext: reference_archive] Extensions config 'extension.toml' doesn't exist '/workspace/go2/reference_archive' or '/workspace/go2/reference_archive/config'
+2026-11-20T05:51:09Z [38ms] [Warning] [omni.ext.plugin] [ext: reports] Extensions config 'extension.toml' doesn't exist '/workspace/go2/reports' or '/workspace/go2/reports/config'
+2026-11-20T05:51:09Z [38ms] [Warning] [omni.ext.plugin] [ext: outputs] Extensions config 'extension.toml' doesn't exist '/workspace/go2/outputs' or '/workspace/go2/outputs/config'
+2026-11-20T05:51:09Z [45ms] [Warning] [omni.ext.plugin] [ext: tests] Extensions config 'extension.toml' doesn't exist '/workspace/go2/tests' or '/workspace/go2/tests/config'
+2026-11-20T05:51:09Z [45ms] [Warning] [omni.ext.plugin] [ext: validation] Extensions config 'extension.toml' doesn't exist '/workspace/go2/validation' or '/workspace/go2/validation/config'
+2026-11-20T05:51:10Z [1,614ms] [Warning] [omni.usd_config.extension] Enable omni.materialx.libs extension to use MaterialX
+2026-11-20T05:51:16Z [7,154ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [omni::physx::IPhysxBenchmarks v1.0] (plugin: <default plugin>), by client: omni.physics.physx.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+2026-11-20T05:51:16Z [7,233ms] [Warning] [omni.isaac.dynamic_control] omni.isaac.dynamic_control is deprecated as of Isaac Sim 4.5. No action is needed from end-users.
+2026-11-20T05:51:24Z [14,974ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+2026-11-20T05:51:24Z [15,367ms] [Warning] [carb.cudainterop.plugin] CUDA_VISIBLE_DEVICES environment variable is set.
+2026-11-20T05:51:24Z [15,367ms] [Warning] [carb.cudainterop.plugin] Note CUDA device enumeration and Omniverse device enumeration are different.
+2026-11-20T05:51:24Z [15,367ms] [Warning] [carb.cudainterop.plugin] Setting CUDA_VISIBLE_DEVICES can lead to undesired behavior or crashes.
+
+|---------------------------------------------------------------------------------------------|
+| Driver Version: 575.57.08     | Graphics API: Vulkan
+|=============================================================================================|
+| GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+|     |                                  |        |     |            | Device-ID | UUID       |
+|     |                                  |        |     |            | Bus-ID    |            |
+|---------------------------------------------------------------------------------------------|
+| 0   | NVIDIA A40                       | Yes: 0 |     | 49386   MB | 10de      | 0          |
+|     |                                  |        |     |            | 2235      | 17e45982.. |
+|     |                                  |        |     |            | ce        |            |
+|=============================================================================================|
+| OS: 24.04.2 LTS (Noble Numbat) ubuntu, Version: 24.04.2, Kernel: 5.4.0-162-generic
+| Processor: Intel(R) Xeon(R) Platinum 8358P CPU @ 2.60GHz
+| Cores: 64 | Logical Cores: 64
+|---------------------------------------------------------------------------------------------|
+| Total Memory (MB): 1031723 | Free Memory: 972524
+| Total Page/Swap (MB): 18431 | Free Page/Swap: 18431
+|---------------------------------------------------------------------------------------------|
+2026-11-20T05:51:26Z [17,536ms] [Warning] [gpu.foundation.plugin] CPU performance profile is set to powersave. This profile sets the CPU to the lowest frequency reducing performance.
+[INFO]: Parsing configuration from: envs.families.rough_velocity.go2_fam_b_env_cfg:Go2B1RoughWalkEnvCfg
+[INFO]: Parsing configuration from: isaaclab_tasks.manager_based.locomotion.velocity.config.go2.agents.rsl_rl_ppo_cfg:UnitreeGo2RoughPPORunnerCfg

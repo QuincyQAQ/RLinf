@@ -1,0 +1,10 @@
+# Selected supported stack, not the unavailable original author's pip freeze.
+torch==2.7.0+cu128
+torchvision==0.22.0+cu128
+rsl-rl-lib==3.1.2
+tensordict==0.8.3
+numpy==1.26.4
+gymnasium==1.2.1
+pillow==11.3.0
+packaging==23.2
+isaacsim==5.1.0.0

@@ -1,0 +1,7 @@
+{
+  "run": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0",
+  "checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/model_1499.pt",
+  "requested_updates": 1500,
+  "checkpoint_number_is_not_assumed_to_equal_updates": true,
+  "main_task_eval": "completed"
+}

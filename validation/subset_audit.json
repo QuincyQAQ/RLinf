@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "tasks": [
+    "A2",
+    "B1",
+    "B2"
+  ],
+  "csv_rows": 13,
+  "raw_evaluations": 28,
+  "episodes": 31771,
+  "checkpoints": 17,
+  "files_hashed": 467,
+  "new_gpu_allocations": 0,
+  "new_simulation_runs": 0,
+  "new_training_runs": 0
+}

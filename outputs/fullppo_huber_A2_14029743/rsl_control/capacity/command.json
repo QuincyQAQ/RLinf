@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "/workspace/go2/a40/container_python.sh",
+    "/workspace/go2/a40/train_continuation_rsl.py",
+    "--task",
+    "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0",
+    "--headless",
+    "--seed",
+    "0",
+    "--num_envs",
+    "2048",
+    "--max_iterations",
+    "2",
+    "--no-stand_reward_anneal",
+    "--no-posture_reward_anneal",
+    "--plot_learning_curves",
+    "--plot_smoothing",
+    "25",
+    "--experiment_name",
+    "a2_postbaseline_14029743_rsl_control_capacity",
+    "--run_name",
+    "A2_omni_2048_s0",
+    "--kit_args=--/app/extensions/excluded/0=omni.kit.telemetry --/persistent/isaac/asset_root/cloud=/workspace/go2/assets/isaac_sim_5.1",
+    "--pretrained_checkpoint",
+    "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/model_1499.pt"
+  ],
+  "overrides": {}
+}

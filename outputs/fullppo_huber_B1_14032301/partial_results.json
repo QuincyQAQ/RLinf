@@ -1,0 +1,74 @@
+{
+  "baseline": {
+    "23456": {
+      "num_episodes": 1024,
+      "success_rate": 0.9990234375,
+      "mean_success_step_ratio": 0.9743569742838563,
+      "mean_lin_vel_error": 0.08523010536303952,
+      "mean_ang_vel_error": 0.08041676784637895,
+      "mean_alive_time_s": 19.99171875,
+      "failure_rate": 0.0009765625,
+      "train_task": "B1_rough_s0",
+      "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+    },
+    "34567": {
+      "num_episodes": 1024,
+      "success_rate": 0.998046875,
+      "mean_success_step_ratio": 0.9741714487449278,
+      "mean_lin_vel_error": 0.08517708437299548,
+      "mean_ang_vel_error": 0.08029169477473265,
+      "mean_alive_time_s": 19.9862890625,
+      "failure_rate": 0.001953125,
+      "train_task": "B1_rough_s0",
+      "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+    }
+  },
+  "rlinf_huber": {
+    "23456": {
+      "num_episodes": 1024,
+      "success_rate": 0.998046875,
+      "mean_success_step_ratio": 0.9753943330605566,
+      "mean_lin_vel_error": 0.07712204194392053,
+      "mean_ang_vel_error": 0.07335395889084813,
+      "mean_alive_time_s": 19.99240234375,
+      "failure_rate": 0.0009765625,
+      "train_task": "B1_rough_s0",
+      "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+    },
+    "34567": {
+      "num_episodes": 1024,
+      "success_rate": 0.998046875,
+      "mean_success_step_ratio": 0.9753675491979915,
+      "mean_lin_vel_error": 0.07774299394922532,
+      "mean_ang_vel_error": 0.07324810800341161,
+      "mean_alive_time_s": 19.98298828125,
+      "failure_rate": 0.001953125,
+      "train_task": "B1_rough_s0",
+      "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+    }
+  },
+  "rsl_control": {
+    "23456": {
+      "num_episodes": 1024,
+      "success_rate": 0.99609375,
+      "mean_success_step_ratio": 0.9751807099163203,
+      "mean_lin_vel_error": 0.08443402061163832,
+      "mean_ang_vel_error": 0.08115530787978434,
+      "mean_alive_time_s": 19.973984375,
+      "failure_rate": 0.0029296875,
+      "train_task": "B1_rough_s0",
+      "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+    },
+    "34567": {
+      "num_episodes": 1024,
+      "success_rate": 0.99609375,
+      "mean_success_step_ratio": 0.9753069540699588,
+      "mean_lin_vel_error": 0.08427315264029366,
+      "mean_ang_vel_error": 0.08084217939211669,
+      "mean_alive_time_s": 19.9662109375,
+      "failure_rate": 0.00390625,
+      "train_task": "B1_rough_s0",
+      "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+    }
+  }
+}

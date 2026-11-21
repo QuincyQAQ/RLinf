@@ -1,0 +1,30 @@
+{
+  "status": "no_new_dependency_conflicts",
+  "baseline_image": {
+    "return_code": 1,
+    "issues": [
+      "fastapi 0.115.7 has requirement starlette<0.46.0,>=0.40.0, but you have starlette 0.49.1.",
+      "msal 1.27.0 requires pyjwt, which is not installed.",
+      "nvidia-srl-base 1.3.0 requires docstring-parser, which is not installed.",
+      "nvidia-srl-usd 2.0.0 requires usd-core, which is not installed.",
+      "nvidia-srl-usd-to-urdf 1.0.2 has requirement lxml<5.0.0,>=4.9.2, but you have lxml 5.4.0.",
+      "nvidia-srl-usd-to-urdf 1.0.2 requires usd-core, which is not installed.",
+      "pin-pink 3.1.0 requires quadprog, which is not installed."
+    ],
+    "stdout": "pin-pink 3.1.0 requires quadprog, which is not installed.\nmsal 1.27.0 requires pyjwt, which is not installed.\nnvidia-srl-usd-to-urdf 1.0.2 requires usd-core, which is not installed.\nnvidia-srl-base 1.3.0 requires docstring-parser, which is not installed.\nnvidia-srl-usd 2.0.0 requires usd-core, which is not installed.\nfastapi 0.115.7 has requirement starlette<0.46.0,>=0.40.0, but you have starlette 0.49.1.\nnvidia-srl-usd-to-urdf 1.0.2 has requirement lxml<5.0.0,>=4.9.2, but you have lxml 5.4.0.\n"
+  },
+  "active_environment": {
+    "return_code": 0,
+    "issues": [],
+    "stdout": "No broken requirements found.\n"
+  },
+  "introduced_issues": [],
+  "global_pip_check_clean": true,
+  "remaining_image_issues_resolved": true,
+  "original_image_modified": false,
+  "optional_exporter_isolated": true,
+  "resolution": "Standalone converter venv and exclusion of its optional prebundle from locomotion Python; original image retained",
+  "scope": "CPU package metadata comparison only; no simulation or GPU validation",
+  "gpu_used": false,
+  "simulation_started": false
+}

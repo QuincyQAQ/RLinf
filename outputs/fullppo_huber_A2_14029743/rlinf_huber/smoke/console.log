@@ -1,0 +1,521 @@
+/isaac-sim/kit/python/lib/python3.11/site-packages/hydra/_internal/hydra.py:119: UserWarning: Future Hydra versions will no longer change working directory at job runtime by default.
+See https://hydra.cc/docs/1.2/upgrades/1.1_to_1.2/changes_to_job_working_dir/ for more information.
+  ret = run_job(
+2026-11-20 10:11:10,588	INFO worker.py:1696 -- Using address local set in the environment variable RAY_ADDRESS
+2026-11-20 10:11:17,529	INFO worker.py:2014 -- Started a local Ray instance. View the dashboard at [1m[32mhttp://127.0.0.1:8266 [39m[22m
+[INFO 10:11:32 RLinf] RLinf is running on a cluster with 1 node and 1 accelerator. The nodes' details are: 
+node_labels: []
+node_rank: 0
+ray_id: 9ba783c399e76b4233e4c68f93c0332eb1e0f5d179f1c0d2cc008962
+node_ip: 10.120.20.226
+num_cpus: 64
+python_interpreter_path: /isaac-sim/kit/python/bin/python3
+hardware_resources:
+- type: Accelerator
+  infos:
+  - type: Accelerator
+    model: NV_GPU:A40
+profiler_backends: []
+
+Node groups' details are: 
+label: cluster
+nodes: '0'
+hardware_type: Accelerator
+ignore_hardware: false
+env_configs: null
+
+label: node
+nodes: '0'
+hardware_type: null
+ignore_hardware: true
+env_configs: null
+
+[INFO 10:11:32 FlexiblePlacementStrategy] 
+[INFO 10:11:32 FlexiblePlacementStrategy] Using flexible placement with hardware ranks: [[0]], node groups: ['cluster'].
+[INFO 10:11:32 FlexiblePlacementStrategy] 
+[INFO 10:11:32 FlexiblePlacementStrategy] Using flexible placement with hardware ranks: [[0]], node groups: ['cluster'].
+{
+  "env": {
+    "train": {
+      "env_type": "isaaclab",
+      "task_key": "A2",
+      "seed": 0,
+      "total_num_envs": 64,
+      "init_params": {
+        "id": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0"
+      },
+      "group_size": 1,
+      "max_steps_per_rollout_epoch": 24,
+      "max_episode_steps": 1000,
+      "auto_reset": true,
+      "ignore_terminations": false,
+      "use_rel_reward": false,
+      "reward_scale": 1.0,
+      "use_fixed_reset_state_ids": false,
+      "use_ordered_reset_state_ids": false,
+      "is_eval": false,
+      "rollout_epoch": 1,
+      "validation_output": "/workspace/go2/outputs/fullppo_huber_A2_14029743/rlinf_huber/smoke/environment",
+      "video_cfg": {
+        "save_video": false,
+        "video_base_dir": "/workspace/go2/outputs/fullppo_huber_A2_14029743/rlinf_huber/smoke/video"
+      },
+      "continuation_start_iteration": 1500,
+      "disable_kit_telemetry": true
+    },
+    "eval": null,
+    "group_name": "EnvGroup"
+  },
+  "actor": {
+    "model": {
+      "model_type": "go2_policy",
+      "model_path": "",
+      "initial_checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/model_1499.pt",
+      "policy_setup": "locomotion",
+      "obs_dim": 235,
+      "critic_obs_dim": 235,
+      "action_dim": 12,
+      "num_action_chunks": 1,
+      "precision": "32",
+      "add_value_head": true,
+      "is_lora": false,
+      "obs_normalization": false,
+      "distribution_safety_patch": false
+    },
+    "fsdp_config": {
+      "strategy": "fsdp",
+      "sharding_strategy": "no_shard",
+      "gradient_checkpointing": false,
+      "cpu_offload": false,
+      "offload_pin_memory": false,
+      "reshard_after_forward": true,
+      "enable_gradient_accumulation": true,
+      "forward_prefetch": false,
+      "limit_all_gathers": false,
+      "backward_prefetch": null,
+      "use_orig_params": false,
+      "use_liger_kernel": false,
+      "mixed_precision": {
+        "param_dtype": "32",
+        "reduce_dtype": "32",
+        "buffer_dtype": "32"
+      },
+      "wrappers": {},
+      "mixed_precision_policies": {},
+      "mixed_precision_rules": {},
+      "amp_autocast": {
+        "enabled": false,
+        "precision": "bf16"
+      },
+      "grad_scaler": {
+        "enabled": false,
+        "init_scale": null,
+        "growth_interval": null
+      }
+    },
+    "group_name": "ActorGroup",
+    "training_backend": "fsdp",
+    "micro_batch_size": 384,
+    "global_batch_size": 384,
+    "seed": 0,
+    "enable_offload": false,
+    "optim": {
+      "lr": 0.0003,
+      "value_lr": 0.0003,
+      "adam_beta1": 0.9,
+      "adam_beta2": 0.999,
+      "adam_eps": 1e-08,
+      "weight_decay": 0.0,
+      "clip_grad": 1.0,
+      "lr_scheduler": "torch_constant"
+    }
+  },
+  "weight_syncer": {
+    "type": "patch",
+    "patch": {
+      "snapshot_device": "cpu",
+      "delta_encoding": true,
+      "compression": "none",
+      "init_sync": {
+        "enabled": true,
+        "prefixes": null,
+        "bucket_size": 134217728
+      }
+    }
+  },
+  "cluster": {
+    "num_nodes": 1,
+    "component_placement": {
+      "actor,env,rollout": "0"
+    },
+    "tracer": {
+      "enable": false
+    }
+  },
+  "runner": {
+    "task_type": "embodied",
+    "logger": {
+      "log_path": "/workspace/go2/outputs/fullppo_huber_A2_14029743/rlinf_huber/smoke",
+      "project_name": "rlinf",
+      "experiment_name": "isaaclab_A2_s0",
+      "logger_backends": [
+        "tensorboard"
+      ]
+    },
+    "max_epochs": 2,
+    "max_steps": 2,
+    "only_eval": false,
+    "val_check_interval": -1,
+    "save_interval": 1,
+    "seq_length": 1,
+    "max_prompt_length": 1,
+    "resume_dir": null,
+    "ckpt_path": null,
+    "per_worker_log": false,
+    "per_worker_log_path": null,
+    "weight_sync_interval": 1,
+    "overlap_env_bootstrap": false
+  },
+  "algorithm": {
+    "update_epoch": 5,
+    "normalize_advantages": true,
+    "kl_penalty": "kl",
+    "group_size": 1,
+    "reward_type": "action_level",
+    "logprob_type": "action_level",
+    "entropy_type": "action_level",
+    "adv_type": "gae",
+    "loss_type": "actor_critic",
+    "loss_agg_func": "token-mean",
+    "kl_beta": 0.0,
+    "entropy_bonus": 0.003,
+    "clip_ratio_high": 0.2,
+    "clip_ratio_low": 0.2,
+    "clip_ratio_c": null,
+    "value_clip": 0.2,
+    "huber_delta": 10.0,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "reward_coef": 1.0,
+    "value_loss_type": "huber",
+    "desired_kl": 0.005
+  },
+  "rollout": {
+    "group_name": "RolloutGroup",
+    "rollout_backend": "huggingface",
+    "enable_offload": false,
+    "pipeline_stage_num": 1,
+    "model": {
+      "model_path": "",
+      "precision": "32"
+    },
+    "enable_torch_compile": false,
+    "enable_cuda_graph": false,
+    "sampling_params": {
+      "do_sample": true,
+      "temperature_train": 1.0,
+      "temperature_eval": 0.0,
+      "top_k": 0,
+      "top_p": 1.0,
+      "max_new_tokens": 1,
+      "repetition_penalty": 1.0
+    }
+  },
+  "reward": {
+    "use_reward_model": false
+  },
+  "critic": {
+    "use_critic_model": false
+  }
+}
+[INFO 10:11:32 FlexiblePlacementStrategy] 
+[INFO 10:11:32 FlexiblePlacementStrategy] Using flexible placement with hardware ranks: [[0]], node groups: ['cluster'].
+[INFO 10:11:32 FlexiblePlacementStrategy] Generated 1 placements: [Placement(rank=0, cluster_node_rank=0, placement_node_rank=0, local_accelerator_rank=0, accelerator_type='NV_GPU', local_rank=0, local_world_size=1, visible_accelerators=['0'], isolate_accelerator=True, local_hardware_ranks=[0], node_group_label='cluster')].
+[INFO 10:11:33 FlexiblePlacementStrategy] Generated 1 placements: [Placement(rank=0, cluster_node_rank=0, placement_node_rank=0, local_accelerator_rank=0, accelerator_type='NV_GPU', local_rank=0, local_world_size=1, visible_accelerators=['0'], isolate_accelerator=True, local_hardware_ranks=[0], node_group_label='cluster')].
+[INFO 10:11:33 FlexiblePlacementStrategy] Generated 1 placements: [Placement(rank=0, cluster_node_rank=0, placement_node_rank=0, local_accelerator_rank=0, accelerator_type='NV_GPU', local_rank=0, local_world_size=1, visible_accelerators=['0'], isolate_accelerator=True, local_hardware_ranks=[0], node_group_label='cluster')].
+[INFO 10:11:33 NodePlacementStrategy] 
+[INFO 10:11:33 NodePlacementStrategy] Using node placement with node ranks: [0], node groups: ['node'].
+[INFO 10:11:33 NodePlacementStrategy] Generated 1 placements: [Placement(rank=0, cluster_node_rank=0, placement_node_rank=0, local_accelerator_rank='0', accelerator_type='NV_GPU', local_rank=0, local_world_size=1, visible_accelerators=['0'], isolate_accelerator=True, local_hardware_ranks=[], node_group_label='cluster')].
+[INFO 10:11:33 NodePlacementStrategy] 
+[INFO 10:11:33 NodePlacementStrategy] Using node placement with node ranks: [0], node groups: ['node'].
+[INFO 10:11:33 NodePlacementStrategy] Generated 1 placements: [Placement(rank=0, cluster_node_rank=0, placement_node_rank=0, local_accelerator_rank='0', accelerator_type='NV_GPU', local_rank=0, local_world_size=1, visible_accelerators=['0'], isolate_accelerator=True, local_hardware_ranks=[], node_group_label='cluster')].
+[INFO 10:11:58 NodePlacementStrategy] 
+[INFO 10:11:58 NodePlacementStrategy] Using node placement with node ranks: [0], node groups: ['node'].
+[INFO 10:11:58 NodePlacementStrategy] Generated 1 placements: [Placement(rank=0, cluster_node_rank=0, placement_node_rank=0, local_accelerator_rank='0', accelerator_type='NV_GPU', local_rank=0, local_world_size=1, visible_accelerators=['0'], isolate_accelerator=True, local_hardware_ranks=[], node_group_label='cluster')].
+[36m(EmbodiedFSDPActor pid=1633352)[0m [INFO 10:11:59 ActorGroup-Rank-0][fsdp_model_manager.py:140] [FSDP] AMP is disabled.
+[36m(EmbodiedFSDPActor pid=1633352)[0m [INFO 10:11:59 FlexiblePlacementStrategy] 
+[36m(EmbodiedFSDPActor pid=1633352)[0m [INFO 10:11:59 FlexiblePlacementStrategy] Using flexible placement with hardware ranks: [[0]], node groups: ['cluster'].
+[36m(MultiStepRolloutWorker pid=1633501)[0m [INFO 10:12:01 FlexiblePlacementStrategy] 
+[36m(MultiStepRolloutWorker pid=1633501)[0m [INFO 10:12:01 FlexiblePlacementStrategy] Using flexible placement with hardware ranks: [[0]], node groups: ['cluster'].
+[36m(EnvWorker pid=1633516)[0m [INFO 10:12:07 FlexiblePlacementStrategy] 
+[36m(EnvWorker pid=1633516)[0m [INFO 10:12:07 FlexiblePlacementStrategy] Using flexible placement with hardware ranks: [[0]], node groups: ['cluster'].
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO][AppLauncher]: Using device: cuda:0
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO][AppLauncher]: Loading experience file: /workspace/go2/IsaacLab/apps/isaaclab.python.headless.kit
+[36m(EnvGroup(rank=0) pid=1633516)[0m Loading user config located at: '/isaac-sim/kit/data/Kit/Isaac-Sim/5.1/user.config.json'
+[36m(EnvGroup(rank=0) pid=1633516)[0m [Info] [carb] Logging to file: /isaac-sim/kit/logs/Kit/Isaac-Sim/5.1/kit_20261120_101210.log
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [28ms] [Warning] [omni.ext.plugin] [ext: .asset_tools] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.asset_tools' or '/workspace/go2/.asset_tools/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [28ms] [Warning] [omni.ext.plugin] [ext: .cache] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.cache' or '/workspace/go2/.cache/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [28ms] [Warning] [omni.ext.plugin] [ext: .container_home] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.container_home' or '/workspace/go2/.container_home/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [28ms] [Warning] [omni.ext.plugin] [ext: .container_homes] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.container_homes' or '/workspace/go2/.container_homes/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: .extra_overlay] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.extra_overlay' or '/workspace/go2/.extra_overlay/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: .extra_overlay_failed_lxml_20261119] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.extra_overlay_failed_lxml_20261119' or '/workspace/go2/.extra_overlay_failed_lxml_20261119/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: .isaacsim_cache] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.isaacsim_cache' or '/workspace/go2/.isaacsim_cache/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: .isaacsim_caches] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.isaacsim_caches' or '/workspace/go2/.isaacsim_caches/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: .rlinf_overlay] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.rlinf_overlay' or '/workspace/go2/.rlinf_overlay/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: .rlinf_overlay_rejected_auto_upgrade_20261119] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.rlinf_overlay_rejected_auto_upgrade_20261119' or '/workspace/go2/.rlinf_overlay_rejected_auto_upgrade_20261119/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: .usd_converter] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.usd_converter' or '/workspace/go2/.usd_converter/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: IsaacLab] Extensions config 'extension.toml' doesn't exist '/workspace/go2/IsaacLab' or '/workspace/go2/IsaacLab/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: RLinf] Extensions config 'extension.toml' doesn't exist '/workspace/go2/RLinf' or '/workspace/go2/RLinf/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: a40] Extensions config 'extension.toml' doesn't exist '/workspace/go2/a40' or '/workspace/go2/a40/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: assets] Extensions config 'extension.toml' doesn't exist '/workspace/go2/assets' or '/workspace/go2/assets/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: benchmark] Extensions config 'extension.toml' doesn't exist '/workspace/go2/benchmark' or '/workspace/go2/benchmark/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: config] Extensions config 'extension.toml' doesn't exist '/workspace/go2/config' or '/workspace/go2/config/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: containers] Extensions config 'extension.toml' doesn't exist '/workspace/go2/containers' or '/workspace/go2/containers/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: contribution] Extensions config 'extension.toml' doesn't exist '/workspace/go2/contribution' or '/workspace/go2/contribution/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: docs] Extensions config 'extension.toml' doesn't exist '/workspace/go2/docs' or '/workspace/go2/docs/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: outputs] Extensions config 'extension.toml' doesn't exist '/workspace/go2/outputs' or '/workspace/go2/outputs/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: reference_archive] Extensions config 'extension.toml' doesn't exist '/workspace/go2/reference_archive' or '/workspace/go2/reference_archive/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: reports] Extensions config 'extension.toml' doesn't exist '/workspace/go2/reports' or '/workspace/go2/reports/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: tests] Extensions config 'extension.toml' doesn't exist '/workspace/go2/tests' or '/workspace/go2/tests/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: validation] Extensions config 'extension.toml' doesn't exist '/workspace/go2/validation' or '/workspace/go2/validation/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:10Z [29ms] [Warning] [omni.ext.plugin] [ext: .python_overlay] Extensions config 'extension.toml' doesn't exist '/workspace/go2/.python_overlay' or '/workspace/go2/.python_overlay/config'
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:12Z [1,436ms] [Warning] [omni.usd_config.extension] Enable omni.materialx.libs extension to use MaterialX
+[36m(ChannelWorker pid=1641338)[0m [INFO 10:12:12 FlexiblePlacementStrategy] 
+[36m(ChannelWorker pid=1641338)[0m [INFO 10:12:12 FlexiblePlacementStrategy] Using flexible placement with hardware ranks: [[0]], node groups: ['cluster'].
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:13Z [2,451ms] [Warning] [carb] Acquiring non optional plugin interface which is not listed as dependency: [omni::physx::IPhysxBenchmarks v1.0] (plugin: <default plugin>), by client: omni.physics.physx.plugin. Add it to CARB_PLUGIN_IMPL_DEPS() macro of a client.
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:13Z [2,465ms] [Warning] [omni.isaac.dynamic_control] omni.isaac.dynamic_control is deprecated as of Isaac Sim 4.5. No action is needed from end-users.
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:17Z [6,948ms] [Warning] [omni.platforminfo.plugin] failed to open the default display.  Can't verify X Server version.
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:17Z [7,040ms] [Warning] [carb.cudainterop.plugin] CUDA_VISIBLE_DEVICES environment variable is set.
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:17Z [7,040ms] [Warning] [carb.cudainterop.plugin] Note CUDA device enumeration and Omniverse device enumeration are different.
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:17Z [7,040ms] [Warning] [carb.cudainterop.plugin] Setting CUDA_VISIBLE_DEVICES can lead to undesired behavior or crashes.
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m |---------------------------------------------------------------------------------------------|
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Driver Version: 575.57.08     | Graphics API: Vulkan
+[36m(EnvGroup(rank=0) pid=1633516)[0m |=============================================================================================|
+[36m(EnvGroup(rank=0) pid=1633516)[0m | GPU | Name                             | Active | LDA | GPU Memory | Vendor-ID | LUID       |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     |                                  |        |     |            | Device-ID | UUID       |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     |                                  |        |     |            | Bus-ID    |            |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |---------------------------------------------------------------------------------------------|
+[36m(EnvGroup(rank=0) pid=1633516)[0m | 0   | NVIDIA A40                       | Yes: 0 |     | 49386   MB | 10de      | 0          |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     |                                  |        |     |            | 2235      | 50807d8a.. |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     |                                  |        |     |            | 3d        |            |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |=============================================================================================|
+[36m(EnvGroup(rank=0) pid=1633516)[0m | OS: 24.04.2 LTS (Noble Numbat) ubuntu, Version: 24.04.2, Kernel: 5.4.0-162-generic
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Processor: Intel(R) Xeon(R) Platinum 8358P CPU @ 2.60GHz
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Cores: 64 | Logical Cores: 64
+[36m(EnvGroup(rank=0) pid=1633516)[0m |---------------------------------------------------------------------------------------------|
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Total Memory (MB): 1031723 | Free Memory: 922805
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Total Page/Swap (MB): 18431 | Free Page/Swap: 18431
+[36m(EnvGroup(rank=0) pid=1633516)[0m |---------------------------------------------------------------------------------------------|
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:19Z [8,325ms] [Warning] [gpu.foundation.plugin] CPU performance profile is set to powersave. This profile sets the CPU to the lowest frequency reducing performance.
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO]: Parsing configuration from: envs.families.flat_velocity.go2_fam_a_env_cfg:Go2A2OmniWalkEnvCfg
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m [36m======================================================================================[0m
+[36m(EnvGroup(rank=0) pid=1633516)[0m [36m[1m[INFO][IsaacLab]: Logging to file: /tmp/isaaclab/logs/isaaclab_2026-11-20_10-12-19.log[0m
+[36m(EnvGroup(rank=0) pid=1633516)[0m [36m======================================================================================[0m
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m [33m10:12:19 [simulation_context.py] WARNING: The `enable_external_forces_every_iteration` parameter in the PhysxCfg is set to False. If you are experiencing noisy velocities, consider enabling this flag. You may need to slightly increase the number of velocity iterations (setting it to 1 or 2 rather than 0), together with this flag, to improve the accuracy of velocity updates.[0m
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO]: Base environment:
+[36m(EnvGroup(rank=0) pid=1633516)[0m 	Environment device    : cuda:0
+[36m(EnvGroup(rank=0) pid=1633516)[0m 	Environment seed      : 0
+[36m(EnvGroup(rank=0) pid=1633516)[0m 	Physics step-size     : 0.005
+[36m(EnvGroup(rank=0) pid=1633516)[0m 	Rendering step-size   : 0.02
+[36m(EnvGroup(rank=0) pid=1633516)[0m 	Environment step-size : 0.02
+[36m(EnvGroup(rank=0) pid=1633516)[0m [33m10:12:19 [terrain_importer.py] WARNING: Visual material specified for ground plane but no diffuse color found. Using default color: (0.0, 0.0, 0.0)[0m
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO]: Time taken for scene creation : 0.453378 seconds
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO]: Scene manager:  <class InteractiveScene>
+[36m(EnvGroup(rank=0) pid=1633516)[0m 	Number of environments: 64
+[36m(EnvGroup(rank=0) pid=1633516)[0m 	Environment spacing   : 2.5
+[36m(EnvGroup(rank=0) pid=1633516)[0m 	Source prim name      : /World/envs/env_0
+[36m(EnvGroup(rank=0) pid=1633516)[0m 	Global prim paths     : ['/World/ground']
+[36m(EnvGroup(rank=0) pid=1633516)[0m 	Replicate physics     : True
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO]: Starting the simulation. This may take a few seconds. Please wait...
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO]: Time taken for simulation start : 0.783481 seconds
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO] Command Manager:  <CommandManager> contains 1 active terms.
+[36m(EnvGroup(rank=0) pid=1633516)[0m +------------------------------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |              Active Command Terms              |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-------+---------------+------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Index | Name          |          Type          |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-------+---------------+------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   0   | base_velocity | UniformVelocityCommand |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-------+---------------+------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO] Event Manager:  <EventManager> contains 2 active terms.
+[36m(EnvGroup(rank=0) pid=1633516)[0m +--------------------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Active Event Terms in Mode: 'startup' |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +----------+---------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |  Index   | Name                      |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +----------+---------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |    0     | physics_material          |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |    1     | add_base_mass             |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +----------+---------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m +---------------------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |  Active Event Terms in Mode: 'reset'  |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +--------+------------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Index  | Name                         |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +--------+------------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   0    | base_external_force_torque   |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   1    | reset_base                   |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   2    | reset_robot_joints           |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +--------+------------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO] Recorder Manager:  <RecorderManager> contains 0 active terms.
+[36m(EnvGroup(rank=0) pid=1633516)[0m +---------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Active Recorder Terms |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-----------+---------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   Index   | Name    |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-----------+---------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-----------+---------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO] Action Manager:  <ActionManager> contains 1 active terms.
+[36m(EnvGroup(rank=0) pid=1633516)[0m +------------------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |  Active Action Terms (shape: 12)   |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +--------+-------------+-------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Index  | Name        |   Dimension |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +--------+-------------+-------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   0    | joint_pos   |          12 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +--------+-------------+-------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO] Observation Manager: <ObservationManager> contains 1 groups.
+[36m(EnvGroup(rank=0) pid=1633516)[0m +----------------------------------------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Active Observation Terms in Group: 'policy' (shape: (235,)) |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-----------+--------------------------------+-------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   Index   | Name                           |    Shape    |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-----------+--------------------------------+-------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     0     | base_lin_vel                   |     (3,)    |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     1     | base_ang_vel                   |     (3,)    |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     2     | projected_gravity              |     (3,)    |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     3     | velocity_commands              |     (3,)    |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     4     | joint_pos                      |    (12,)    |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     5     | joint_vel                      |    (12,)    |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     6     | actions                        |    (12,)    |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     7     | height_scan                    |    (187,)   |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-----------+--------------------------------+-------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO] Termination Manager:  <TerminationManager> contains 2 active terms.
+[36m(EnvGroup(rank=0) pid=1633516)[0m +---------------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |     Active Termination Terms    |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-------+--------------+----------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Index | Name         | Time Out |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-------+--------------+----------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   0   | time_out     |   True   |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   1   | base_contact |  False   |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-------+--------------+----------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO] Reward Manager:  <RewardManager> contains 11 active terms.
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-----------------------------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |           Active Reward Terms           |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-------+----------------------+----------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Index | Name                 |   Weight |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-------+----------------------+----------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   0   | track_lin_vel_xy_exp |      1.5 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   1   | track_ang_vel_z_exp  |     0.75 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   2   | lin_vel_z_l2         |     -2.0 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   3   | ang_vel_xy_l2        |    -0.05 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   4   | dof_torques_l2       |   -1e-05 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   5   | dof_acc_l2           | -2.5e-07 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   6   | action_rate_l2       |    -0.01 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   7   | feet_air_time        |     0.25 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   8   | flat_orientation_l2  |     -2.5 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   9   | dof_pos_limits       |      0.0 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   10  | base_height          |     -4.0 |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-------+----------------------+----------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO] Curriculum Manager:  <CurriculumManager> contains 0 active terms.
+[36m(EnvGroup(rank=0) pid=1633516)[0m +----------------------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m | Active Curriculum Terms |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-----------+----------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m |   Index   | Name     |
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-----------+----------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m +-----------+----------+
+[36m(EnvGroup(rank=0) pid=1633516)[0m 
+[36m(EnvGroup(rank=0) pid=1633516)[0m [INFO]: Completed setting up the environment...
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:24Z [13,106ms] [Warning] [omni.physx.fabric.plugin] FabricManager::initializePointInstancer mismatched prototypes on point instancer: /Visuals/Command/velocity_goal.
+[36m(EnvGroup(rank=0) pid=1633516)[0m 2026-11-20T02:12:24Z [13,106ms] [Warning] [omni.physx.fabric.plugin] FabricManager::initializePointInstancer mismatched prototypes on point instancer: /Visuals/Command/velocity_current.
+[36m(ActorGroup(rank=0) pid=1633352)[0m [INFO 10:12:24 ActorGroup-Rank-0][fsdp_model_manager.py:310] [FSDP] Gradient checkpointing is disabled
+[36m(RolloutGroup(rank=0) pid=1633501)[0m Generating Rollout Epochs:   0%|          | 0/1 [00:00<?, ?it/s]
+[36m(RolloutGroup(rank=0) pid=1633501)[0m Generating Rollout Epochs: 100%|██████████| 1/1 [00:03<00:00,  3.46s/it]Generating Rollout Epochs: 100%|██████████| 1/1 [00:03<00:00,  3.47s/it]
+[INFO 10:12:29 RLinf] Saving checkpoint at step 1.
+[36m(ActorGroup(rank=0) pid=1633352)[0m /isaac-sim/exts/omni.isaac.ml_archive/pip_prebundle/torch/distributed/distributed_c10d.py:859: UserWarning: `_get_pg_default_device` will be deprecated, it only stays for backward-compatiblity reason. If you need to find a device for object collectives, please use `_get_object_coll_device`. If you need to query the device types supported by group, please use `_device_capability(group)`. 
+[36m(ActorGroup(rank=0) pid=1633352)[0m   warnings.warn(
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+├──────────────────────────────────────────────────── Metric Table ────────────────────────────────────────────────────┤
+│ Global Step:    1/2 │ Progress: ████████████████████░░░░░░░░░░░░░░░░░░░░ │  50.0%                                    │
+│ Elapsed: 00:05 │ ETA: 00:05 │ Step Time: 5.348s                                                                      │
+├──────────────────────────────────────────────────────── Time ────────────────────────────────────────────────────────┤
+│                                                                                                                      │
+│actor/actor/compute_adv=0.033          │actor/actor/recv_traj=3.534            │actor/actor/sync_model_to_rollout=0.1…│
+│actor/run_training=0.943               │actor_training=0.957                   │cal_adv_and_returns=0.037             │
+│env/env/bootstrap_step=6.59e-04        │env/env_interact_step=2.165            │env/interact=3.499                    │
+│env/run_interact_once=3.499            │generate_rollouts=3.603                │rollout/generate_one_epoch=3.465      │
+│rollout/predict=0.280                  │rollout/rollout/generate=3.472         │rollout/sync_model_from_actor=0.321   │
+│step=5.309                             │sync_weights=0.326                     │                                      │
+│                                                                                                                      │
+├──────────────────────────────────────────────────── Environment ─────────────────────────────────────────────────────┤
+│                                                                                                                      │
+│episode_len=19.0                       │num_trajectories=2                     │return=0.40957665                     │
+│                                                                                                                      │
+├────────────────────────────────────────────────────── Rollout ───────────────────────────────────────────────────────┤
+│                                                                                                                      │
+│advantages_max=11.815                  │advantages_mean=-1.74e-08              │advantages_min=-4.016                 │
+│returns_max=3.814                      │returns_mean=3.529                     │returns_min=2.762                     │
+│rewards=0.027                          │                                       │                                      │
+│                                                                                                                      │
+├─────────────────────────────────────────────────── Training/Actor ───────────────────────────────────────────────────┤
+│                                                                                                                      │
+│actor/analytic_kl=0.129                │actor/approx_kl=0.155                  │actor/clip_fraction=0.389             │
+│actor/clipped_ratio=0.961              │actor/dual_cliped_ratio=0.0000         │actor/entropy=6.352                   │
+│actor/entropy_bonus_term=0.019         │actor/entropy_loss=6.352               │actor/grad_norm=6.296                 │
+│actor/lr=4.93e-05                      │actor/policy_loss=0.0038               │actor/policy_loss_abs=0.596           │
+│actor/ratio=0.994                      │actor/ratio_abs=0.387                  │actor/total_loss=-0.013               │
+│                                                                                                                      │
+├────────────────────────────────────────────────── Training/Critic ───────────────────────────────────────────────────┤
+│                                                                                                                      │
+│critic/explained_variance=0.893        │critic/value_clip_ratio=0.011          │critic/value_loss=0.0020              │
+│                                                                                                                      │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+[36m(RolloutGroup(rank=0) pid=1633501)[0m Generating Rollout Epochs:   0%|          | 0/1 [00:00<?, ?it/s]
+[36m(RolloutGroup(rank=0) pid=1633501)[0m Generating Rollout Epochs: 100%|██████████| 1/1 [00:03<00:00,  3.03s/it]Generating Rollout Epochs: 100%|██████████| 1/1 [00:03<00:00,  3.03s/it]
+[INFO 10:12:34 RLinf] Saving checkpoint at step 2.
+[36m(ActorGroup(rank=0) pid=1633352)[0m /isaac-sim/exts/omni.isaac.ml_archive/pip_prebundle/torch/distributed/distributed_c10d.py:859: UserWarning: `_get_pg_default_device` will be deprecated, it only stays for backward-compatiblity reason. If you need to find a device for object collectives, please use `_get_object_coll_device`. If you need to query the device types supported by group, please use `_device_capability(group)`. 
+[36m(ActorGroup(rank=0) pid=1633352)[0m   warnings.warn(
+
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+├──────────────────────────────────────────────────── Metric Table ────────────────────────────────────────────────────┤
+│ Global Step:    2/2 │ Progress: ████████████████████████████████████████ │ 100.0%                                    │
+│ Elapsed: 00:09 │ ETA: 00:00 │ Step Time: 4.922s                                                                      │
+├──────────────────────────────────────────────────────── Time ────────────────────────────────────────────────────────┤
+│                                                                                                                      │
+│actor/actor/compute_adv=0.0058         │actor/actor/recv_traj=3.064            │actor/actor/sync_model_to_rollout=0.0…│
+│actor/run_training=0.610               │actor_training=0.614                   │cal_adv_and_returns=0.0086            │
+│env/env/bootstrap_step=5.71e-04        │env/env_interact_step=2.014            │env/interact=3.043                    │
+│env/run_interact_once=3.043            │generate_rollouts=3.118                │rollout/generate_one_epoch=3.029      │
+│rollout/predict=0.112                  │rollout/rollout/generate=3.030         │rollout/sync_model_from_actor=0.390   │
+│step=4.456                             │sync_weights=0.393                     │                                      │
+│                                                                                                                      │
+├──────────────────────────────────────────────────── Environment ─────────────────────────────────────────────────────┤
+│                                                                                                                      │
+│episode_len=34.0                       │num_trajectories=2                     │return=0.60280013                     │
+│                                                                                                                      │
+├────────────────────────────────────────────────────── Rollout ───────────────────────────────────────────────────────┤
+│                                                                                                                      │
+│advantages_max=24.603                  │advantages_mean=2.48e-09               │advantages_min=-4.831                 │
+│returns_max=3.819                      │returns_mean=3.621                     │returns_min=3.152                     │
+│rewards=0.040                          │                                       │                                      │
+│                                                                                                                      │
+├─────────────────────────────────────────────────── Training/Actor ───────────────────────────────────────────────────┤
+│                                                                                                                      │
+│actor/analytic_kl=0.012                │actor/approx_kl=0.013                  │actor/clip_fraction=0.117             │
+│actor/clipped_ratio=0.995              │actor/dual_cliped_ratio=0.0000         │actor/entropy=6.349                   │
+│actor/entropy_bonus_term=0.019         │actor/entropy_loss=6.349               │actor/grad_norm=4.181                 │
+│actor/lr=1.82e-05                      │actor/policy_loss=-0.019               │actor/policy_loss_abs=0.420           │
+│actor/ratio=1.000                      │actor/ratio_abs=0.112                  │actor/total_loss=-0.037               │
+│                                                                                                                      │
+├────────────────────────────────────────────────── Training/Critic ───────────────────────────────────────────────────┤
+│                                                                                                                      │
+│critic/explained_variance=0.873        │critic/value_clip_ratio=6.51e-04       │critic/value_loss=8.26e-04            │
+│                                                                                                                      │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+

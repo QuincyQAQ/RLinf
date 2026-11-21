@@ -1,0 +1,7 @@
+{
+  "run": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0",
+  "checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_2112.pt",
+  "requested_updates": 2200,
+  "checkpoint_number_is_not_assumed_to_equal_updates": true,
+  "main_task_eval": "completed"
+}

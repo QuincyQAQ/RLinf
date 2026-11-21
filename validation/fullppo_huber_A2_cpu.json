@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "cuda_initialized": false,
+  "protocol": {
+    "task": "A2",
+    "training_seed": 0,
+    "source": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/model_1499.pt",
+    "training_log": "/workspace/go2/outputs/train_s0_20261119_202408_239260/A2/training/console.log",
+    "completed_ppo_updates": 1500,
+    "additional_updates": 1000,
+    "total_training_updates": 2500,
+    "num_envs": 2048,
+    "rollout_steps": 24,
+    "additional_transitions_per_lane": 49152000,
+    "recipe": {
+      "lr": 0.0003,
+      "entropy_bonus": 0.003,
+      "value_loss_type": "huber",
+      "desired_kl": 0.005
+    },
+    "recipe_selection": "frozen B2 Huber recipe; no per-task hyperparameter search",
+    "source_selection": "final saved checkpoint of verified complete PPO training, not best evaluation checkpoint",
+    "lanes": [
+      "rlinf_huber",
+      "rsl_control"
+    ],
+    "optimizer": "fresh in both lanes",
+    "environment": "fresh in both lanes; terrain RNG/curriculum state not restored",
+    "holdout_seeds": [
+      23456,
+      34567
+    ],
+    "episodes_per_evaluation_minimum": 1024,
+    "metrics": [
+      "tracking",
+      "velocity errors"
+    ],
+    "b1_safety": "not enabled",
+    "caveat": "one training seed; parameterized framework comparison, not a framework-only causal effect"
+  },
+  "source": {
+    "status": "passed",
+    "strict_load": true,
+    "finite": true,
+    "positive_std": true,
+    "changed": {},
+    "checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/model_1499.pt"
+  }
+}

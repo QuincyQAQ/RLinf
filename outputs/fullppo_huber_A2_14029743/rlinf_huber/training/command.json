@@ -1,0 +1,14 @@
+{
+  "argv": [
+    "/workspace/go2/a40/container_python.sh",
+    "/workspace/go2/RLinf/examples/embodiment/train_embodied_agent.py",
+    "--config-path",
+    "/workspace/go2/outputs/fullppo_huber_A2_14029743/rlinf_huber/training/config",
+    "--config-name",
+    "experiment"
+  ],
+  "overrides": {
+    "RAY_ADDRESS": "local",
+    "RAY_TMPDIR": "/tmp/ray/huber_tr"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "artifact": "/workspace/go2/outputs/train_s0_20261119_202408_239260/results/A2_omni_s0/A2_omni.json",
+  "successes": 943,
+  "episodes": 1029,
+  "failures": 73,
+  "benchmark_tracking_success_rate": 0.9164237123420796,
+  "physical_obstacle_passage_rate": null,
+  "physical_evaluation_status": "not_applicable",
+  "joint_tracking_and_passage_success_rate": null,
+  "required_obstacle_metrics_complete": true,
+  "explicit_environment_eval_seed": null
+}

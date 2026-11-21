@@ -1,0 +1,125 @@
+{
+  "status": "verified",
+  "protocol": {
+    "task": "B1",
+    "training_seed": 0,
+    "new_evaluation_seed": 45678,
+    "episodes_per_lane_minimum": 2048,
+    "num_envs": 256,
+    "all_lanes_same_seed": true,
+    "models": {
+      "baseline": "/workspace/go2/benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/model_2999.pt",
+      "rlinf_huber": "/workspace/go2/outputs/fullppo_huber_B1_14032301/rlinf_huber/training/policy.pt",
+      "rsl_control": "/workspace/go2/benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_training/2026-11-20_15-38-00_B1_rough_2048_s0/model_999.pt"
+    },
+    "original_result": "/workspace/go2/outputs/fullppo_huber_B1_14032301/result.json",
+    "numerical_repair": "same action/history bound +/-100 in all lanes; original rewards and terminations",
+    "selection": "single prespecified seed; retain every outcome and original results; no winner-dependent reruns",
+    "scope": "evaluation-only; fixed checkpoints, no training or policy tuning"
+  },
+  "sha256": {
+    "baseline": "75ce9c0f82178884444dd40331ecf34905b162e29f45b5a40d54cab3ad8891f3",
+    "rlinf_huber": "83f15a745391a34388b1e3cfcecc2833dcfec9313c7a1a384964855cbf1f65ba",
+    "rsl_control": "6896797e4c2c944357b54e3d48e6ba743108fc72d257fcbdc08a76285ba85012"
+  },
+  "new_seed_results": {
+    "baseline": {
+      "num_episodes": 2048,
+      "success_rate": 0.998046875,
+      "mean_success_step_ratio": 0.9742443981874219,
+      "mean_lin_vel_error": 0.08563293249028932,
+      "mean_ang_vel_error": 0.0803872078372375,
+      "mean_alive_time_s": 19.98001953125,
+      "failure_rate": 0.001953125,
+      "train_task": "B1_rough_s0",
+      "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+    },
+    "rlinf_huber": {
+      "num_episodes": 2048,
+      "success_rate": 0.998046875,
+      "mean_success_step_ratio": 0.9751520191791242,
+      "mean_lin_vel_error": 0.07823912887517807,
+      "mean_ang_vel_error": 0.07317155067073408,
+      "mean_alive_time_s": 19.983544921874998,
+      "failure_rate": 0.001953125,
+      "train_task": "B1_rough_s0",
+      "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+    },
+    "rsl_control": {
+      "num_episodes": 2048,
+      "success_rate": 0.998046875,
+      "mean_success_step_ratio": 0.9751319350942885,
+      "mean_lin_vel_error": 0.08494293079357569,
+      "mean_ang_vel_error": 0.08115285865613157,
+      "mean_alive_time_s": 19.986865234375,
+      "failure_rate": 0.00146484375,
+      "train_task": "B1_rough_s0",
+      "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+    }
+  },
+  "new_seed_summary": {
+    "baseline": {
+      "episodes": 2048,
+      "successes": 2044,
+      "tracking_rate": 0.998046875,
+      "mean_lin_vel_error": 0.08563293249028932,
+      "mean_ang_vel_error": 0.0803872078372375,
+      "mean_alive_time_s": 19.98001953125,
+      "mean_success_step_ratio": 0.9742443981874219,
+      "failure_rate": 0.001953125
+    },
+    "rlinf_huber": {
+      "episodes": 2048,
+      "successes": 2044,
+      "tracking_rate": 0.998046875,
+      "mean_lin_vel_error": 0.07823912887517807,
+      "mean_ang_vel_error": 0.07317155067073408,
+      "mean_alive_time_s": 19.983544921874998,
+      "mean_success_step_ratio": 0.9751520191791242,
+      "failure_rate": 0.001953125
+    },
+    "rsl_control": {
+      "episodes": 2048,
+      "successes": 2044,
+      "tracking_rate": 0.998046875,
+      "mean_lin_vel_error": 0.08494293079357569,
+      "mean_ang_vel_error": 0.08115285865613157,
+      "mean_alive_time_s": 19.986865234375,
+      "mean_success_step_ratio": 0.9751319350942885,
+      "failure_rate": 0.00146484375
+    }
+  },
+  "pooled_original_and_new": {
+    "baseline": {
+      "episodes": 4096,
+      "successes": 4089,
+      "tracking_rate": 0.998291015625,
+      "mean_lin_vel_error": 0.08541826367915341,
+      "mean_ang_vel_error": 0.08037071957389666,
+      "mean_alive_time_s": 19.98451171875,
+      "mean_success_step_ratio": 0.9742543048509069,
+      "failure_rate": 0.001708984375
+    },
+    "rlinf_huber": {
+      "episodes": 4096,
+      "successes": 4088,
+      "tracking_rate": 0.998046875,
+      "mean_lin_vel_error": 0.0778358234108755,
+      "mean_ang_vel_error": 0.07323629205893198,
+      "mean_alive_time_s": 19.9856201171875,
+      "mean_success_step_ratio": 0.975266480154199,
+      "failure_rate": 0.001708984375
+    },
+    "rsl_control": {
+      "episodes": 4096,
+      "successes": 4084,
+      "tracking_rate": 0.9970703125,
+      "mean_lin_vel_error": 0.08464825870977083,
+      "mean_ang_vel_error": 0.08107580114604104,
+      "mean_alive_time_s": 19.9784814453125,
+      "mean_success_step_ratio": 0.975187883543714,
+      "failure_rate": 0.00244140625
+    }
+  },
+  "caveat": "one training seed; evaluation randomness near ceiling; no guaranteed RLinf ranking"
+}

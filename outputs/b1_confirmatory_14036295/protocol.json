@@ -1,0 +1,17 @@
+{
+  "task": "B1",
+  "training_seed": 0,
+  "new_evaluation_seed": 45678,
+  "episodes_per_lane_minimum": 2048,
+  "num_envs": 256,
+  "all_lanes_same_seed": true,
+  "models": {
+    "baseline": "/workspace/go2/benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/model_2999.pt",
+    "rlinf_huber": "/workspace/go2/outputs/fullppo_huber_B1_14032301/rlinf_huber/training/policy.pt",
+    "rsl_control": "/workspace/go2/benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_training/2026-11-20_15-38-00_B1_rough_2048_s0/model_999.pt"
+  },
+  "original_result": "/workspace/go2/outputs/fullppo_huber_B1_14032301/result.json",
+  "numerical_repair": "same action/history bound +/-100 in all lanes; original rewards and terminations",
+  "selection": "single prespecified seed; retain every outcome and original results; no winner-dependent reruns",
+  "scope": "evaluation-only; fixed checkpoints, no training or policy tuning"
+}

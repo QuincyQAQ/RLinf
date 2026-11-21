@@ -1,0 +1,17 @@
+{
+  "artifact": "/workspace/go2/outputs/train_s0_20261119_203027_599630/results/B2_stairs_s0/B2_stairs.json",
+  "successes": 1024,
+  "episodes": 1024,
+  "failures": 0,
+  "benchmark_tracking_success_rate": 1.0,
+  "physical_obstacle_passage_rate": 0.2294921875,
+  "joint_tracking_and_passage_success_rate": 0.2294921875,
+  "physical_evaluation_status": "measured",
+  "physical_measured_episodes": 1024,
+  "physical_eligible_start_episodes": 1024,
+  "physical_passage_rate_given_eligible_start": 0.2294921875,
+  "physical_passage_successes": 235,
+  "metric_version": "square_obstacle_v1",
+  "required_obstacle_metrics_complete": true,
+  "explicit_environment_eval_seed": null
+}

@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "/workspace/go2/a40/container_python.sh",
+    "/workspace/go2/benchmark/scripts/train.py",
+    "--task",
+    "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0",
+    "--headless",
+    "--seed",
+    "0",
+    "--num_envs",
+    "2048",
+    "--max_iterations",
+    "1500",
+    "--no-stand_reward_anneal",
+    "--no-posture_reward_anneal",
+    "--plot_learning_curves",
+    "--plot_smoothing",
+    "25",
+    "--experiment_name",
+    "unitree_go2_a2_baseline_2048_seeds",
+    "--run_name",
+    "A2_omni_2048_s0",
+    "--kit_args=--/persistent/isaac/asset_root/cloud=/workspace/go2/assets/isaac_sim_5.1"
+  ],
+  "cwd": "/workspace/go2/benchmark",
+  "start": "20261119_202644_904665",
+  "returncode": 0,
+  "asset_source": "mirror",
+  "end": "20261119_210904_999437"
+}

@@ -1,0 +1,193 @@
+{
+  "status": "passed",
+  "finished_unix": 1795090343.74087,
+  "official_cloud_root": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1",
+  "local_cloud_root": "/workspace/go2/assets/isaac_sim_5.1",
+  "file_count": 14,
+  "total_bytes": 44720015,
+  "files": [
+    {
+      "key": "Assets/Isaac/5.1/Isaac/Environments/Grid/default_environment.usd",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Environments/Grid/default_environment.usd",
+      "local_path": "assets/isaac_sim_5.1/Isaac/Environments/Grid/default_environment.usd",
+      "bytes": 13622,
+      "etag": "\"4fe2f36b4ffefb09bacff13b00e41d9c\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
+      "local_path": "assets/isaac_sim_5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
+      "bytes": 2000,
+      "etag": "\"335da7bf6720b3b4e1c60f4a4745a94d\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_COL_8K.jpg",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_COL_8K.jpg",
+      "local_path": "assets/isaac_sim_5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_COL_8K.jpg",
+      "bytes": 935107,
+      "etag": "\"071d634c2a07dbae81775785cf51791b\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_GLOSS_8K.jpg",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_GLOSS_8K.jpg",
+      "local_path": "assets/isaac_sim_5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_GLOSS_8K.jpg",
+      "bytes": 653707,
+      "etag": "\"fc581c13e1597ede102f37b43c94f369\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_NRM_8K.png",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_NRM_8K.png",
+      "local_path": "assets/isaac_sim_5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_NRM_8K.png",
+      "bytes": 3842435,
+      "etag": "\"0c3f3146976510541b334fc353982b41\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Robots/Unitree/Go2/Props/instanceable_meshes.usd",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/Robots/Unitree/Go2/Props/instanceable_meshes.usd",
+      "local_path": "assets/isaac_sim_5.1/Isaac/IsaacLab/Robots/Unitree/Go2/Props/instanceable_meshes.usd",
+      "bytes": 18802187,
+      "etag": "\"79cfc265c577a0c75620a5a65514dce7-3\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Robots/Unitree/Go2/config.yaml",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/Robots/Unitree/Go2/config.yaml",
+      "local_path": "assets/isaac_sim_5.1/Isaac/IsaacLab/Robots/Unitree/Go2/config.yaml",
+      "bytes": 445,
+      "etag": "\"caa2a1ddf17e3c2d8f03f12473236df0\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Robots/Unitree/Go2/go2.usd",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/Robots/Unitree/Go2/go2.usd",
+      "local_path": "assets/isaac_sim_5.1/Isaac/IsaacLab/Robots/Unitree/Go2/go2.usd",
+      "bytes": 8142,
+      "etag": "\"8430562a941334d76de815696980b472\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/Materials/Textures/Skies/PolyHaven/kloofendal_43d_clear_puresky_4k.hdr",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Materials/Textures/Skies/PolyHaven/kloofendal_43d_clear_puresky_4k.hdr",
+      "local_path": "assets/isaac_sim_5.1/Isaac/Materials/Textures/Skies/PolyHaven/kloofendal_43d_clear_puresky_4k.hdr",
+      "bytes": 18429221,
+      "etag": "\"d2bc7bc972223fe480b0a419e472868c-3\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/Props/UIElements/arrow_x.usd",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Props/UIElements/arrow_x.usd",
+      "local_path": "assets/isaac_sim_5.1/Isaac/Props/UIElements/arrow_x.usd",
+      "bytes": 5377,
+      "etag": "\"e516b463cb590f111dd7ef235ffd9f31\""
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/Props/UIElements/frame_prim.usd",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Props/UIElements/frame_prim.usd",
+      "local_path": "assets/isaac_sim_5.1/Isaac/Props/UIElements/frame_prim.usd",
+      "bytes": 4662,
+      "etag": "\"77eb98355e8d787f8ca321ffe82a0ecf\""
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/Environments/Grid/Materials/Textures/WireframeBlur_basecolor.png",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Environments/Grid/Materials/Textures/WireframeBlur_basecolor.png",
+      "local_path": "assets/isaac_sim_5.1/Isaac/Environments/Grid/Materials/Textures/WireframeBlur_basecolor.png",
+      "bytes": 436257,
+      "etag": "\"c26f34f3cab3638cd9ca2e0c7c2ac79e\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/Environments/Grid/Materials/Textures/WireframeBlur_blue.png",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Environments/Grid/Materials/Textures/WireframeBlur_blue.png",
+      "local_path": "assets/isaac_sim_5.1/Isaac/Environments/Grid/Materials/Textures/WireframeBlur_blue.png",
+      "bytes": 1474958,
+      "etag": "\"9014e8f437e94ad605d90a5db7df3a1b\"",
+      "reused": true
+    },
+    {
+      "key": "Assets/Isaac/5.1/Isaac/Environments/Grid/Materials/Textures/Wireframe_blue.png",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Environments/Grid/Materials/Textures/Wireframe_blue.png",
+      "local_path": "assets/isaac_sim_5.1/Isaac/Environments/Grid/Materials/Textures/Wireframe_blue.png",
+      "bytes": 111895,
+      "etag": "\"947477dcb82fa91335c7ee79fad27dc0\"",
+      "reused": true
+    }
+  ],
+  "asset_references": [
+    {
+      "parent": "Assets/Isaac/5.1/Isaac/Environments/Grid/default_environment.usd",
+      "authored_reference": "./Materials/Textures/WireframeBlur_basecolor.png",
+      "key": "Assets/Isaac/5.1/Isaac/Environments/Grid/Materials/Textures/WireframeBlur_basecolor.png",
+      "absolute_url_in_source": false
+    },
+    {
+      "parent": "Assets/Isaac/5.1/Isaac/Environments/Grid/default_environment.usd",
+      "authored_reference": "./Materials/Textures/WireframeBlur_blue.png",
+      "key": "Assets/Isaac/5.1/Isaac/Environments/Grid/Materials/Textures/WireframeBlur_blue.png",
+      "absolute_url_in_source": false
+    },
+    {
+      "parent": "Assets/Isaac/5.1/Isaac/Environments/Grid/default_environment.usd",
+      "authored_reference": "./Materials/Textures/Wireframe_blue.png",
+      "key": "Assets/Isaac/5.1/Isaac/Environments/Grid/Materials/Textures/Wireframe_blue.png",
+      "absolute_url_in_source": false
+    },
+    {
+      "parent": "Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
+      "authored_reference": "./TilesMarbleSpiderWhiteBrickBondHoned001_COL_8K.jpg",
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_COL_8K.jpg",
+      "absolute_url_in_source": false
+    },
+    {
+      "parent": "Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
+      "authored_reference": "./TilesMarbleSpiderWhiteBrickBondHoned001_GLOSS_8K.jpg",
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_GLOSS_8K.jpg",
+      "absolute_url_in_source": false
+    },
+    {
+      "parent": "Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned.mdl",
+      "authored_reference": "./TilesMarbleSpiderWhiteBrickBondHoned001_NRM_8K.png",
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Materials/TilesMarbleSpiderWhiteBrickBondHoned/TilesMarbleSpiderWhiteBrickBondHoned001_NRM_8K.png",
+      "absolute_url_in_source": false
+    },
+    {
+      "parent": "Assets/Isaac/5.1/Isaac/IsaacLab/Robots/Unitree/Go2/go2.usd",
+      "authored_reference": "./Props/instanceable_meshes.usd",
+      "key": "Assets/Isaac/5.1/Isaac/IsaacLab/Robots/Unitree/Go2/Props/instanceable_meshes.usd",
+      "absolute_url_in_source": false
+    }
+  ],
+  "missing": [],
+  "builtin_mdl": {
+    "OmniPBR.mdl": "/isaac-sim/kit/mdl/core/Base/OmniPBR.mdl"
+  },
+  "robot_revolute_joint_count": 12,
+  "robot_joint_paths": [
+    "/go2_description/base/FL_hip_joint",
+    "/go2_description/base/FR_hip_joint",
+    "/go2_description/base/RL_hip_joint",
+    "/go2_description/base/RR_hip_joint",
+    "/go2_description/FL_hip/FL_thigh_joint",
+    "/go2_description/FL_thigh/FL_calf_joint",
+    "/go2_description/FR_hip/FR_thigh_joint",
+    "/go2_description/FR_thigh/FR_calf_joint",
+    "/go2_description/RL_hip/RL_thigh_joint",
+    "/go2_description/RL_thigh/RL_calf_joint",
+    "/go2_description/RR_hip/RR_thigh_joint",
+    "/go2_description/RR_thigh/RR_calf_joint"
+  ],
+  "asset_contents_rewritten": false,
+  "training_asset_root_overridden": false,
+  "usd_tool_version": [
+    0,
+    25,
+    2
+  ],
+  "simulation_started": false,
+  "gpu_used": false,
+  "runtime_shader_and_physics_validation": "pending A40 simulation checks"
+}

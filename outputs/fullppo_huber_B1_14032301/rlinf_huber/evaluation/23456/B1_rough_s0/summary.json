@@ -1,0 +1,13 @@
+{
+  "B1_rough": {
+    "num_episodes": 1024,
+    "success_rate": 0.998046875,
+    "mean_success_step_ratio": 0.9753943330605566,
+    "mean_lin_vel_error": 0.07712204194392053,
+    "mean_ang_vel_error": 0.07335395889084813,
+    "mean_alive_time_s": 19.99240234375,
+    "failure_rate": 0.0009765625,
+    "train_task": "B1_rough_s0",
+    "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+  }
+}

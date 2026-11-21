@@ -1,0 +1,13 @@
+{
+  "A2_omni": {
+    "num_episodes": 1031,
+    "success_rate": 0.9136760426770126,
+    "mean_success_step_ratio": 0.9566129067352608,
+    "mean_lin_vel_error": 0.06904242329716467,
+    "mean_ang_vel_error": 0.1019583852331675,
+    "mean_alive_time_s": 19.318603297769155,
+    "failure_rate": 0.07177497575169738,
+    "train_task": "A2_omni_s0",
+    "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0"
+  }
+}

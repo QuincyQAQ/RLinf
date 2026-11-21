@@ -1,0 +1,74 @@
+{
+  "baseline": {
+    "23456": {
+      "num_episodes": 1031,
+      "success_rate": 0.9136760426770126,
+      "mean_success_step_ratio": 0.9566129067352608,
+      "mean_lin_vel_error": 0.06904242329716467,
+      "mean_ang_vel_error": 0.1019583852331675,
+      "mean_alive_time_s": 19.318603297769155,
+      "failure_rate": 0.07177497575169738,
+      "train_task": "A2_omni_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0"
+    },
+    "34567": {
+      "num_episodes": 1032,
+      "success_rate": 0.9156976744186046,
+      "mean_success_step_ratio": 0.955499480205711,
+      "mean_lin_vel_error": 0.06954980669837608,
+      "mean_ang_vel_error": 0.10211161897259671,
+      "mean_alive_time_s": 19.37,
+      "failure_rate": 0.06201550387596899,
+      "train_task": "A2_omni_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0"
+    }
+  },
+  "rlinf_huber": {
+    "23456": {
+      "num_episodes": 1024,
+      "success_rate": 0.9755859375,
+      "mean_success_step_ratio": 0.9700140877431159,
+      "mean_lin_vel_error": 0.056349677415876855,
+      "mean_ang_vel_error": 0.08165538717181148,
+      "mean_alive_time_s": 19.78923828125,
+      "failure_rate": 0.021484375,
+      "train_task": "A2_omni_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0"
+    },
+    "34567": {
+      "num_episodes": 1025,
+      "success_rate": 0.9775609756097561,
+      "mean_success_step_ratio": 0.9692199939868581,
+      "mean_lin_vel_error": 0.057437635462504924,
+      "mean_ang_vel_error": 0.08122358639507947,
+      "mean_alive_time_s": 19.86729756097561,
+      "failure_rate": 0.016585365853658537,
+      "train_task": "A2_omni_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0"
+    }
+  },
+  "rsl_control": {
+    "23456": {
+      "num_episodes": 1026,
+      "success_rate": 0.9434697855750487,
+      "mean_success_step_ratio": 0.9633785603531612,
+      "mean_lin_vel_error": 0.06671596392074218,
+      "mean_ang_vel_error": 0.09142052381684629,
+      "mean_alive_time_s": 19.54980506822612,
+      "failure_rate": 0.05263157894736842,
+      "train_task": "A2_omni_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0"
+    },
+    "34567": {
+      "num_episodes": 1028,
+      "success_rate": 0.9231517509727627,
+      "mean_success_step_ratio": 0.9619033930262617,
+      "mean_lin_vel_error": 0.06770812618590406,
+      "mean_ang_vel_error": 0.09274693790751015,
+      "mean_alive_time_s": 19.31033073929961,
+      "failure_rate": 0.07198443579766536,
+      "train_task": "A2_omni_s0",
+      "eval_task": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0"
+    }
+  }
+}

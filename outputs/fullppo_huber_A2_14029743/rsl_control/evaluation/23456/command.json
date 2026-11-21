@@ -1,0 +1,25 @@
+{
+  "argv": [
+    "/workspace/go2/a40/container_python.sh",
+    "/workspace/go2/a40/evaluate_continuation.py",
+    "--task",
+    "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0",
+    "--checkpoint",
+    "/workspace/go2/benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_training/2026-11-20_11-32-33_A2_omni_2048_s0/model_999.pt",
+    "--report_train_task",
+    "A2_omni_s0",
+    "--headless",
+    "--num_envs",
+    "256",
+    "--num_episodes",
+    "1024",
+    "--output_dir",
+    "/workspace/go2/outputs/fullppo_huber_A2_14029743/rsl_control/evaluation/23456",
+    "--eval_task",
+    "A2_omni",
+    "--kit_args=--/app/extensions/excluded/0=omni.kit.telemetry --/persistent/isaac/asset_root/cloud=/workspace/go2/assets/isaac_sim_5.1"
+  ],
+  "overrides": {
+    "GO2_EVAL_SEED": "23456"
+  }
+}

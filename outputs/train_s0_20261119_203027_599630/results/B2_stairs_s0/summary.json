@@ -1,0 +1,22 @@
+{
+  "B2_stairs": {
+    "num_episodes": 1024,
+    "success_rate": 1.0,
+    "mean_success_step_ratio": 0.9937470703125065,
+    "mean_lin_vel_error": 0.07036696350574485,
+    "mean_ang_vel_error": 0.08497318629920476,
+    "mean_alive_time_s": 20.0,
+    "failure_rate": 0.0,
+    "physical_obstacle_passage_rate": 0.2294921875,
+    "joint_tracking_and_passage_success_rate": 0.2294921875,
+    "physical_evaluation_status": "measured",
+    "physical_measured_episodes": 1024,
+    "physical_eligible_start_episodes": 1024,
+    "physical_passage_rate_given_eligible_start": 0.2294921875,
+    "physical_passage_successes": 235,
+    "metric_version": "square_obstacle_v1",
+    "required_obstacle_metrics_complete": true,
+    "train_task": "B2_stairs_s0",
+    "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0"
+  }
+}

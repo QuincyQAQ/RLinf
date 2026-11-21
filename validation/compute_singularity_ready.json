@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "scope": "allocated A40 container Python/CUDA only; Kit/PPO pending",
+  "job": 14021619,
+  "node": "gpu3-9",
+  "runtime": "singularity-ce 4.1.3",
+  "image": "existing user-owned official-image extraction",
+  "checked": 1795089624.3280227
+}

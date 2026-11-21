@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "seed": 23456,
+  "artifact": "/workspace/go2/outputs/b2_postbaseline_14025574/holdout_baseline/23456/B2_stairs_s0/B2_stairs.json",
+  "summary": {
+    "num_episodes": 1024,
+    "success_rate": 0.998046875,
+    "mean_success_step_ratio": 0.9935925729425039,
+    "mean_lin_vel_error": 0.07074369049508622,
+    "mean_ang_vel_error": 0.08494879533523393,
+    "mean_alive_time_s": 19.99271484375,
+    "failure_rate": 0.001953125,
+    "physical_obstacle_passage_rate": 0.203125,
+    "joint_tracking_and_passage_success_rate": 0.203125,
+    "physical_evaluation_status": "measured",
+    "physical_measured_episodes": 1024,
+    "physical_eligible_start_episodes": 1024,
+    "physical_passage_rate_given_eligible_start": 0.203125,
+    "physical_passage_successes": 208,
+    "metric_version": "square_obstacle_v1",
+    "required_obstacle_metrics_complete": true,
+    "train_task": "B2_stairs_s0",
+    "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0"
+  }
+}

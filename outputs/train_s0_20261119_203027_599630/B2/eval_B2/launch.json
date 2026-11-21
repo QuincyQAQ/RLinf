@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "/workspace/go2/a40/container_python.sh",
+    "/workspace/go2/a40/evaluate_dual.py",
+    "--task",
+    "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0",
+    "--checkpoint",
+    "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_2112.pt",
+    "--report_train_task",
+    "B2_stairs_s0",
+    "--headless",
+    "--num_envs",
+    "256",
+    "--num_episodes",
+    "1024",
+    "--output_dir",
+    "/workspace/go2/outputs/train_s0_20261119_203027_599630/results",
+    "--eval_task",
+    "B2_stairs",
+    "--kit_args=--/persistent/isaac/asset_root/cloud=/workspace/go2/assets/isaac_sim_5.1"
+  ],
+  "cwd": "/workspace/go2/benchmark",
+  "start": "20261119_221225_353169",
+  "returncode": 0,
+  "asset_source": "mirror",
+  "end": "20261119_221652_647171"
+}

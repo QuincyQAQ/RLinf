@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "finished_unix": 1795056047.0294492,
+  "training_pip_check_clean": true,
+  "converter_pip_check_clean": true,
+  "converter_actual_conversion_checked": true,
+  "training_lxml": "5.4.0",
+  "converter_lxml": "4.9.4",
+  "excluded_training_prebundle": "/isaac-sim/exts/isaacsim.asset.exporter.urdf/pip_prebundle",
+  "original_image_modified": false,
+  "simulation_started": false,
+  "gpu_used": false,
+  "scope": "CPU process isolation; actual Kit/PhysX validation pending allocation"
+}

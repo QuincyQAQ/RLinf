@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "seed": 23456,
+  "artifact": "/workspace/go2/outputs/fullppo_huber_B1_14032301/baseline/23456/B1_rough_s0/B1_rough.json",
+  "summary": {
+    "num_episodes": 1024,
+    "success_rate": 0.9990234375,
+    "mean_success_step_ratio": 0.9743569742838563,
+    "mean_lin_vel_error": 0.08523010536303952,
+    "mean_ang_vel_error": 0.08041676784637895,
+    "mean_alive_time_s": 19.99171875,
+    "failure_rate": 0.0009765625,
+    "train_task": "B1_rough_s0",
+    "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/workspace/go2/a40/container_python.sh",
+    "/workspace/go2/a40/runtime_probe.py",
+    "--headless",
+    "--mode",
+    "config",
+    "--task-key",
+    "B1",
+    "--seed",
+    "0",
+    "--disable-kit-telemetry",
+    "--report",
+    "/workspace/go2/outputs/fullppo_huber_B1_14032301/effective_config.json"
+  ],
+  "overrides": {}
+}

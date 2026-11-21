@@ -1,0 +1,10 @@
+{
+  "source": "/workspace/go2/benchmark/logs/rsl_rl/b1_diagnostic_14031449/2026-11-20_13-15-36_B1_rough_2048_s0/model_2850.pt",
+  "optimizer_restored": true,
+  "diagnostic_only": true,
+  "updates": 149,
+  "task": "B1",
+  "seed": 0,
+  "num_envs": 2048,
+  "recipe_changes": []
+}

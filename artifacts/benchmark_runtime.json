@@ -1,0 +1,169 @@
+{
+  "archive_sha256": "6ccf9a2c33bf84e90a6f8bffb5d56786909f755588fdc6ff980d12fd646c033a",
+  "files": {
+    "benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_capacity/2026-11-20_10-15-18_A2_omni_2048_s0/params/agent.yaml": {
+      "sha256": "1f473e39144b4fa054a8358b38ab3891ad407a5ee3491bcb87ad722bf6795807",
+      "mtime_ns": 1795267639767005121
+    },
+    "benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_capacity/2026-11-20_10-15-18_A2_omni_2048_s0/params/env.yaml": {
+      "sha256": "83cb809d35206500ac21bd50001ab5f7c492c3aa085532311ec296188f454619",
+      "mtime_ns": 1795267639767005121
+    },
+    "benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_smoke/2026-11-20_10-14-54_A2_omni_2048_s0/params/agent.yaml": {
+      "sha256": "dfa2dbbe5c932ea0b629f7615095a3ccbe39b5b5651d2c1579c4b91ba15f9295",
+      "mtime_ns": 1795267639767005121
+    },
+    "benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_smoke/2026-11-20_10-14-54_A2_omni_2048_s0/params/env.yaml": {
+      "sha256": "1396401dfd576720f3c9445f083ac0bbf0c3aab1f2919f53eea603d9c7e9b706",
+      "mtime_ns": 1795267639768005114
+    },
+    "benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_training/2026-11-20_11-32-33_A2_omni_2048_s0/model_999.pt": {
+      "sha256": "f2e50853d4bacf88e24f5de608e1e4f5f9b327f133ae274469519e34bd4243f0",
+      "mtime_ns": 1795146807525072534
+    },
+    "benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_training/2026-11-20_11-32-33_A2_omni_2048_s0/params/agent.yaml": {
+      "sha256": "e31ee6dc3add59aefcb5de1cdd07da07e28128119b6a4f0829a09de715b3c3d2",
+      "mtime_ns": 1795267639768005114
+    },
+    "benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_training/2026-11-20_11-32-33_A2_omni_2048_s0/params/env.yaml": {
+      "sha256": "ada23b0b71c3613fe1331dd080307e1e9882b13517fcf597d78c45f67d3fd07e",
+      "mtime_ns": 1795267639768005114
+    },
+    "benchmark/logs/rsl_rl/b1_boundary_probe_14032253/2026-11-20_13-43-20_B1_rough_2048_s0/params/agent.yaml": {
+      "sha256": "f45e674bfe8b9ef9577c7a2b0d82af2a49fe4c9edf7db1f34e1c268d36ad1ce0",
+      "mtime_ns": 1795267639768005114
+    },
+    "benchmark/logs/rsl_rl/b1_boundary_probe_14032253/2026-11-20_13-43-20_B1_rough_2048_s0/params/env.yaml": {
+      "sha256": "0c15610804a8f5629e6b569088b9f74c09f2c769146fda8511936e3733df7242",
+      "mtime_ns": 1795267639768005114
+    },
+    "benchmark/logs/rsl_rl/b1_diagnostic_14031449/2026-11-20_13-15-36_B1_rough_2048_s0/model_2850.pt": {
+      "sha256": "7bdaf0a8f06e46e959d3b6482655ba7fef9b5b13037eb54fb4dcfcd17ae54af4",
+      "mtime_ns": 1795152365920122477
+    },
+    "benchmark/logs/rsl_rl/b1_diagnostic_14031449/2026-11-20_13-15-36_B1_rough_2048_s0/params/agent.yaml": {
+      "sha256": "c7099ac5957c4534005c7b9b11d0af65550a06fa632ba8d3b65e64bb22a439a6",
+      "mtime_ns": 1795267639769005107
+    },
+    "benchmark/logs/rsl_rl/b1_diagnostic_14031449/2026-11-20_13-15-36_B1_rough_2048_s0/params/env.yaml": {
+      "sha256": "7d1a1e0fd9bd774bc7a385866c8989f4889fe6467e4dae312f63982380c18bdd",
+      "mtime_ns": 1795267639769005107
+    },
+    "benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/model_2999.pt": {
+      "sha256": "75ce9c0f82178884444dd40331ecf34905b162e29f45b5a40d54cab3ad8891f3",
+      "mtime_ns": 1795153844261973969
+    },
+    "benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/params/agent.yaml": {
+      "sha256": "a13e9b7f9df5b42f06a79f0eeb58b39d41d9e41a6168b53b4c57ecd71bd5be86",
+      "mtime_ns": 1795267639769005107
+    },
+    "benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/params/env.yaml": {
+      "sha256": "bbe2a6b72a5fa91c5f46139f2f86b7a9c540ca78886726f4ad9040bd61ef8a9d",
+      "mtime_ns": 1795267639769005107
+    },
+    "benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_capacity/2026-11-20_13-55-49_B1_rough_2048_s0/params/agent.yaml": {
+      "sha256": "bc9b70e66c4d53413eba88b27f7059817ab0a8038460b4fc6d854cc8dd6e917a",
+      "mtime_ns": 1795267639770005100
+    },
+    "benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_capacity/2026-11-20_13-55-49_B1_rough_2048_s0/params/env.yaml": {
+      "sha256": "80ef325fe60e71ad158c77285e50e518634c0c066de9e7dc39e5d18b844b2bc7",
+      "mtime_ns": 1795267639770005100
+    },
+    "benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_smoke/2026-11-20_13-55-20_B1_rough_2048_s0/params/agent.yaml": {
+      "sha256": "7312531b34bdd2e99b79f73a4b8bd4dcea68be84fd34a90b516ce9c059ef575b",
+      "mtime_ns": 1795267639770005100
+    },
+    "benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_smoke/2026-11-20_13-55-20_B1_rough_2048_s0/params/env.yaml": {
+      "sha256": "84295cbce23012454d886b64e54734fa4b078d5d2258b872ce19d7ec0417214f",
+      "mtime_ns": 1795267639770005100
+    },
+    "benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_training/2026-11-20_15-38-00_B1_rough_2048_s0/model_999.pt": {
+      "sha256": "6896797e4c2c944357b54e3d48e6ba743108fc72d257fcbdc08a76285ba85012",
+      "mtime_ns": 1795162972801956848
+    },
+    "benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_training/2026-11-20_15-38-00_B1_rough_2048_s0/params/agent.yaml": {
+      "sha256": "131acf019985349502017b8444fefba695dc6ee93f966069f507e32591d30adb",
+      "mtime_ns": 1795267639771005093
+    },
+    "benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_training/2026-11-20_15-38-00_B1_rough_2048_s0/params/env.yaml": {
+      "sha256": "39099acba6af6adc9acbb78ef1d2d7a5fca7fa78a2ba780b946a4406b564c294",
+      "mtime_ns": 1795267639771005093
+    },
+    "benchmark/logs/rsl_rl/b1_source_repair_14029762_1000_training/2026-11-20_11-11-51_B1_rough_2048_s0/params/agent.yaml": {
+      "sha256": "1cf6bb75172e0dbc7a80cd5d936ca6af4de9b69ea6680ae38b3db84bd0cd3fce",
+      "mtime_ns": 1795267639771005093
+    },
+    "benchmark/logs/rsl_rl/b1_source_repair_14029762_1000_training/2026-11-20_11-11-51_B1_rough_2048_s0/params/env.yaml": {
+      "sha256": "d0167c1bf29c368572d2f311678b1d4f323ac3607fac3cb23d66d22bae472fb7",
+      "mtime_ns": 1795267639772005086
+    },
+    "benchmark/logs/rsl_rl/b2_postbaseline_14025574_rsl_control_training/2026-11-20_02-21-33_B2_stairs_posture_apr15_refined_1024_s0/model_960.pt": {
+      "sha256": "aa5b5ca30f514403c2d2a4748a32679dbdec777d5b619e8a501738acbac0aa5d",
+      "mtime_ns": 1795115118177577778
+    },
+    "benchmark/logs/rsl_rl/b2_postbaseline_14025574_rsl_control_training/2026-11-20_02-21-33_B2_stairs_posture_apr15_refined_1024_s0/params/agent.yaml": {
+      "sha256": "92535353282b7a99981926a63471a0049d2d4ae65cb4271f4410df49f1cfeb71",
+      "mtime_ns": 1795267639772005086
+    },
+    "benchmark/logs/rsl_rl/b2_postbaseline_14025574_rsl_control_training/2026-11-20_02-21-33_B2_stairs_posture_apr15_refined_1024_s0/params/env.yaml": {
+      "sha256": "91194bb46768f32c583c121a54bfe6cc41303b21b2f78179435ff992aa3224fd",
+      "mtime_ns": 1795267639772005086
+    },
+    "benchmark/logs/rsl_rl/b2_postbaseline_14025580_rsl_control_capacity/2026-11-20_01-36-38_B2_stairs_posture_apr15_refined_1024_s0/params/agent.yaml": {
+      "sha256": "a006808d51a70d2cd5e8a671a04b55283ba80065990aeb81da10b38e6bbaa501",
+      "mtime_ns": 1795267639773005079
+    },
+    "benchmark/logs/rsl_rl/b2_postbaseline_14025580_rsl_control_capacity/2026-11-20_01-36-38_B2_stairs_posture_apr15_refined_1024_s0/params/env.yaml": {
+      "sha256": "914eab4ac39bc33d09a679c91114e507439a34213a5455e657c83f05421e156b",
+      "mtime_ns": 1795267639773005079
+    },
+    "benchmark/logs/rsl_rl/b2_postbaseline_14025580_rsl_control_smoke/2026-11-20_01-35-53_B2_stairs_posture_apr15_refined_1024_s0/params/agent.yaml": {
+      "sha256": "cb7389a0c2bca05eff798367340f241e5f965cc39910f320a64476301153208e",
+      "mtime_ns": 1795267639773005079
+    },
+    "benchmark/logs/rsl_rl/b2_postbaseline_14025580_rsl_control_smoke/2026-11-20_01-35-53_B2_stairs_posture_apr15_refined_1024_s0/params/env.yaml": {
+      "sha256": "0627a947c511a9e3143ea9f1bc6c47701a94b884582e9f0d2cccd71e152a187e",
+      "mtime_ns": 1795267639774005072
+    },
+    "benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/model_1499.pt": {
+      "sha256": "3bead8f500d495b299b72724c8ac1e998d525f2d7984826916638bcfbd99a463",
+      "mtime_ns": 1795093726766129617
+    },
+    "benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/params/agent.yaml": {
+      "sha256": "02bd0da78a8f586561a82db7dd3a8ee3f06d6b2e709e4841131af973cab60f7c",
+      "mtime_ns": 1795267639775005066
+    },
+    "benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/params/env.yaml": {
+      "sha256": "9213458fcfb8e3dd123255c46c6383f0ebcc5b40cd8f92a55c779053deacd013",
+      "mtime_ns": 1795267639775005066
+    },
+    "benchmark/logs/rsl_rl/unitree_go2_b1_baseline_2048_seeds/2026-11-19_22-18-47_B1_rough_2048_s0/params/agent.yaml": {
+      "sha256": "7d12d1591e978954b512b14dd6ae42fa94e5edd409fc6098b5967a40b9f87819",
+      "mtime_ns": 1795267639775005066
+    },
+    "benchmark/logs/rsl_rl/unitree_go2_b1_baseline_2048_seeds/2026-11-19_22-18-47_B1_rough_2048_s0/params/env.yaml": {
+      "sha256": "b6def8038d895b41d21a205af004eb7d7b170234d1b2755b5d91d807fb6d928e",
+      "mtime_ns": 1795267639775005066
+    },
+    "benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_1272.pt": {
+      "sha256": "c9d34b7fbf1a7d6245c21beaa716e1c7ccffb3a419b0e625a93ac55e805ee7bf",
+      "mtime_ns": 1795095230424693942
+    },
+    "benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_1680.pt": {
+      "sha256": "39e984500204644e0558fb0ada67728686c4a828772bc513ff5e3ff89c303e67",
+      "mtime_ns": 1795096354168051091
+    },
+    "benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_2112.pt": {
+      "sha256": "c9cd3187d058b1ff1ae172c5a947adfff6b60922de451aa4184408b6ba67aff1",
+      "mtime_ns": 1795097522817014347
+    },
+    "benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/params/agent.yaml": {
+      "sha256": "95fc57a5fb470dee6e5577dcbbb31731c911046a583c486d902b6d25e00a48c0",
+      "mtime_ns": 1795267639776005059
+    },
+    "benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/params/env.yaml": {
+      "sha256": "2422fe44fd7ecf6a61881a5b98f8e53346abe912db285c1340dddad0b00d02e8",
+      "mtime_ns": 1795267639776005059
+    }
+  }
+}

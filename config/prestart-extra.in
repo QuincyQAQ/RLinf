@@ -1,0 +1,13 @@
+# Repair auxiliary image requirements while preserving core training versions.
+fastapi
+starlette==0.49.1
+pydantic==2.11.7
+pydantic-core==2.33.2
+typing-extensions==4.12.2
+anyio==4.9.0
+cryptography==44.0.0
+quadprog>=0.1.11
+docstring-parser==0.16
+PyJWT[crypto]>=1.0.0,<3
+# Preserve lxml version for dex-retargeting after exporter prebundle isolation.
+lxml==5.4.0

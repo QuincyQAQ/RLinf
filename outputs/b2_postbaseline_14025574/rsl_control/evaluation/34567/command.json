@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "/workspace/go2/a40/container_python.sh",
+    "/workspace/go2/a40/evaluate_continuation.py",
+    "--task",
+    "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0",
+    "--checkpoint",
+    "/workspace/go2/benchmark/logs/rsl_rl/b2_postbaseline_14025574_rsl_control_training/2026-11-20_02-21-33_B2_stairs_posture_apr15_refined_1024_s0/model_960.pt",
+    "--report_train_task",
+    "B2_stairs_s0",
+    "--headless",
+    "--num_envs",
+    "256",
+    "--num_episodes",
+    "1024",
+    "--output_dir",
+    "/workspace/go2/outputs/b2_postbaseline_14025574/rsl_control/evaluation/34567",
+    "--eval_task",
+    "B2_stairs"
+  ],
+  "overrides": {
+    "GO2_EVAL_SEED": "34567"
+  }
+}

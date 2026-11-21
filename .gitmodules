@@ -1,0 +1,9 @@
+[submodule "RLinf"]
+	path = RLinf
+	url = https://github.com/QuincyQAQ/RLinf.git
+[submodule "benchmark"]
+	path = benchmark
+	url = https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env.git
+[submodule "IsaacLab"]
+	path = IsaacLab
+	url = https://github.com/isaac-sim/IsaacLab.git

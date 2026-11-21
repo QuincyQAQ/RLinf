@@ -1,0 +1,170 @@
+[
+  {
+    "task": "B2",
+    "original": "outputs/train_s0_20261119_203027_599630/results/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/train_s0_20261119_203027_599630/results/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/rlinf_conservative_mse/evaluation/23456/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/rlinf_conservative_mse/evaluation/23456/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/rlinf_conservative_mse/evaluation/34567/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/rlinf_conservative_mse/evaluation/34567/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/rsl_control/evaluation/23456/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/rsl_control/evaluation/23456/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/rsl_control/evaluation/34567/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/rsl_control/evaluation/34567/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/holdout_baseline/23456/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/holdout_baseline/23456/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/holdout_baseline/34567/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/holdout_baseline/34567/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/curve/1/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/curve/1/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/curve/0/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/curve/0/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/curve/2/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/curve/2/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/rlinf_conservative_huber/evaluation/23456/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/rlinf_conservative_huber/evaluation/23456/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B2",
+    "original": "outputs/b2_postbaseline_14025574/rlinf_conservative_huber/evaluation/34567/B2_stairs_s0/B2_stairs.json",
+    "central_copy": "reports/raw/B2/b2_postbaseline_14025574/rlinf_conservative_huber/evaluation/34567/B2_stairs_s0/B2_stairs.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B1",
+    "original": "outputs/fullppo_huber_B1_14032301/rsl_control/evaluation/23456/B1_rough_s0/B1_rough.json",
+    "central_copy": "reports/raw/B1/fullppo_huber_B1_14032301/rsl_control/evaluation/23456/B1_rough_s0/B1_rough.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B1",
+    "original": "outputs/fullppo_huber_B1_14032301/rsl_control/evaluation/34567/B1_rough_s0/B1_rough.json",
+    "central_copy": "reports/raw/B1/fullppo_huber_B1_14032301/rsl_control/evaluation/34567/B1_rough_s0/B1_rough.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B1",
+    "original": "outputs/fullppo_huber_B1_14032301/rlinf_huber/evaluation/23456/B1_rough_s0/B1_rough.json",
+    "central_copy": "reports/raw/B1/fullppo_huber_B1_14032301/rlinf_huber/evaluation/23456/B1_rough_s0/B1_rough.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B1",
+    "original": "outputs/fullppo_huber_B1_14032301/rlinf_huber/evaluation/34567/B1_rough_s0/B1_rough.json",
+    "central_copy": "reports/raw/B1/fullppo_huber_B1_14032301/rlinf_huber/evaluation/34567/B1_rough_s0/B1_rough.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B1",
+    "original": "outputs/fullppo_huber_B1_14032301/baseline/23456/B1_rough_s0/B1_rough.json",
+    "central_copy": "reports/raw/B1/fullppo_huber_B1_14032301/baseline/23456/B1_rough_s0/B1_rough.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B1",
+    "original": "outputs/fullppo_huber_B1_14032301/baseline/34567/B1_rough_s0/B1_rough.json",
+    "central_copy": "reports/raw/B1/fullppo_huber_B1_14032301/baseline/34567/B1_rough_s0/B1_rough.json",
+    "episodes": 1024
+  },
+  {
+    "task": "B1",
+    "original": "outputs/b1_confirmatory_14036295/rsl_control/B1_rough_s0/B1_rough.json",
+    "central_copy": "reports/raw/B1/b1_confirmatory_14036295/rsl_control/B1_rough_s0/B1_rough.json",
+    "episodes": 2048
+  },
+  {
+    "task": "B1",
+    "original": "outputs/b1_confirmatory_14036295/rlinf_huber/B1_rough_s0/B1_rough.json",
+    "central_copy": "reports/raw/B1/b1_confirmatory_14036295/rlinf_huber/B1_rough_s0/B1_rough.json",
+    "episodes": 2048
+  },
+  {
+    "task": "B1",
+    "original": "outputs/b1_confirmatory_14036295/baseline/B1_rough_s0/B1_rough.json",
+    "central_copy": "reports/raw/B1/b1_confirmatory_14036295/baseline/B1_rough_s0/B1_rough.json",
+    "episodes": 2048
+  },
+  {
+    "task": "A2",
+    "original": "outputs/fullppo_huber_A2_14029743/rsl_control/evaluation/23456/A2_omni_s0/A2_omni.json",
+    "central_copy": "reports/raw/A2/fullppo_huber_A2_14029743/rsl_control/evaluation/23456/A2_omni_s0/A2_omni.json",
+    "episodes": 1026
+  },
+  {
+    "task": "A2",
+    "original": "outputs/fullppo_huber_A2_14029743/rsl_control/evaluation/34567/A2_omni_s0/A2_omni.json",
+    "central_copy": "reports/raw/A2/fullppo_huber_A2_14029743/rsl_control/evaluation/34567/A2_omni_s0/A2_omni.json",
+    "episodes": 1028
+  },
+  {
+    "task": "A2",
+    "original": "outputs/fullppo_huber_A2_14029743/rlinf_huber/evaluation/23456/A2_omni_s0/A2_omni.json",
+    "central_copy": "reports/raw/A2/fullppo_huber_A2_14029743/rlinf_huber/evaluation/23456/A2_omni_s0/A2_omni.json",
+    "episodes": 1024
+  },
+  {
+    "task": "A2",
+    "original": "outputs/fullppo_huber_A2_14029743/rlinf_huber/evaluation/34567/A2_omni_s0/A2_omni.json",
+    "central_copy": "reports/raw/A2/fullppo_huber_A2_14029743/rlinf_huber/evaluation/34567/A2_omni_s0/A2_omni.json",
+    "episodes": 1025
+  },
+  {
+    "task": "A2",
+    "original": "outputs/fullppo_huber_A2_14029743/baseline/23456/A2_omni_s0/A2_omni.json",
+    "central_copy": "reports/raw/A2/fullppo_huber_A2_14029743/baseline/23456/A2_omni_s0/A2_omni.json",
+    "episodes": 1031
+  },
+  {
+    "task": "A2",
+    "original": "outputs/fullppo_huber_A2_14029743/baseline/34567/A2_omni_s0/A2_omni.json",
+    "central_copy": "reports/raw/A2/fullppo_huber_A2_14029743/baseline/34567/A2_omni_s0/A2_omni.json",
+    "episodes": 1032
+  },
+  {
+    "task": "A2",
+    "original": "outputs/train_s0_20261119_202408_239260/results/A2_omni_s0/A2_omni.json",
+    "central_copy": "reports/raw/A2/train_s0_20261119_202408_239260/results/A2_omni_s0/A2_omni.json",
+    "episodes": 1029
+  }
+]

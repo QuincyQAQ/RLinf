@@ -1,0 +1,79 @@
+{
+  "points": [
+    {
+      "checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_1272.pt",
+      "history_index": 76,
+      "summary": {
+        "num_episodes": 1024,
+        "success_rate": 0.9931640625,
+        "mean_success_step_ratio": 0.9825009111987163,
+        "mean_lin_vel_error": 0.10658084211773221,
+        "mean_ang_vel_error": 0.11504880102677778,
+        "mean_alive_time_s": 19.95556640625,
+        "failure_rate": 0.0068359375,
+        "physical_obstacle_passage_rate": 0.7041015625,
+        "joint_tracking_and_passage_success_rate": 0.7041015625,
+        "physical_evaluation_status": "measured",
+        "physical_measured_episodes": 1024,
+        "physical_eligible_start_episodes": 1024,
+        "physical_passage_rate_given_eligible_start": 0.7041015625,
+        "physical_passage_successes": 721,
+        "metric_version": "square_obstacle_v1",
+        "required_obstacle_metrics_complete": true,
+        "train_task": "B2_stairs_s0",
+        "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0"
+      }
+    },
+    {
+      "checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_1680.pt",
+      "history_index": 101,
+      "summary": {
+        "num_episodes": 1024,
+        "success_rate": 0.9990234375,
+        "mean_success_step_ratio": 0.9926842647081944,
+        "mean_lin_vel_error": 0.08346701726204568,
+        "mean_ang_vel_error": 0.09636909047185388,
+        "mean_alive_time_s": 19.99994140625,
+        "failure_rate": 0.0009765625,
+        "physical_obstacle_passage_rate": 0.423828125,
+        "joint_tracking_and_passage_success_rate": 0.423828125,
+        "physical_evaluation_status": "measured",
+        "physical_measured_episodes": 1024,
+        "physical_eligible_start_episodes": 1024,
+        "physical_passage_rate_given_eligible_start": 0.423828125,
+        "physical_passage_successes": 434,
+        "metric_version": "square_obstacle_v1",
+        "required_obstacle_metrics_complete": true,
+        "train_task": "B2_stairs_s0",
+        "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0"
+      }
+    },
+    {
+      "checkpoint": "/workspace/go2/benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_2112.pt",
+      "history_index": 127,
+      "summary": {
+        "num_episodes": 1024,
+        "success_rate": 0.9990234375,
+        "mean_success_step_ratio": 0.9936432947659276,
+        "mean_lin_vel_error": 0.07104086314606349,
+        "mean_ang_vel_error": 0.08489821290267283,
+        "mean_alive_time_s": 19.9907421875,
+        "failure_rate": 0.0009765625,
+        "physical_obstacle_passage_rate": 0.2470703125,
+        "joint_tracking_and_passage_success_rate": 0.2470703125,
+        "physical_evaluation_status": "measured",
+        "physical_measured_episodes": 1024,
+        "physical_eligible_start_episodes": 1024,
+        "physical_passage_rate_given_eligible_start": 0.2470703125,
+        "physical_passage_successes": 253,
+        "metric_version": "square_obstacle_v1",
+        "required_obstacle_metrics_complete": true,
+        "train_task": "B2_stairs_s0",
+        "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0"
+      }
+    }
+  ],
+  "late_change": -0.1767578125,
+  "plateau_candidate": false,
+  "caveat": "two late snapshots on one eval seed only; not statistical proof of plateau"
+}
