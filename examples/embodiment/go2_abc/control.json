@@ -1,0 +1,77 @@
+{
+  "source_effective_env_sha256": "d2e0f25d5afcd4f1ccd84294d6eb22d92b42cc7f64f7dcbf388a4d9f61d1bff0",
+  "isaaclab_commit": "37ddf626871758333d6ed89cf64ad702aef127d0",
+  "sdk2_commit": "814556d15970dd2ecf1c9984e845ca02ab07e206",
+  "policy_joint_names": [
+    "FL_hip_joint",
+    "FR_hip_joint",
+    "RL_hip_joint",
+    "RR_hip_joint",
+    "FL_thigh_joint",
+    "FR_thigh_joint",
+    "RL_thigh_joint",
+    "RR_thigh_joint",
+    "FL_calf_joint",
+    "FR_calf_joint",
+    "RL_calf_joint",
+    "RR_calf_joint"
+  ],
+  "sdk_joint_names": [
+    "FR_hip_joint",
+    "FR_thigh_joint",
+    "FR_calf_joint",
+    "FL_hip_joint",
+    "FL_thigh_joint",
+    "FL_calf_joint",
+    "RR_hip_joint",
+    "RR_thigh_joint",
+    "RR_calf_joint",
+    "RL_hip_joint",
+    "RL_thigh_joint",
+    "RL_calf_joint"
+  ],
+  "default_joint_positions": [
+    0.1,
+    -0.1,
+    0.1,
+    -0.1,
+    0.8,
+    0.8,
+    1.0,
+    1.0,
+    -1.5,
+    -1.5,
+    -1.5,
+    -1.5
+  ],
+  "action_scale": 0.25,
+  "physics_dt": 0.005,
+  "policy_decimation": 4,
+  "stiffness": 25.0,
+  "damping": 0.5,
+  "effort_limit": 23.5,
+  "saturation_effort": 23.5,
+  "velocity_limit": 30.0,
+  "height_grid": {
+    "func": "isaaclab.sensors.ray_caster.patterns.patterns:grid_pattern",
+    "resolution": 0.1,
+    "size": [
+      1.6,
+      1.0
+    ],
+    "direction": [
+      0.0,
+      0.0,
+      -1.0
+    ],
+    "ordering": "xy"
+  },
+  "height_offset": 0.5,
+  "height_clip": [
+    -1.0,
+    1.0
+  ],
+  "state_timeout": 0.05,
+  "perception_timeout": 0.1,
+  "initial_pose_tolerance": 0.2
+}
