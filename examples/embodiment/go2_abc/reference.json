@@ -1,0 +1,282 @@
+{
+  "common_env_expectations": {
+    "sim.dt": 0.005,
+    "decimation": 4,
+    "episode_length_s": 20.0,
+    "sim.render_interval": 4,
+    "scene.env_spacing": 2.5,
+    "scene.height_scanner.update_period": 0.02,
+    "scene.contact_forces.update_period": 0.005,
+    "scene.contact_forces.history_length": 3,
+    "scene.height_scanner.pattern_cfg.resolution": 0.1,
+    "scene.height_scanner.pattern_cfg.size": [
+      1.6,
+      1.0
+    ],
+    "scene.height_scanner.offset.pos": [
+      0.0,
+      0.0,
+      20.0
+    ],
+    "scene.height_scanner.mesh_prim_paths": [
+      "/World/ground"
+    ],
+    "actions.joint_pos.scale": 0.25,
+    "actions.joint_pos.use_default_offset": true,
+    "commands.base_velocity.resampling_time_range": [
+      10.0,
+      10.0
+    ],
+    "commands.base_velocity.heading_control_stiffness": 0.5,
+    "observations.policy.enable_corruption": true,
+    "observations.policy.concatenate_terms": true,
+    "observations.policy.height_scan.clip": [
+      -1.0,
+      1.0
+    ],
+    "events.push_robot": null,
+    "events.base_com": null,
+    "events.add_base_mass.params.mass_distribution_params": [
+      -1.0,
+      3.0
+    ],
+    "events.reset_robot_joints.params.position_range": [
+      1.0,
+      1.0
+    ],
+    "scene.robot.actuators.base_legs.stiffness": 25.0,
+    "scene.robot.actuators.base_legs.damping": 0.5,
+    "scene.robot.init_state.pos": [
+      0.0,
+      0.0,
+      0.4
+    ],
+    "rewards.lin_vel_z_l2.weight": -2.0,
+    "rewards.ang_vel_xy_l2.weight": -0.05,
+    "rewards.dof_acc_l2.weight": -2.5e-07
+  },
+  "tasks": {
+    "A": {
+      "source": "benchmark/scripts/slurm/train_a2_baseline_alice.sbatch",
+      "gym_id": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0",
+      "eval_gym_id": "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0",
+      "num_envs": 2048,
+      "max_iterations": 1500,
+      "training_initialization": "scratch in the original source recipe; continuation/recovery initialization is recorded per run",
+      "transitions_per_update": 49152,
+      "transition_budget": 73728000,
+      "env_expectations": {
+        "commands.base_velocity.ranges.lin_vel_x": [
+          -1.0,
+          1.0
+        ],
+        "commands.base_velocity.ranges.lin_vel_y": [
+          -1.0,
+          1.0
+        ],
+        "commands.base_velocity.ranges.ang_vel_z": [
+          -1.0,
+          1.0
+        ],
+        "commands.base_velocity.heading_command": true,
+        "commands.base_velocity.rel_heading_envs": 1.0,
+        "commands.base_velocity.rel_standing_envs": 0.05,
+        "rewards.base_height.weight": -4.0,
+        "rewards.base_height.params.target_height": 0.4,
+        "rewards.flat_orientation_l2.weight": -2.5,
+        "rewards.track_lin_vel_xy_exp.weight": 1.5,
+        "rewards.track_ang_vel_z_exp.weight": 0.75,
+        "rewards.feet_air_time.weight": 0.25,
+        "rewards.dof_torques_l2.weight": -1e-05,
+        "rewards.action_rate_l2.weight": -0.01,
+        "rewards.dof_pos_limits.weight": 0.0,
+        "scene.terrain.terrain_type": "plane",
+        "scene.terrain.terrain_generator": null,
+        "curriculum.terrain_levels": null
+      },
+      "terrain_subtypes": [],
+      "commands_by_seed": {
+        "0": [
+          "--task",
+          "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0",
+          "--headless",
+          "--seed",
+          "0",
+          "--num_envs",
+          "2048",
+          "--max_iterations",
+          "1500",
+          "--no-stand_reward_anneal",
+          "--no-posture_reward_anneal",
+          "--plot_learning_curves",
+          "--plot_smoothing",
+          "25",
+          "--experiment_name",
+          "unitree_go2_a2_baseline_2048_seeds",
+          "--run_name",
+          "A2_omni_2048_s0"
+        ]
+      }
+    },
+    "B": {
+      "source": "benchmark/scripts/slurm/train_b1_baseline_alice.sbatch",
+      "gym_id": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0",
+      "eval_gym_id": "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0",
+      "num_envs": 2048,
+      "max_iterations": 3000,
+      "training_initialization": "scratch in the original source recipe; continuation/recovery initialization is recorded per run",
+      "transitions_per_update": 49152,
+      "transition_budget": 147456000,
+      "env_expectations": {
+        "commands.base_velocity.ranges.lin_vel_x": [
+          -1.0,
+          1.0
+        ],
+        "commands.base_velocity.ranges.lin_vel_y": [
+          -1.0,
+          1.0
+        ],
+        "commands.base_velocity.ranges.ang_vel_z": [
+          -1.0,
+          1.0
+        ],
+        "commands.base_velocity.heading_command": true,
+        "commands.base_velocity.rel_heading_envs": 1.0,
+        "commands.base_velocity.rel_standing_envs": 0.0,
+        "rewards.base_height.weight": -10.0,
+        "rewards.base_height.params.target_height": 0.38,
+        "rewards.flat_orientation_l2.weight": -5.0,
+        "rewards.track_lin_vel_xy_exp.weight": 2.0,
+        "rewards.track_ang_vel_z_exp.weight": 1.0,
+        "rewards.feet_air_time.weight": 0.25,
+        "rewards.dof_torques_l2.weight": -1e-05,
+        "rewards.action_rate_l2.weight": -0.01,
+        "rewards.dof_pos_limits.weight": 0.0
+      },
+      "terrain_subtypes": [
+        "random_rough"
+      ],
+      "commands_by_seed": {
+        "0": [
+          "--task",
+          "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0",
+          "--headless",
+          "--seed",
+          "0",
+          "--num_envs",
+          "2048",
+          "--max_iterations",
+          "3000",
+          "--no-stand_reward_anneal",
+          "--no-posture_reward_anneal",
+          "--distribution_safety_patch",
+          "--plot_learning_curves",
+          "--plot_smoothing",
+          "25",
+          "--experiment_name",
+          "unitree_go2_b1_baseline_2048_seeds",
+          "--run_name",
+          "B1_rough_2048_s0"
+        ]
+      }
+    },
+    "C": {
+      "source": "benchmark/scripts/slurm/train_b2_baseline_posture_alice.sbatch",
+      "gym_id": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0",
+      "eval_gym_id": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0",
+      "num_envs": 1024,
+      "max_iterations": 2200,
+      "training_initialization": "scratch in the original source recipe; continuation/recovery initialization is recorded per run",
+      "transitions_per_update": 24576,
+      "transition_budget": 54067200,
+      "env_expectations": {
+        "commands.base_velocity.ranges.lin_vel_x": [
+          0.4,
+          0.9
+        ],
+        "commands.base_velocity.ranges.lin_vel_y": [
+          0.0,
+          0.0
+        ],
+        "commands.base_velocity.ranges.ang_vel_z": [
+          0.0,
+          0.0
+        ],
+        "commands.base_velocity.heading_command": false,
+        "commands.base_velocity.rel_heading_envs": 0.0,
+        "commands.base_velocity.rel_standing_envs": 0.0,
+        "rewards.base_height.weight": -3.5,
+        "rewards.base_height.params.target_height": 0.42,
+        "rewards.flat_orientation_l2.weight": -2.0,
+        "rewards.track_lin_vel_xy_exp.weight": 1.5,
+        "rewards.track_ang_vel_z_exp.weight": 0.75,
+        "rewards.feet_air_time.weight": 0.04,
+        "rewards.dof_torques_l2.weight": -2e-05,
+        "rewards.action_rate_l2.weight": -0.003,
+        "rewards.dof_pos_limits.weight": -2.0,
+        "scene.terrain.max_init_terrain_level": 1,
+        "events.reset_base.params.pose_range.yaw": [
+          -0.2,
+          0.2
+        ],
+        "rewards.feet_air_time.params.threshold": 0.35,
+        "scene.terrain.terrain_generator.sub_terrains.pyramid_stairs_inv.step_height_range": [
+          0.04,
+          0.16
+        ]
+      },
+      "terrain_subtypes": [
+        "pyramid_stairs_inv"
+      ],
+      "commands_by_seed": {
+        "0": [
+          "--task",
+          "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0",
+          "--headless",
+          "--seed",
+          "0",
+          "--num_envs",
+          "1024",
+          "--max_iterations",
+          "2200",
+          "--no-stand_reward_anneal",
+          "--posture_reward_anneal",
+          "--posture_anneal_end_frac",
+          "0.35",
+          "--posture_height_weight_early",
+          "-10.0",
+          "--posture_height_weight_late",
+          "-3.5",
+          "--posture_orientation_weight_early",
+          "-5.0",
+          "--posture_orientation_weight_late",
+          "-2.0",
+          "--distribution_safety_patch",
+          "--plot_learning_curves",
+          "--plot_smoothing",
+          "25",
+          "--experiment_name",
+          "unitree_go2_b2_posture_apr15_refined_1024_seeds",
+          "--run_name",
+          "B2_stairs_posture_apr15_refined_1024_s0"
+        ]
+      }
+    }
+  },
+  "b2_schedule": {
+    "enabled": true,
+    "start_fraction": 0.0,
+    "end_fraction": 0.35,
+    "height_weight": [
+      -10.0,
+      -3.5
+    ],
+    "orientation_weight": [
+      -5.0,
+      -2.0
+    ],
+    "schedule_check_interval": 25,
+    "number_of_learn_calls": 88,
+    "note": "Original chunked runner.learn behavior is retained, including original checkpoint indexing"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "C_baseline",
+  "entry": "${GO2_ABC_RUNTIME}/a40/evaluate_continuation.py",
+  "argv": [
+    "--task",
+    "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0",
+    "--checkpoint",
+    "${GO2_ABC_DATA}/models/C/baseline.pt",
+    "--headless",
+    "--num_envs",
+    "256",
+    "--num_episodes",
+    "1024",
+    "--report_train_task",
+    "B2_stairs_s0",
+    "--eval_task",
+    "B2_stairs"
+  ],
+  "env": {}
+}

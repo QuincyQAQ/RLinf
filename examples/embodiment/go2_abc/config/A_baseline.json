@@ -1,0 +1,20 @@
+{
+  "id": "A_baseline",
+  "entry": "${GO2_ABC_RUNTIME}/a40/evaluate_continuation.py",
+  "argv": [
+    "--task",
+    "MTL-Velocity-Flat-Unitree-Go2-A2-Omni-v0",
+    "--checkpoint",
+    "${GO2_ABC_DATA}/models/A/baseline.pt",
+    "--headless",
+    "--num_envs",
+    "256",
+    "--num_episodes",
+    "1024",
+    "--report_train_task",
+    "A2_omni_s0",
+    "--eval_task",
+    "A2_omni"
+  ],
+  "env": {}
+}
