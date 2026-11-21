@@ -193,6 +193,7 @@ jobs:
             unit_test_filter: &unit
               - *shared
               - 'examples/embodiment/go2_abc/**'
+              - 'tests/fixtures/go2_control_reference.json'
               - 'rlinf/robotics/**'
               - 'rlinf/models/embodiment/openpi/**'
               # Unit tests import env modules directly (robot task envs, the

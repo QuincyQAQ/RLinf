@@ -20,6 +20,7 @@ import ast
 import contextlib
 import ctypes
 import io
+import json
 import os
 import pickle
 import re
@@ -9400,3 +9401,205 @@ def test_lekiwi_camera_save_failure_returns_error(monkeypatch, tmp_path, capsys)
     assert result == 1
     assert "Could not save camera frame" in output.err
     assert "Saved the last frame" not in output.out
+
+
+@pytest.fixture
+def go2_control_case(tmp_path):
+    import torch
+
+    from examples.embodiment.go2_abc.control import Go2Control, JointState, Perception
+    from examples.embodiment.go2_abc.policy import Go2Policy
+
+    record = json.loads(
+        (Path(__file__).parents[1] / "fixtures/go2_control_reference.json").read_text()
+    )
+    model = Go2Policy()
+    with torch.no_grad():
+        for parameter in model.actor.parameters():
+            parameter.zero_()
+        model.actor[-1].bias.copy_(torch.tensor(record["policy_action"]))
+    checkpoint = tmp_path / "policy.pt"
+    torch.save({"model_state_dict": model.state_dict()}, checkpoint)
+    control = Go2Control(checkpoint, "A")
+    frame = record["frame"]
+    return (
+        control,
+        JointState(**frame["state"]),
+        Perception(**frame["perception"]),
+        frame["command"],
+        record,
+    )
+
+
+def test_go2_control_matches_original_observations_and_dc_motor(go2_control_case):
+    control, state, perception, command, record = go2_control_case
+    result = control.step(state, perception, command, 1.0)
+    for name, expected in record["expected"].items():
+        np.testing.assert_allclose(result[name], expected, rtol=1e-6, atol=1e-6)
+    np.testing.assert_allclose(control.scan_xy(), record["scan_xy"], atol=1e-7)
+    assert result["observation"].shape == (235,)
+
+
+def test_go2_control_holds_actions_for_four_motor_steps(go2_control_case):
+    import torch
+
+    control, state, perception, command, _ = go2_control_case
+    first = control.step(state, perception, command, 1.0)["action"]
+    with torch.no_grad():
+        control.model.actor[-1].bias.add_(0.1)
+    for index in range(1, 4):
+        result = control.step(state, perception, command, 1 + index * 0.005)
+        np.testing.assert_array_equal(result["action"], first)
+        np.testing.assert_array_equal(result["observation"][36:48], first)
+    updated = control.step(state, perception, command, 1.02)["action"]
+    np.testing.assert_allclose(updated, first + 0.1)
+
+
+@pytest.mark.parametrize(
+    "bad",
+    [
+        "terrain_missing",
+        "terrain_nan",
+        "velocity_nan",
+        "quaternion",
+        "stale_state",
+        "stale_perception",
+        "future_state",
+    ],
+)
+def test_go2_control_rejects_incomplete_or_stale_sensors(go2_control_case, bad):
+    from dataclasses import replace
+
+    control, state, perception, command, _ = go2_control_case
+    if bad == "terrain_missing":
+        perception = replace(perception, ground_z_w=perception.ground_z_w[:-1])
+    elif bad == "terrain_nan":
+        perception = replace(perception, ground_z_w=[float("nan")] * 187)
+    elif bad == "velocity_nan":
+        perception = replace(perception, base_lin_vel_b=[float("nan"), 0.0, 0.0])
+    elif bad == "quaternion":
+        state = replace(state, quaternion_wxyz=[0.0] * 4)
+    elif bad == "stale_state":
+        state = replace(state, timestamp=0.0)
+    elif bad == "future_state":
+        state = replace(state, timestamp=2.0)
+    else:
+        perception = replace(perception, timestamp=0.0)
+    with pytest.raises((ValueError, TimeoutError)):
+        control.step(state, perception, command, 1.0)
+
+
+def test_go2_sdk2_readonly_session_never_opens_publisher(monkeypatch):
+    from robot_mocks.go2 import FakeGo2SDK
+
+    from examples.embodiment.go2_abc.sdk2 import Go2SDK2
+
+    sdk = FakeGo2SDK()
+    sdk.install(monkeypatch)
+    transport = Go2SDK2("test0")
+    transport.connect()
+    try:
+        sdk.callback(sdk.state())
+        first = transport.read()
+        duplicate = sdk.state()
+        duplicate.motor_state[0].q = 1.0
+        sdk.callback(duplicate)
+        assert transport.read() == first
+        corrupt = sdk.state(2)
+        corrupt.crc = 0
+        sdk.callback(corrupt)
+        assert transport.read() == first
+        with pytest.raises(PermissionError):
+            transport.write(np.ones(12))
+        with pytest.raises(RuntimeError, match="exclusive"):
+            Go2SDK2("test0").connect()
+    finally:
+        transport.close()
+        transport.close()
+    assert not any(
+        event[0] in ("publisher", "write", "check_mode") for event in sdk.events
+    )
+    assert ("reader_close",) in sdk.events
+
+
+def test_go2_sdk2_torque_packet_and_cleanup(monkeypatch):
+    from robot_mocks.go2 import FakeGo2SDK
+
+    from examples.embodiment.go2_abc.sdk2 import Go2SDK2
+
+    sdk = FakeGo2SDK()
+    sdk.install(monkeypatch)
+    transport = Go2SDK2("test0", enable_motion=True)
+    transport.connect()
+    sdk.callback(sdk.state())
+    transport.write(np.arange(12))
+    transport.close()
+    packets = [event[1] for event in sdk.events if event[0] == "write"]
+    assert len(packets) == 2
+    packet = packets[0]
+    assert packet.head == [0xFE, 0xEF] and packet.level_flag == 0xFF
+    assert packet.crc == 42
+    assert [motor.tau for motor in packet.motor_cmd[:12]] == list(range(12))
+    for motor in packet.motor_cmd:
+        assert motor.kp == motor.kd == 0.0
+        assert motor.q == 2.146e9 and motor.dq == 16000.0
+    assert all(motor.tau == 0.0 for motor in packet.motor_cmd[12:])
+    assert all(motor.tau == 0.0 for motor in packets[1].motor_cmd)
+    assert ("writer_close",) in sdk.events and ("reader_close",) in sdk.events
+
+
+def test_go2_sdk2_active_builtin_mode_rejects_joint_control(monkeypatch):
+    from robot_mocks.go2 import FakeGo2SDK
+
+    from examples.embodiment.go2_abc.sdk2 import Go2SDK2
+
+    sdk = FakeGo2SDK()
+    sdk.mode = "sport"
+    sdk.install(monkeypatch)
+    with pytest.raises(RuntimeError, match="operator"):
+        Go2SDK2("test0", enable_motion=True).connect()
+    assert not any(event[0] in ("publisher", "write") for event in sdk.events)
+    assert ("reader_close",) in sdk.events
+
+
+def test_go2_sdk2_write_failure_still_closes_channels(monkeypatch):
+    from robot_mocks.go2 import FakeGo2SDK
+
+    from examples.embodiment.go2_abc.sdk2 import Go2SDK2
+
+    sdk = FakeGo2SDK()
+    sdk.write_ok = False
+    sdk.install(monkeypatch)
+    transport = Go2SDK2("test0", enable_motion=True)
+    transport.connect()
+    sdk.callback(sdk.state())
+    with pytest.raises(OSError):
+        transport.write(np.zeros(12))
+    with pytest.raises(OSError):
+        transport.close()
+    assert ("writer_close",) in sdk.events and ("reader_close",) in sdk.events
+
+
+def test_go2_control_loop_stale_perception_never_publishes(
+    monkeypatch, go2_control_case
+):
+    from robot_mocks.go2 import FakeGo2SDK
+
+    from examples.embodiment.go2_abc.deploy import run_control_loop
+    from examples.embodiment.go2_abc.sdk2 import Go2SDK2
+
+    control, state, perception, _, _ = go2_control_case
+    sdk = FakeGo2SDK()
+    sdk.install(monkeypatch)
+    transport = Go2SDK2("test0", enable_motion=True)
+    transport.connect()
+    msg = sdk.state()
+    for motor, q in zip(msg.motor_state[:12], state.q, strict=True):
+        motor.q = q
+    sdk.callback(msg)
+    with pytest.raises(TimeoutError):
+        run_control_loop(
+            control, transport, lambda: perception, lambda: [0.0, 0.0, 0.0]
+        )
+    assert not any(event[0] == "write" for event in sdk.events)
+    assert ("writer_close",) in sdk.events
