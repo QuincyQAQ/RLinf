@@ -61,6 +61,12 @@ def launch(experiment: str, execute: bool) -> None:
     commands = []
 
     def run(command: list[str], stage: str) -> None:
+        if "--headless" in command:
+            command.append(
+                "--kit_args=--/persistent/isaac/asset_root/cloud="
+                f"{runtime}/assets/isaac_sim_5.1"
+                " --/app/extensions/excluded/0=omni.kit.telemetry"
+            )
         commands.append({"stage": stage, "argv": command})
         if execute:
             output = directory / stage
