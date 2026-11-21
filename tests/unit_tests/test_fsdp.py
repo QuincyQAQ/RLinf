@@ -2110,3 +2110,24 @@ def test_multi_turn_fsdp_logprob_gap_uses_only_response_tokens(dense):
         batch = DynamicRolloutResult.materialize_actor_batch(batch, 32, 0)
     gap = compute_rollout_train_kl(batch, batch["response_mask"])
     torch.testing.assert_close(gap, torch.tensor((2 * 0.2 + 5 * 0.3 + 9 * 0.4) / 16))
+
+
+@pytest.mark.parametrize(
+    "kl, initial, expected",
+    [
+        (0.02, 3e-4, 2e-4),
+        (0.001, 3e-4, 4.5e-4),
+        (0.005, 3e-4, 3e-4),
+        (0.0, 3e-4, 3e-4),
+        (0.02, 1e-5, 1e-5),
+        (0.001, 1e-2, 1e-2),
+    ],
+)
+def test_analytical_kl_adapts_learning_rate(kl, initial, expected):
+    from rlinf.hybrid_engines.fsdp.optim import adapt_learning_rate
+
+    parameter = nn.Parameter(torch.ones(1))
+    optimizer = torch.optim.Adam([parameter], lr=initial)
+    adapt_learning_rate(optimizer, kl, desired_kl=0.005)
+    assert optimizer.param_groups[0]["lr"] == pytest.approx(expected)
+    torch.testing.assert_close(parameter, torch.ones(1))

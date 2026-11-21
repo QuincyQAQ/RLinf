@@ -33,6 +33,7 @@ from rlinf.data.storage.lerobot import resolve_lerobot_repo_id
 from rlinf.data.storage.replay import EnvReplayBuffer, TrajectoryReplayBuffer
 from rlinf.envs.layout import EnvSpec
 from rlinf.hybrid_engines.fsdp.fsdp_model_manager import FSDPModelManager
+from rlinf.hybrid_engines.fsdp.optim import adapt_learning_rate
 from rlinf.hybrid_engines.weight_syncer import WeightSyncer
 from rlinf.models import get_model
 from rlinf.models.embodiment.base_policy import ForwardType
@@ -930,6 +931,7 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
                     batch["prev_logprobs"].shape[0] for batch in micro_batches
                 )
                 self.optimizer.zero_grad()
+                self._ppo_kl_sum = torch.zeros(2, device=self.device)
                 for idx, batch in enumerate(micro_batches):
                     self.train_micro_batch(
                         micro_batch=batch,
@@ -943,6 +945,12 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
 
                 self.torch_platform.empty_cache()
 
+                desired_kl = self.cfg.algorithm.get("desired_kl", None)
+                if desired_kl is not None:
+                    torch.distributed.all_reduce(self._ppo_kl_sum)
+                    kl = (self._ppo_kl_sum[0] / self._ppo_kl_sum[1]).item()
+                    adapt_learning_rate(self.optimizer, kl, desired_kl)
+                    append_to_dict(metrics, {"actor/analytic_kl": kl})
                 grad_norm, lr_list = self.optimizer_step()
                 data = {
                     "actor/grad_norm": grad_norm,
@@ -1037,6 +1045,11 @@ class EmbodiedFSDPActor(FSDPModelManager, Worker):
                 use_cache=False,
                 **kwargs,
             )
+
+        if self.cfg.algorithm.get("desired_kl", None) is not None:
+            kl = output_dict["kl_divergence"].detach()
+            self._ppo_kl_sum[0] += kl.sum()
+            self._ppo_kl_sum[1] += kl.numel()
 
         if SupportedModel(self.cfg.actor.model.model_type) in [
             SupportedModel.GR00T,
