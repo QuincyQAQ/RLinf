@@ -10,7 +10,7 @@ Run the three Go2 tasks with the completed PPO policy, ordinary PPO continuation
 | B: rough terrain | 3000 | 1000 | 2048 | 99.8535% | 99.6094% | 99.8047% |
 | C: stairs | 2200 | 1000 | 1024 | 99.8535% | 100% | 100% |
 
-C physical passage rates are 21.3867%, 44.8242%, and 76.5625%, respectively. [Results](results.csv) include velocity errors and same-episode tracking plus passage. Training seed is 0; evaluation seeds are 23456 and 34567, pooled by episode count.
+C stair-passage rates in simulation are 21.3867%, 44.8242%, and 76.5625%, respectively. [Results](results.csv) include velocity errors and the fraction of episodes that pass both tracking and passage checks. Training seed is 0; evaluation seeds are 23456 and 34567, pooled by episode count.
 
 ## Prepare Inputs
 
@@ -42,6 +42,8 @@ Inside an allocated A40 Slurm job, add `--execute` to run it. Experiment names a
 The configs retain 235 observations each for the actor and critic, 12 actions, ELU layers `[512, 256, 128]`, 24 rollout steps and five PPO epochs. RLinf uses Huber value loss, learning rate `3e-4`, entropy coefficient `0.003`, and analytical KL target `0.005`; ordinary PPO retains its adaptive KL target `0.01`. B retains the recorded numerical guard; C continuations use the late posture weights.
 
 The branch starts from upstream RLinf `dcf00fd6`. The generic KL scheduler is a separate commit; Go2 registers through `RLINF_EXT_MODULE`. Rebase this branch onto upstream to update the framework. [Manifest](manifest.json) pins the recorded code, input hashes and checkpoint paths.
+
+For observation assembly, motor conversion and SDK2 integration, see [Motion Control](MOTION.md).
 
 ## Limitations
 
