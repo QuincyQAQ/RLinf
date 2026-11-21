@@ -36,6 +36,7 @@ exec "$ABC_ENGINE" exec --cleanenv --writable-tmpfs "${ABC_GPU[@]}" \
   --bind "$ABC_PRIVATE/cache:/isaac-sim/kit/cache" \
   --bind "$ABC_PRIVATE/data:/isaac-sim/kit/data" --bind "$ABC_PRIVATE/logs:/isaac-sim/kit/logs" \
   --env ACCEPT_EULA=Y --env PRIVACY_CONSENT=Y --env PYTHONUNBUFFERED=1 --env GO2_RLINF=1 \
+  --env "OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-4}" --env OPENBLAS_NUM_THREADS=1 \
   --env GO2_ABC_RUNTIME=/workspace/go2 --env GO2_ABC_DATA=/workspace/project/data/go2_abc \
   "$ABC_IMAGE" bash /workspace/go2/a40/container_python.sh \
   "${ABC_ENTRY[@]}" "$@"
