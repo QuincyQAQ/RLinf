@@ -72,6 +72,33 @@ from rlinf.workers.rollout.phyai import phyai_rollout_worker
 from rlinf.workers.rollout.phyai.phyai_rollout_worker import PhyAIRolloutWorker
 
 
+def test_embodied_entry_registers_external_models_before_validation(tmp_path):
+    import subprocess
+
+    project = Path(__file__).resolve().parents[2]
+    environment = dict(
+        os.environ,
+        RLINF_EXT_MODULE="examples.embodiment.go2_abc.extension",
+        GO2_ABC_RUNTIME=str(tmp_path),
+    )
+    script = """
+import examples.embodiment.train_embodied_agent
+from rlinf.config import EMBODIED_MODEL, SupportedModel
+from rlinf.envs.sim.isaaclab import REGISTER_ISAACLAB_ENVS
+assert SupportedModel('go2_policy') in EMBODIED_MODEL
+assert 'MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0' in REGISTER_ISAACLAB_ENVS
+"""
+    subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=project,
+        env=environment,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+
 def test_go2_checkpoint_supports_ppo_update_and_analytical_kl(tmp_path):
     from examples.embodiment.go2_abc.policy import Go2Policy
 

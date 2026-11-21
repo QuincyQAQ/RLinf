@@ -22,10 +22,12 @@ from omegaconf.omegaconf import OmegaConf
 from rlinf.config import validate_cfg
 from rlinf.runners.embodied_runner import EmbodiedRunner
 from rlinf.scheduler import Cluster
+from rlinf.scheduler.cluster import load_user_extension_module
 from rlinf.utils.placement import HybridComponentPlacement
 from rlinf.workers.env.env_worker import EnvWorker
 from rlinf.workers.reward import EmbodiedAPIRewardWorker, EmbodiedRewardWorker
 
+load_user_extension_module()
 mp.set_start_method("spawn", force=True)
 
 _REWARD_SERVER_COMPONENT_NAME = "reward_server"
