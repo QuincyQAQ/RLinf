@@ -20,13 +20,13 @@
     "A_baseline": 14061617,
     "A_ppo": 14061618,
     "A_rlinf": 14061619,
-    "B_baseline": 14061620,
-    "B_ppo": 14061621,
-    "B_rlinf": 14061622
+    "B_baseline": 14062923,
+    "B_ppo": 14062924,
+    "B_rlinf": 14062925
   },
   "files_sha256": {
     "launchers.tar.gz": "35c0d6d40515213f9b1a7f50a91bddaa417da2e8cb11131aa6d3ad04f2a96eb2",
-    "runtime_sources.tar.gz": "844e089d57b3dbe49c4205c5baa6c60bc3a4811640ad449b5932356ea3772802",
+    "runtime_sources.tar.gz": "827c9fd752c8c4cc8d5c6787a66df2b75199aab774d7a8901523e82e11284751",
     "evidence/C_first/23456/B2_stairs_s0/B2_stairs.json": "884c3b65e536add2f4805acd29fa645d51bd68363e561e891792804fb2c50634",
     "evidence/C_first/34567/B2_stairs_s0/B2_stairs.json": "2ddd0ef2e2752d8b88d763d72d4e15ed7ffecb7f2f707d4107c029177527feb9",
     "evidence/C_repeat/23456/B2_stairs_s0/B2_stairs.json": "884c3b65e536add2f4805acd29fa645d51bd68363e561e891792804fb2c50634",
@@ -35,6 +35,19 @@
     "evidence/new_independent_20261122/comparison.json": "b5c6c9082b80d9b5779d7a649604968e5d40e86fe999d7aaaea90aae3d63e123",
     "evidence/new_independent_20261122/protocol.json": "0111d467d26a04bd287a1efa48cc05958b40dfdb0b57a5dacf5c7cb2d6fa075b",
     "evidence/AB_six_20261122/cpu_audit.json": "6e6b5a882908954fcf50931ac592c338919d3647b899eef776c92f85dc22b8d5",
-    "evidence/AB_six_20261122/jobs.tsv": "04cf9308f6f7c0142118603a081456f6cea3b47a841d0abcd30eb6d894b870ca"
+    "evidence/AB_six_20261122/jobs.tsv": "04cf9308f6f7c0142118603a081456f6cea3b47a841d0abcd30eb6d894b870ca",
+    "evidence/B_retry_20261122/jobs.tsv": "71ba154109b83d0f26a7c0bcb9456bccfba0f7d38c7d9fdd585f13201b02a9e1",
+    "evidence/B_retry_20261122/repair.json": "718faf6fdc0fc77152c832485dac97ec02ae1fbbc87d78d6f79be0be4498ec5a",
+    "B_retry_launchers.tar.gz": "6724086acdd683b63b1a30671ad080cc1906b4619715e2396550ddd5151933d4"
+  },
+  "runtime_dependency_repair": {
+    "file": "a40/b1_numerical_boundary.py",
+    "sha256": "eb85dcd035d7485194005d5d4b0ef232e33c0ca6f14f996f0151b78cf6d5ee25",
+    "reason": "Restore omitted original B dependency; training configs and RLinf implementation unchanged",
+    "failed_jobs": [
+      14061620,
+      14061621,
+      14061622
+    ]
   }
 }

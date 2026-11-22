@@ -1,0 +1,17 @@
+{
+  "dependency": "b1_numerical_boundary",
+  "cpu_import": "passed",
+  "bounded_action_check": "passed",
+  "training_configuration_changed": false,
+  "old_jobs": [
+    14061620,
+    14061621,
+    14061622
+  ],
+  "replacement_jobs": [
+    14062923,
+    14062924,
+    14062925
+  ],
+  "gpu_validation": "pending"
+}
