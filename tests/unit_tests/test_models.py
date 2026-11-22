@@ -99,6 +99,58 @@ assert 'MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0' in REGISTER_ISAACLAB_EN
     )
 
 
+def test_hf_rollout_training_seed_controls_checkpoint_sampling(tmp_path):
+    from examples.embodiment.go2_abc.extension import build_policy
+    from examples.embodiment.go2_abc.policy import Go2Policy
+    from rlinf.utils.utils import get_rng_state, set_rng_state
+    from rlinf.workers.rollout.hf.huggingface_worker import MultiStepRolloutWorker
+
+    register_model("go2_policy", build_policy, force=True)
+    checkpoint = tmp_path / "policy.pt"
+    torch.save({"model_state_dict": Go2Policy().state_dict()}, checkpoint)
+    cfg = OmegaConf.create(
+        {
+            "actor": {"seed": 0},
+            "runner": {},
+            "rollout": {"model": {}},
+        }
+    )
+    model_cfg = OmegaConf.create(
+        {
+            "model_type": "go2_policy",
+            "precision": "32",
+            "is_lora": False,
+            "load_to_device": False,
+            "initial_checkpoint": str(checkpoint),
+            "distribution_safety_patch": False,
+        }
+    )
+    previous_rng = get_rng_state()
+    try:
+        actions = []
+        for rank, inherited_seed in ((0, 111), (0, 222), (1, 111)):
+            torch.manual_seed(inherited_seed)
+            worker = object.__new__(MultiStepRolloutWorker)
+            worker._rank = rank
+            worker.cfg = cfg
+            worker.model_cfg = model_cfg
+            worker.algorithm_cfg = {}
+            worker.enable_train = True
+            worker.enable_opd = worker.enable_dagger = False
+            worker.enable_rlt = worker.enable_offload = False
+            worker.enable_cuda_graph = worker.value_only_bootstrap = False
+            worker.expert_model = worker.rlt_feature_model = None
+            worker.init_worker()
+            sampled, _ = worker.hf_model.predict_action_batch(
+                {"states": torch.zeros(4, 235)}
+            )
+            actions.append(sampled)
+        torch.testing.assert_close(actions[0], actions[1], rtol=0, atol=0)
+        assert not torch.equal(actions[0], actions[2])
+    finally:
+        set_rng_state(previous_rng)
+
+
 def test_go2_checkpoint_supports_ppo_update_and_analytical_kl(tmp_path):
     from examples.embodiment.go2_abc.policy import Go2Policy
 
