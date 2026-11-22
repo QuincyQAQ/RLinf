@@ -8,15 +8,18 @@
 
 C 的两次独立 RLinf-Huber 续训，作业 14060127、14061035，均从同一份冻结 PPO 基线权重出发，训练 seed 0、续训 1000 轮。20 份 checkpoint 的全部张量完全一致；2048 条评测记录和两份汇总完全一致：跟踪成功率 100%，楼梯通过率 925/2048（45.1660%）。评测 seed 为 23456、34567。[evidence](evidence) 保存报告与逐回合数据。
 
-A、B 各三组已分别提交，六个作业编号见 [jobs.tsv](evidence/AB_six_20261122/jobs.tsv)。基线组评测冻结权重；普通 PPO、RLinf-Huber 各续训 1000 轮。两任务均使用 2048 个环境，保留原任务配置及 B 的数值保护。
+A、B 六项均已完成。按基线、继续 PPO、继续 RLinf-Huber 排列，跟踪成功率为 A：91.4687%、93.3301%、96.7285%；B：99.8535%、99.6094%、99.8535%。B 使用 [manifest.json](manifest.json) 中的重提作业。基线组评测冻结权重；普通 PPO、RLinf-Huber 各续训 1000 轮。两任务均使用 2048 个环境，保留原任务配置及 B 的数值保护。
 
 ## 恢复代码并运行
 
-从本分支创建固定训练版本的独立工作目录，再恢复启动脚本：
+从本分支独立克隆并检出固定训练版本，再恢复启动脚本：
 
 ```bash
 export GO2_SNAPSHOT="$PWD/artifacts/go2_seed0_20261122"
-git worktree add --detach ../go2-seed0-run e8815cac3b3abecedf13e9310aa9661baa6d1043
+git clone --depth 1 --branch repro/go2-abc-seed0-verified-20261122 \
+  https://github.com/QuincyQAQ/RLinf.git ../go2-seed0-run
+git -C ../go2-seed0-run fetch --depth 1 origin e8815cac3b3abecedf13e9310aa9661baa6d1043
+git -C ../go2-seed0-run checkout --detach e8815cac3b3abecedf13e9310aa9661baa6d1043
 cd ../go2-seed0-run
 tar -xzf "$GO2_SNAPSHOT/launchers.tar.gz"
 python -m examples.embodiment.go2_abc.prepare_data
@@ -45,4 +48,4 @@ sbatch --export=ALL --job-name=go2_A_rlinf_seed0 \
 
 ## Limitations
 
-目前已确认 C 在记录环境中的逐项复现，A、B 尚待验证。历史 C 的 76.5625% 属于另一份模型，已复现其评测，尚未复现其训练成绩。只固定 seed 不能保证跨硬件或软件版本完全一致。本归档包含源码与证据；容器二进制、仿真资产和依赖包仍需准备好的运行环境。辅助文件中的验证标记记录原环境状态，不能替代新安装的检查。
+目前已确认 C 在记录环境中的逐项复现，A、B 各完成一次运行；独立训练重复一致性目前只验证了 C。历史 C 的 76.5625% 属于另一份模型，已复现其评测，尚未复现其训练成绩。只固定 seed 不能保证跨硬件或软件版本完全一致。本归档包含源码与证据；容器二进制、仿真资产和依赖包仍需准备好的运行环境。辅助文件中的验证标记记录原环境状态，不能替代新安装的检查。
