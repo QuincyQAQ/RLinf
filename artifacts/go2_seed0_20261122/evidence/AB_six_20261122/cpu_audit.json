@@ -1,0 +1,9 @@
+{
+  "experiments": 9,
+  "inputs": 33,
+  "episodes": 18454,
+  "device": "cpu",
+  "status": "passed",
+  "source_commit": "e8815cac3b3abecedf13e9310aa9661baa6d1043",
+  "cuda_initialized": false
+}

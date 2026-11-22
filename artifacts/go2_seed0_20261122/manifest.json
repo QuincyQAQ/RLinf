@@ -1,0 +1,40 @@
+{
+  "training_source_commit": "e8815cac3b3abecedf13e9310aa9661baa6d1043",
+  "training_seed": 0,
+  "evaluation_seeds": [
+    23456,
+    34567
+  ],
+  "benchmark_commit": "743ac04d9543b04b7854f1100bfa0cc69c993106",
+  "isaaclab_commit": "37ddf626871758333d6ed89cf64ad702aef127d0",
+  "input_archive": {
+    "url": "https://raw.githubusercontent.com/QuincyQAQ/RLinf/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/artifacts/benchmark_runtime.tar.gz",
+    "sha256": "6ccf9a2c33bf84e90a6f8bffb5d56786909f755588fdc6ff980d12fd646c033a"
+  },
+  "verified_experiment": "C_rlinf",
+  "verified_jobs": [
+    14060127,
+    14061035
+  ],
+  "remaining_jobs": {
+    "A_baseline": 14061617,
+    "A_ppo": 14061618,
+    "A_rlinf": 14061619,
+    "B_baseline": 14061620,
+    "B_ppo": 14061621,
+    "B_rlinf": 14061622
+  },
+  "files_sha256": {
+    "launchers.tar.gz": "35c0d6d40515213f9b1a7f50a91bddaa417da2e8cb11131aa6d3ad04f2a96eb2",
+    "runtime_sources.tar.gz": "844e089d57b3dbe49c4205c5baa6c60bc3a4811640ad449b5932356ea3772802",
+    "evidence/C_first/23456/B2_stairs_s0/B2_stairs.json": "884c3b65e536add2f4805acd29fa645d51bd68363e561e891792804fb2c50634",
+    "evidence/C_first/34567/B2_stairs_s0/B2_stairs.json": "2ddd0ef2e2752d8b88d763d72d4e15ed7ffecb7f2f707d4107c029177527feb9",
+    "evidence/C_repeat/23456/B2_stairs_s0/B2_stairs.json": "884c3b65e536add2f4805acd29fa645d51bd68363e561e891792804fb2c50634",
+    "evidence/C_repeat/34567/B2_stairs_s0/B2_stairs.json": "2ddd0ef2e2752d8b88d763d72d4e15ed7ffecb7f2f707d4107c029177527feb9",
+    "evidence/new_independent_20261122/local_verification.json": "444b674e3f14a3cf28adad5b26e5dd0af2af529104603436a5d65f9d03dd1d4c",
+    "evidence/new_independent_20261122/comparison.json": "b5c6c9082b80d9b5779d7a649604968e5d40e86fe999d7aaaea90aae3d63e123",
+    "evidence/new_independent_20261122/protocol.json": "0111d467d26a04bd287a1efa48cc05958b40dfdb0b57a5dacf5c7cb2d6fa075b",
+    "evidence/AB_six_20261122/cpu_audit.json": "6e6b5a882908954fcf50931ac592c338919d3647b899eef776c92f85dc22b8d5",
+    "evidence/AB_six_20261122/jobs.tsv": "04cf9308f6f7c0142118603a081456f6cea3b47a841d0abcd30eb6d894b870ca"
+  }
+}

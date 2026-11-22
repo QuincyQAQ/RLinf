@@ -4,6 +4,8 @@
 
 Run the three Go2 tasks with the completed PPO policy, ordinary PPO continuation, and RLinf-Huber continuation: nine groups in total.
 
+The table below contains historical results. For the fixed-seed code and current reproduction evidence, use the [seed-0 snapshot](../../../artifacts/go2_seed0_20261122/README.md).
+
 | Task | Source Updates | Added Updates per Continuation | Parallel Environments | Baseline Tracking | Continue PPO | Continue RLinf-Huber |
 |---|---:|---:|---:|---:|---:|---:|
 | A: omnidirectional | 1500 | 1000 | 2048 | 91.4687% | 93.3301% | 97.6574% |
@@ -47,4 +49,4 @@ For observation assembly, motor conversion and SDK2 integration, see [Motion Con
 
 ## Limitations
 
-These scores come from the recorded A40 runs on RLinf `5aa29ec`; the upstream integration has CPU checks and has not been retrained on a GPU. The comparison uses one training seed and the listed PPO configurations.
+The table records runs on RLinf `5aa29ec`. At `e8815cac`, two independent C RLinf-Huber continuations produced identical tensors at all 20 saved checkpoints and identical 2048 evaluation records: tracking 100%, stair passage 45.1660%. A/B validation is in progress. The historical 76.5625% policy evaluation was reproduced, but its training score has not been reproduced. Exact agreement is verified for the recorded A40 runtime and recipe, not arbitrary hardware or dependencies.

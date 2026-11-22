@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "job_id": 14061035,
+  "previous_job_id": 14060127,
+  "completed_at_cst": "2026-11-22 19:43:13",
+  "slurm_state": "COMPLETED",
+  "exit_code": "0:0",
+  "local_episode_comparison": "2048 episodes and both summaries identical",
+  "passages": 925,
+  "checkpoint_report": "20/20 parameters exact (computed on server)"
+}

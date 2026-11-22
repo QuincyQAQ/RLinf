@@ -1,0 +1,227 @@
+{
+  "status": "completed",
+  "reproducibility": "exact_match",
+  "source_commit": "e8815cac3b3abecedf13e9310aa9661baa6d1043",
+  "training_seed": 0,
+  "evaluation_seeds": [
+    23456,
+    34567
+  ],
+  "previous_job_id": 14060127,
+  "job_id": "14061035",
+  "previous": {
+    "training_iterations": 1000,
+    "episodes": 2048,
+    "tracking_successes": 2048,
+    "tracking_rate": 1.0,
+    "passage_successes": 925,
+    "passage_rate": 0.45166015625,
+    "linear_error": 0.06314018547348674,
+    "angular_error": 0.0700340788122267,
+    "policy_sha256": "3c444a693501d16577eb369371cd928c95a8536ac87c2ca64eac62055286cb1b"
+  },
+  "current": {
+    "training_iterations": 1000,
+    "episodes": 2048,
+    "tracking_successes": 2048,
+    "tracking_rate": 1.0,
+    "passage_successes": 925,
+    "passage_rate": 0.45166015625,
+    "linear_error": 0.06314018547348674,
+    "angular_error": 0.0700340788122267,
+    "policy_sha256": "209e5bcc35308c9f344e42f852c5f59dc0223a373c9b05eb6fdf103067c85f92"
+  },
+  "passage_delta_percentage_points": 0.0,
+  "checkpoints": [
+    {
+      "step": 50,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 100,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 150,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 200,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 250,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 300,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 350,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 400,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 450,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 500,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 550,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 600,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 650,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 700,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 750,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 800,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 850,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 900,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 950,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    },
+    {
+      "step": 1000,
+      "weights_exact_match": true,
+      "max_absolute_differences": {}
+    }
+  ],
+  "evaluations": [
+    {
+      "seed": 23456,
+      "episodes_exact_match": true,
+      "previous_summary": {
+        "num_episodes": 1024,
+        "success_rate": 1.0,
+        "mean_success_step_ratio": 0.9941337890625088,
+        "mean_lin_vel_error": 0.06337082614377146,
+        "mean_ang_vel_error": 0.0700269697010518,
+        "mean_alive_time_s": 20.0,
+        "failure_rate": 0.0,
+        "physical_obstacle_passage_rate": 0.439453125,
+        "joint_tracking_and_passage_success_rate": 0.439453125,
+        "physical_evaluation_status": "measured",
+        "physical_measured_episodes": 1024,
+        "physical_eligible_start_episodes": 1024,
+        "physical_passage_rate_given_eligible_start": 0.439453125,
+        "physical_passage_successes": 450,
+        "metric_version": "square_obstacle_v1",
+        "required_obstacle_metrics_complete": true,
+        "train_task": "B2_stairs_s0",
+        "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0"
+      },
+      "current_summary": {
+        "num_episodes": 1024,
+        "success_rate": 1.0,
+        "mean_success_step_ratio": 0.9941337890625088,
+        "mean_lin_vel_error": 0.06337082614377146,
+        "mean_ang_vel_error": 0.0700269697010518,
+        "mean_alive_time_s": 20.0,
+        "failure_rate": 0.0,
+        "physical_obstacle_passage_rate": 0.439453125,
+        "joint_tracking_and_passage_success_rate": 0.439453125,
+        "physical_evaluation_status": "measured",
+        "physical_measured_episodes": 1024,
+        "physical_eligible_start_episodes": 1024,
+        "physical_passage_rate_given_eligible_start": 0.439453125,
+        "physical_passage_successes": 450,
+        "metric_version": "square_obstacle_v1",
+        "required_obstacle_metrics_complete": true,
+        "train_task": "B2_stairs_s0",
+        "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0"
+      }
+    },
+    {
+      "seed": 34567,
+      "episodes_exact_match": true,
+      "previous_summary": {
+        "num_episodes": 1024,
+        "success_rate": 1.0,
+        "mean_success_step_ratio": 0.9941826171875073,
+        "mean_lin_vel_error": 0.06290954480320214,
+        "mean_ang_vel_error": 0.07004118792340168,
+        "mean_alive_time_s": 20.0,
+        "failure_rate": 0.0,
+        "physical_obstacle_passage_rate": 0.4638671875,
+        "joint_tracking_and_passage_success_rate": 0.4638671875,
+        "physical_evaluation_status": "measured",
+        "physical_measured_episodes": 1024,
+        "physical_eligible_start_episodes": 1024,
+        "physical_passage_rate_given_eligible_start": 0.4638671875,
+        "physical_passage_successes": 475,
+        "metric_version": "square_obstacle_v1",
+        "required_obstacle_metrics_complete": true,
+        "train_task": "B2_stairs_s0",
+        "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0"
+      },
+      "current_summary": {
+        "num_episodes": 1024,
+        "success_rate": 1.0,
+        "mean_success_step_ratio": 0.9941826171875073,
+        "mean_lin_vel_error": 0.06290954480320214,
+        "mean_ang_vel_error": 0.07004118792340168,
+        "mean_alive_time_s": 20.0,
+        "failure_rate": 0.0,
+        "physical_obstacle_passage_rate": 0.4638671875,
+        "joint_tracking_and_passage_success_rate": 0.4638671875,
+        "physical_evaluation_status": "measured",
+        "physical_measured_episodes": 1024,
+        "physical_eligible_start_episodes": 1024,
+        "physical_passage_rate_given_eligible_start": 0.4638671875,
+        "physical_passage_successes": 475,
+        "metric_version": "square_obstacle_v1",
+        "required_obstacle_metrics_complete": true,
+        "train_task": "B2_stairs_s0",
+        "eval_task": "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0"
+      }
+    }
+  ]
+}
