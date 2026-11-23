@@ -193,6 +193,8 @@ jobs:
             unit_test_filter: &unit
               - *shared
               - 'examples/embodiment/go2_abc/**'
+              - 'examples/embodiment/go2_sport/**'
+              - 'artifacts/go2_sport_20261116/**'
               - 'tests/fixtures/go2_control_reference.json'
               - 'rlinf/robotics/**'
               - 'rlinf/models/embodiment/openpi/**'

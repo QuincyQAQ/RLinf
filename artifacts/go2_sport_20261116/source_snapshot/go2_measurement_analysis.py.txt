@@ -1,0 +1,104 @@
+"""Offline measurement summaries from operator-run Go2 diagnostic logs."""
+import argparse
+import json
+import math
+from pathlib import Path
+
+
+def summarize(report):
+    command = report['command']
+    seconds = report.get('planned_seconds')
+    result = {
+        'measurement_source': 'SDK position/IMU estimates, not external ground truth',
+        'nominal_seconds': seconds,
+        'nominal_body_displacement_m': [v * seconds for v in command[:2]] if seconds is not None else None,
+        'nominal_yaw_rad': command[2] * seconds if seconds is not None else None,
+        'nominal_yaw_deg': math.degrees(command[2] * seconds) if seconds is not None else None,
+        'operator_stop_confirmed': report.get('operator_stop_confirmed'),
+        'physical_stop_status': report.get('physical_stop', 'unconfirmed'),
+        'warnings': [],
+        'external_measurement': None,
+        'automatic_pass_fail': 'not assigned; no distance/angle acceptance threshold defined',
+    }
+    moves = [e for e in report.get('events', []) if e['method'] == 'Move' and e.get('return_code') == 0]
+    if not moves:
+        result['warnings'].append('No successful local Move send; movement cannot be evaluated.')
+        return result
+    start = moves[0]['t_start']
+    stops = [e for e in report['events'] if e['method'] == 'StopMove' and e['t_start'] >= start]
+    result['move_send_count'] = len(moves)
+    result['stop_return_codes'] = [e.get('return_code') for e in stops]
+    if stops:
+        duration = stops[0]['t_start'] - start
+        result['command_window_seconds'] = duration
+        result['command_window_reference_body_m'] = [v * duration for v in command[:2]]
+        result['command_window_reference_yaw_deg'] = math.degrees(command[2] * duration)
+    else:
+        result['warnings'].append('No subsequent StopMove recorded.')
+    rows = report.get('speeds', [])
+    if any(b['t'] < a['t'] for a, b in zip(rows, rows[1:])):
+        result['warnings'].append('Nonmonotonic reception timestamps; endpoint estimates omitted.')
+        return result
+    pre = [r for r in rows if r['t'] <= start]
+    if not pre or start - pre[-1]['t'] > .2:
+        result['warnings'].append('No fresh pre-motion baseline; endpoint estimates omitted.')
+        return result
+    baseline = pre[-1]
+    after = [r for r in rows if r['t'] >= start]
+    if not after:
+        result['warnings'].append('No post-motion samples.')
+        return result
+    endpoint = after[-1]
+    result['measurement_window_seconds'] = endpoint['t'] - baseline['t']
+    result['baseline_age_at_first_move_s'] = start - baseline['t']
+    result['endpoint_includes_stopping_tail'] = True
+    if report.get('physical_stop', 'unconfirmed') == 'unconfirmed':
+        result['warnings'].append('Stop unconfirmed: final endpoint is provisional, not a stopped pose.')
+    if report.get('errors'):
+        result['warnings'].append('Run contains errors; inspect original report before interpreting measurements.')
+    segment = [baseline] + after
+    gaps = [b['t'] - a['t'] for a, b in zip(segment, segment[1:])]
+    result['max_state_reception_gap_s'] = max(gaps, default=0)
+    if result['max_state_reception_gap_s'] > .2:
+        result['warnings'].append('State gap >0.2s; displacement/yaw estimates may be unreliable.')
+    if all('rpy' in r and len(r['rpy']) == 3 for r in segment):
+        yaw_delta = sum(math.atan2(math.sin(b['rpy'][2] - a['rpy'][2]),
+                                  math.cos(b['rpy'][2] - a['rpy'][2]))
+                        for a, b in zip(segment, segment[1:]))
+        result['sdk_net_yaw_rad'] = yaw_delta
+        result['sdk_net_yaw_deg'] = math.degrees(yaw_delta)
+        if result['nominal_yaw_deg'] is not None:
+            result['yaw_error_vs_nominal_deg'] = result['sdk_net_yaw_deg'] - result['nominal_yaw_deg']
+    else:
+        result['warnings'].append('IMU yaw absent; integrated yaw-speed is not substituted as ground truth.')
+    if all('position' in r and len(r['position']) == 3 for r in [baseline, endpoint]):
+        delta = [b-a for a,b in zip(baseline['position'], endpoint['position'])]
+        result['sdk_world_net_displacement_m'] = delta
+        result['sdk_planar_net_distance_m'] = math.hypot(*delta[:2])
+        if 'rpy' in baseline:
+            yaw = baseline['rpy'][2]
+            local = [math.cos(yaw)*delta[0]+math.sin(yaw)*delta[1],
+                     -math.sin(yaw)*delta[0]+math.cos(yaw)*delta[1]]
+            result['sdk_initial_heading_projection_m'] = local
+            result['projection_assumption'] = 'Position and IMU yaw share world axes; verify with an external tape/heading reference.'
+            if not command[2] and seconds is not None:
+                result['projected_error_vs_nominal_m'] = [a-b for a,b in zip(local,result['nominal_body_displacement_m'])]
+    else:
+        result['warnings'].append('SDK position absent; actual distance unavailable. Do not use commanded speed as measured distance.')
+    result['warnings'].append('IMU yaw change alone cannot distinguish stepping rotation from planted-foot body twisting; operator observation is required.')
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('report', type=Path)
+    args = parser.parse_args()
+    result = summarize(json.loads(args.report.read_text()))
+    output = args.report.with_name(args.report.stem + '_measurement.json')
+    output.write_text(json.dumps(result, indent=2, allow_nan=False) + '\n')
+    print(json.dumps(result, indent=2))
+    print('Summary:', output)
+
+
+if __name__ == '__main__':
+    main()

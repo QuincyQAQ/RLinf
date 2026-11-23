@@ -5,6 +5,7 @@ kernel_meta/
 *.idx
 *.npy
 *.txt
+!artifacts/go2_sport_20261116/source_snapshot/*.py.txt
 !requirements/**
 !docs/*
 *.DS_Store

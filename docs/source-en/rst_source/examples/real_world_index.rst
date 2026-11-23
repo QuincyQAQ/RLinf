@@ -115,6 +115,12 @@ Use these guides to connect a robot and run its hardware test script. Piper, SO1
 
       Set up the wheel motors, check the front webcam, and drive the mobile base.
 
+   .. grid-item-card:: Go2 EDU
+      :link: embodied/go2
+      :link-type: doc
+
+      Read state and check six directions with the original Unitree controller.
+
 .. toctree::
    :hidden:
    :maxdepth: 3
@@ -130,3 +136,4 @@ Use these guides to connect a robot and run its hardware test script. Piper, SO1
    Piper <embodied/piper>
    SO101 <embodied/so101>
    LeKiwi <embodied/lekiwi>
+   Go2 EDU <embodied/go2>

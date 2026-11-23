@@ -1,0 +1,247 @@
+"""Operator-run RLinf bounded motion diagnostic. Never starts motion on import."""
+import argparse
+import json
+import math
+import os
+import signal
+import threading
+import time
+from datetime import datetime
+from pathlib import Path
+
+
+class SpeedLog:
+    """Record SDK estimates; reception time is not acquisition time."""
+    def __init__(self):
+        self.rows = []
+        self.lock = threading.Lock()
+
+    def callback(self, state):
+        try:
+            velocity = [float(v) for v in state.velocity]
+            yaw = float(state.yaw_speed)
+            if len(velocity) != 3 or not all(map(math.isfinite, velocity + [yaw])):
+                return
+            row = dict(t=time.monotonic(), velocity=velocity, yaw_speed=yaw)
+            for name in ('mode', 'gait_type', 'error_code'):
+                value = getattr(state, name, None)
+                if value is not None:
+                    row[name] = int(value)
+            imu = getattr(state, 'imu_state', None)
+            if imu is not None:
+                rpy = [float(v) for v in imu.rpy]
+                if len(rpy) != 3 or not all(map(math.isfinite, rpy)):
+                    return
+                row['rpy'] = rpy
+            position = getattr(state, 'position', None)
+            if position is not None:
+                values = [float(v) for v in position]
+                if len(values) != 3 or not all(map(math.isfinite, values)):
+                    return
+                row['position'] = values
+        except (AttributeError, TypeError, ValueError, OverflowError):
+            return
+        with self.lock:
+            self.rows.append(row)
+
+    def snapshot(self):
+        with self.lock:
+            return list(self.rows)
+
+    def stopped(self, since):
+        rows = [r for r in self.snapshot() if r['t'] >= since]
+        if len(rows) < 3 or time.monotonic() - rows[-1]['t'] > .2:
+            return False
+        start = rows[-1]['t']
+        previous = start
+        for row in reversed(rows):
+            if previous - row['t'] > .2:
+                return False
+            previous = row['t']
+            if math.hypot(*row['velocity'][:2]) > .05 or abs(row['yaw_speed']) > .1:
+                return False
+            if start - row['t'] >= .5:
+                return True
+        return False
+
+
+def audited_client(original, events):
+    class Client(original):
+        def _record(self, name, fn, *args):
+            row = dict(method=name, t_start=time.monotonic(), args=list(args))
+            events.append(row)
+            try:
+                code = fn(*args)
+                row['return_code'] = code
+                return code
+            except BaseException as exc:
+                row['error'] = repr(exc)
+                raise
+            finally:
+                row['t_end'] = time.monotonic()
+
+        def Move(self, vx, vy, yaw):
+            return self._record('Move', super().Move, vx, vy, yaw)
+
+        def StopMove(self):
+            return self._record('StopMove', super().StopMove)
+    return Client
+
+
+def competing_processes():
+    matches = []
+    for entry in Path('/proc').iterdir():
+        if not entry.name.isdigit() or int(entry.name) == os.getpid():
+            continue
+        try:
+            argv = (entry / 'cmdline').read_bytes().split(b'\0')
+            # Match Python script arguments rather than shell command text.
+            if not argv or 'python' not in Path(os.fsdecode(argv[0])).name:
+                continue
+            scripts = [os.fsdecode(a) for a in argv[1:] if a.endswith(b'.py')]
+            if any('go2' in Path(a).name.lower() for a in scripts):
+                matches.append(dict(pid=int(entry.name), scripts=scripts))
+        except (OSError, ValueError):
+            continue
+    return matches
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--interface', required=True)
+    parser.add_argument('--direction', choices=['left', 'right', 'turn_left', 'turn_right', 'backward', 'forward'], default='left')
+    parser.add_argument('--seconds', type=int, choices=[1, 2], default=1)
+    parser.add_argument('--quantify', action='store_true', help='Require stationary baseline and SDK position, then write measurement summary')
+    parser.add_argument('--dry-run', action='store_true', help='Print plan and exit without SDK imports, DDS, or commands')
+    args = parser.parse_args()
+    steps = args.seconds * 10
+    commands = {
+        'left': [0., .3, 0.], 'right': [0., -.3, 0.],
+        'backward': [-.3, 0., 0.], 'forward': [.3, 0., 0.],
+        'turn_left': [0., 0., .5], 'turn_right': [0., 0., -.5],
+    }
+    command = commands[args.direction]
+    if args.dry_run:
+        print(json.dumps(dict(direction=args.direction, command=command, seconds=args.seconds, steps=steps,
+                              nominal_body_displacement_m=[v*args.seconds for v in command[:2]],
+                              nominal_yaw_deg=math.degrees(command[2]*args.seconds),
+                              quantify=args.quantify, hardware_access=False), indent=2))
+        return
+    conflicts = competing_processes()
+    if conflicts:
+        raise RuntimeError(f'Other local Go2 Python scripts found; close them first: {conflicts}')
+    print(f'{args.direction}: command={command} for {steps} steps at 10 Hz, then request StopMove.')
+    print('Stop timing is not guaranteed. Keep remote ready. No PPO or posture changes.')
+    try:
+        confirmation = input('Standing, movement area clear, remote in hand: type GO: ')
+    except (EOFError, KeyboardInterrupt):
+        return
+    if confirmation.strip() != 'GO':
+        return
+    # Imports and DDS are deliberately after operator confirmation.
+    import numpy as np
+    import gymnasium as gym
+    import unitree_sdk2py.go2.sport.sport_client as sdk
+    import rlinf.envs.real.go2  # registration
+    from rlinf.robotics import Go2Config
+    from rlinf.robotics.discovery.registry import RobotDiscovery
+    from unitree_sdk2py.core.channel import ChannelSubscriber
+    from unitree_sdk2py.idl.unitree_go.msg.dds_ import SportModeState_
+
+    events, speeds = [], SpeedLog()
+    original = sdk.SportClient
+    sdk.SportClient = audited_client(original, events)
+    report = dict(pid=os.getpid(), script=str(Path(__file__).resolve()),
+                  interface=args.interface, direction=args.direction, command=command, uses_ppo=False,
+                  planned_seconds=args.seconds, planned_steps=steps, step_frequency_hz=10.,
+                  quantify=args.quantify,
+                  events=events, errors=[], physical_stop='unconfirmed',
+                  velocity_source='SportModeState SDK estimate; frame not verified',
+                  stop_threshold='planar speed <=0.05 m/s and abs yaw <=0.1 rad/s for >=0.5s; fresh <=0.2s')
+    output = Path(__file__).with_name('reviewed_' + args.direction + '_' + datetime.now().strftime('%Y%m%d_%H%M%S_%f') + '.json')
+    env = subscriber = None
+    old_handler = signal.getsignal(signal.SIGTERM)
+    def interrupted(signum, frame):
+        raise KeyboardInterrupt('SIGTERM received')
+    signal.signal(signal.SIGTERM, interrupted)
+    try:
+        cfg = Go2Config(node_rank=0, interface=args.interface, enable_motion=True,
+                        state_timeout=.5, command_timeout=.5, rpc_timeout=1.)
+        resource = RobotDiscovery.registry['UnitreeGo2'].discovery_cls.enumerate(0, [cfg])
+        env = gym.make('Go2DriveEnv-v1', override_cfg=dict(is_dummy=False, step_frequency=10., max_num_steps=steps),
+                       worker_info=None, robot_info=resource.infos[0], env_idx=0, env_cfg={})
+        subscriber = ChannelSubscriber('rt/sportmodestate', SportModeState_)
+        subscriber.Init(speeds.callback, 10)
+        until = time.monotonic() + 3
+        while not speeds.snapshot() and time.monotonic() < until:
+            time.sleep(.02)
+        if not speeds.snapshot():
+            raise RuntimeError('No valid SportModeState; no Move will be sent.')
+        if time.monotonic() - speeds.snapshot()[-1]['t'] > .2:
+            raise RuntimeError('SportModeState stale; no Move will be sent.')
+        if args.quantify:
+            baseline_start = time.monotonic()
+            until = baseline_start + 3
+            while not speeds.stopped(baseline_start) and time.monotonic() < until:
+                time.sleep(.02)
+            baseline = speeds.snapshot()[-1]
+            if not speeds.stopped(baseline_start):
+                raise RuntimeError('No stable fresh stationary baseline; no Move will be sent.')
+            if 'position' not in baseline or 'rpy' not in baseline:
+                raise RuntimeError('Position/IMU unavailable; no quantitative Move will be sent.')
+        env.reset()
+        report['motion_start'] = time.monotonic()
+        for _ in range(steps):
+            if time.monotonic() - speeds.snapshot()[-1]['t'] > .2:
+                raise RuntimeError('Speed feedback stale; requesting stop.')
+            _, _, terminated, truncated, _ = env.step(np.array(command, dtype=np.float32))
+            if terminated or truncated:
+                break
+    except BaseException as exc:
+        report['errors'].append(repr(exc))
+        print('Test interrupted:', repr(exc), flush=True)
+    finally:
+        try:
+            if env is not None:
+                env.close()
+                report['close_completed'] = True
+        except BaseException as exc:
+            report['errors'].append('close: ' + repr(exc))
+        try:
+            print('Stop requested. If still moving, use the remote now.', flush=True)
+            stops = [e for e in events if e['method'] == 'StopMove']
+            final_stop = stops[-1] if stops else None
+            since = final_stop['t_end'] if final_stop else time.monotonic()
+            until = time.monotonic() + 2
+            while subscriber is not None and time.monotonic() < until:
+                if final_stop and final_stop.get('return_code') == 0 and speeds.stopped(since):
+                    report['physical_stop'] = 'SDK estimated speed below thresholds; operator confirmation required'
+                    break
+                time.sleep(.02)
+            print('Stop status:', report['physical_stop'], flush=True)
+            if report['physical_stop'] == 'unconfirmed':
+                print('If still moving, stop with the remote immediately.', flush=True)
+        finally:
+            if subscriber is not None:
+                try:
+                    subscriber.Close()
+                except BaseException as exc:
+                    report['errors'].append('subscriber close: ' + repr(exc))
+            report['speeds'] = speeds.snapshot()
+            sdk.SportClient = original
+            signal.signal(signal.SIGTERM, old_handler)
+            output.write_text(json.dumps(report, indent=2) + '\n')
+            print('Report:', output, flush=True)
+            if args.quantify:
+                from go2_measurement_analysis import summarize
+                measurement = summarize(report)
+                summary_path = output.with_name(output.stem + '_measurement.json')
+                summary_path.write_text(json.dumps(measurement, indent=2, allow_nan=False) + '\n')
+                print(json.dumps(measurement, indent=2), flush=True)
+                print('Measurement:', summary_path, flush=True)
+    if report['errors'] or report['physical_stop'] == 'unconfirmed':
+        raise SystemExit(1)
+
+
+if __name__ == '__main__':
+    main()

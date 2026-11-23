@@ -115,6 +115,12 @@ Piper、SO101 与 LeKiwi 配置
 
       配置轮电机、检查前置摄像头，并驱动移动底盘。
 
+   .. grid-item-card:: Go2 EDU
+      :link: embodied/go2
+      :link-type: doc
+
+      读取状态，通过宇树原厂控制器检查六个运动方向。
+
 .. toctree::
    :hidden:
    :maxdepth: 3
@@ -130,3 +136,4 @@ Piper、SO101 与 LeKiwi 配置
    Piper <embodied/piper>
    SO101 <embodied/so101>
    LeKiwi <embodied/lekiwi>
+   Go2 EDU <embodied/go2>

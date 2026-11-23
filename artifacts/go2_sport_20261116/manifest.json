@@ -1,0 +1,64 @@
+{
+  "source_root": "Unitree_GO2",
+  "historical_test_date": "2026-11-16",
+  "scope": "RLinf high-level control using original SportClient, not PPO deployment",
+  "operator_confirmed_directions": [
+    "forward",
+    "left",
+    "right",
+    "turn_left",
+    "turn_right",
+    "backward"
+  ],
+  "quantitative_acceptance_complete": false,
+  "migration_hardware_retest": false,
+  "files": {
+    "basic_control_acceptance_20261116.json": {
+      "source": "rlinf_integration/hardware_checks/basic_control_acceptance_20261116.json",
+      "sha256": "8053c74922f510ff257bffb01a5733a505ab37900ca1e06397c5ad1bbc7e28c9"
+    },
+    "rlinf_forward_20261116_170103_668926.json": {
+      "source": "rlinf_integration/hardware_checks/rlinf_forward_20261116_170103_668926.json",
+      "sha256": "67582b79d2f739c25ea983f1c2be251a46b337e908dd6249b7d05b0bfa3514f5"
+    },
+    "reviewed_left_20261116_172253_067734.json": {
+      "source": "rlinf_integration/hardware_checks/reviewed_left_20261116_172253_067734.json",
+      "sha256": "03a6fcb389ec0dfe741d89c2623a0bd430eb7f8bdef5d18aa87241d78953169b"
+    },
+    "reviewed_right_20261116_172723_510920.json": {
+      "source": "rlinf_integration/hardware_checks/reviewed_right_20261116_172723_510920.json",
+      "sha256": "86bb56de5ef85bb5e0482e8f4801cff9100406c43df2827afc915dc862ce55a6"
+    },
+    "reviewed_turn_left_20261116_174834_838196.json": {
+      "source": "rlinf_integration/hardware_checks/reviewed_turn_left_20261116_174834_838196.json",
+      "sha256": "9ca11dcd730a6084e7328c9454a8301babaa6ccaa7b7e4aec645c99a41684c91"
+    },
+    "reviewed_turn_right_20261116_175033_553901.json": {
+      "source": "rlinf_integration/hardware_checks/reviewed_turn_right_20261116_175033_553901.json",
+      "sha256": "f2745921688b8e0870963e5bacca31d92b301949aa02f45b316def2ce7f84079"
+    },
+    "reviewed_backward_20261116_175129_194941.json": {
+      "source": "rlinf_integration/hardware_checks/reviewed_backward_20261116_175129_194941.json",
+      "sha256": "a02eadacfc36929ccec72506fc1d78bf0a19b0cf34536044b7011e137bd10bc4"
+    },
+    "source_snapshot/go2_rlinf_forward_manual.py.txt": {
+      "source": "rlinf_integration/hardware_checks/go2_rlinf_forward_manual.py",
+      "sha256": "f7e93e168a7d1ffac3b35cf063b6695c70428fdfbf584c296053f0d1e177ea4c"
+    },
+    "source_snapshot/go2_rlinf_left_reviewed.py.txt": {
+      "source": "rlinf_integration/hardware_checks/go2_rlinf_left_reviewed.py",
+      "sha256": "9478c3f9588c917959b446543a2f9e52478f267d41a4e574b79cf4ef6c23aa5b"
+    },
+    "source_snapshot/go2_measurement_analysis.py.txt": {
+      "source": "rlinf_integration/hardware_checks/go2_measurement_analysis.py",
+      "sha256": "b9f40092b59b77c546541c6f3d9fa1cc03df19be817e1ef009058c180738a901"
+    }
+  },
+  "driver_sources": {
+    "rlinf/robotics/parts/mobility/unitree_go2.py": "307365b05f2a1cf0b86729820f9e137933e1efe7ac4f2e7783005de1d17a8b38",
+    "rlinf/robotics/robots/unitree_go2.py": "c329859f11923b05bc3af97ea0426fbe050b44219aa1ef72adcdddec554c0b52",
+    "rlinf/envs/real/go2/__init__.py": "c083d4395a8de9d087912aa7df291e6ab88e3daa7faf6da4a3d1973b89725292",
+    "rlinf/envs/real/go2/base.py": "ab967a0aa19a4c536000b3f113ff8b4eb1866e5e72c0d97bcd164236fad0089b",
+    "rlinf/envs/real/go2/drive.py": "04c92ab33cb737e762f2e62d55a64ea4556c47cb2499bfaa8fcb0eed2fde3158"
+  }
+}

@@ -47,6 +47,8 @@ bash examples/embodiment/go2_abc/container.sh --experiment C_rlinf
 
 观测拼接、电机换算与 SDK2 接口见[运动控制说明](MOTION.zh-CN.md)。
 
+本分支同时包含[Go2 六方向真机控制](../go2_sport/README.zh-CN.md)及历史现场验收记录。
+
 ## Limitations
 
 表中成绩来自 RLinf `5aa29ec`。在 `e8815cac` 上，C 的两次独立 RLinf-Huber 续训得到完全一致的 20 份 checkpoint 张量和 2048 条评测记录：跟踪成功率 100%，楼梯通过率 45.1660%。A、B 正在验证。历史 76.5625% 模型的评测已复现，训练成绩尚未复现。逐项一致的验证范围是记录的 A40 环境与配置，不涵盖任意硬件或依赖版本。

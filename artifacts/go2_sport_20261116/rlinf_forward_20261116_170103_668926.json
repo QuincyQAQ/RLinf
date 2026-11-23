@@ -1,0 +1,77 @@
+{
+  "interface": "enp2s0",
+  "velocity_command": [
+    0.3,
+    0.0,
+    0.0
+  ],
+  "planned_seconds": 1.0,
+  "uses_ppo": false,
+  "posture_transition": false,
+  "steps": [
+    {
+      "step": 1,
+      "elapsed_s": 0.10047181195113808,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "step": 2,
+      "elapsed_s": 0.2006945819593966,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "step": 3,
+      "elapsed_s": 0.3009290839545429,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "step": 4,
+      "elapsed_s": 0.4012463450198993,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "step": 5,
+      "elapsed_s": 0.5014643659815192,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "step": 6,
+      "elapsed_s": 0.6017298760125414,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "step": 7,
+      "elapsed_s": 0.7020480450009927,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "step": 8,
+      "elapsed_s": 0.8022795439464971,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "step": 9,
+      "elapsed_s": 0.9025032219942659,
+      "terminated": false,
+      "truncated": false
+    },
+    {
+      "step": 10,
+      "elapsed_s": 1.0036855660146102,
+      "terminated": false,
+      "truncated": true
+    }
+  ],
+  "errors": [],
+  "close_completed": true,
+  "physical_result": "Await operator observation; API success is not physical confirmation.",
+  "stop_at_episode_end_completed": true
+}

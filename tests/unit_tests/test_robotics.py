@@ -9603,3 +9603,382 @@ def test_go2_control_loop_stale_perception_never_publishes(
         )
     assert not any(event[0] == "write" for event in sdk.events)
     assert ("writer_close",) in sdk.events
+
+
+@pytest.fixture
+def go2_sdk(monkeypatch):
+    """Replace only SDK2 modules; tests cannot reach DDS or hardware."""
+    from robot_mocks.unitree_go2 import FakeGo2SDK
+
+    sdk = FakeGo2SDK()
+    for name, module in sdk.modules().items():
+        monkeypatch.setitem(sys.modules, name, module)
+    return sdk
+
+
+def test_go2_readonly_never_creates_motion_client(go2_sdk):
+    from rlinf.robotics.parts.mobility import Go2Base
+
+    base = Go2Base("fake-go2")
+    base.connect()
+    try:
+        obs = base.get_observation()
+        assert obs["joint_position"].shape == (12,)
+        np.testing.assert_array_equal(obs["foot_force_raw"], [40, 0, 0, 0])
+        assert obs["battery_voltage"][0] == pytest.approx(31.52)
+        obs["joint_position"][:] = 99
+        assert base.get_observation()["joint_position"][0] == 0
+        base.send_action({"velocity": [0, 0, 0]})
+        with pytest.raises(PermissionError, match="read-only"):
+            base.send_action({"velocity": [0.3, 0, 0]})
+    finally:
+        base.disconnect()
+    assert not any(e[0] in ("client", "move", "stop") for e in go2_sdk.events)
+
+
+def test_go2_motion_preserves_sdk_units_and_stops_on_reset_and_close(go2_sdk):
+    from rlinf.robotics import Go2Robot
+
+    robot = Go2Robot.build(interface="fake-go2", enable_motion=True)
+    assert go2_sdk.events == []
+    robot.connect()
+    robot.send_action({"base": {"velocity": [0.3, -0.3, 0.5]}})
+    move = next(e for e in go2_sdk.events if e[0] == "move")
+    assert move[1:] == pytest.approx((0.3, -0.3, 0.5))
+    robot.reset()
+    robot.disconnect()
+    robot.disconnect()
+    assert [e[0] for e in go2_sdk.events].count("stop") == 3
+    assert go2_sdk.events[-1] == ("close",)
+
+
+def test_go2_watchdog_stops_without_another_step_and_latches(go2_sdk):
+    from rlinf.robotics.parts.mobility import Go2Base
+
+    base = Go2Base("fake-go2", enable_motion=True, command_timeout=0.04)
+    base.connect()
+    try:
+        go2_sdk.stopped.clear()
+        base.send_action({"velocity": [0.3, 0, 0]})
+        assert go2_sdk.stopped.wait(1), "Watchdog failed to request StopMove"
+        base.reset()
+        with pytest.raises(RuntimeError, match="reconnect"):
+            base.send_action({"velocity": [0.3, 0, 0]})
+        assert sum(e[0] == "move" for e in go2_sdk.events) == 1
+    finally:
+        base.disconnect()
+
+
+@pytest.mark.parametrize(
+    "action",
+    [
+        {"velocity": [float("nan"), 0, 0]},
+        {"velocity": [float("inf"), 0, 0]},
+        {"velocity": [0.31, 0, 0]},
+        {"velocity": [0, 0, 0.51]},
+        {"velocity": [0, 0]},
+        {"unexpected": [0, 0, 0]},
+    ],
+)
+def test_go2_invalid_actions_stop_instead_of_clipping(go2_sdk, action):
+    from rlinf.robotics.parts.mobility import Go2Base
+
+    base = Go2Base("fake-go2", enable_motion=True)
+    base.connect()
+    try:
+        with pytest.raises(ValueError):
+            base.send_action(action)
+        assert not any(e[0] == "move" for e in go2_sdk.events)
+        assert go2_sdk.events[-1] == ("stop",)
+    finally:
+        base.disconnect()
+
+
+def test_go2_stale_state_stops_motion_even_when_command_is_recent(go2_sdk):
+    from rlinf.robotics.parts.mobility import Go2Base
+
+    base = Go2Base(
+        "fake-go2", enable_motion=True, state_timeout=0.04, command_timeout=0.5
+    )
+    base.connect()
+    try:
+        go2_sdk.stopped.clear()
+        base.send_action({"velocity": [0.3, 0, 0]})
+        assert go2_sdk.stopped.wait(1)
+        with pytest.raises(TimeoutError, match="expired"):
+            base.get_observation()
+        go2_sdk.publish()
+        with pytest.raises(RuntimeError, match="reconnect"):
+            base.send_action({"velocity": [0.3, 0, 0]})
+    finally:
+        base.disconnect()
+
+
+def test_go2_missing_initial_state_rolls_back_connection(go2_sdk):
+    from rlinf.robotics.parts.mobility import Go2Base
+
+    go2_sdk.publish_initial = False
+    base = Go2Base("fake-go2", enable_motion=True, state_timeout=0.01)
+    with pytest.raises(TimeoutError, match="No valid"):
+        base.connect()
+    assert not base.is_connected
+    assert go2_sdk.events[-1] == ("close",)
+    assert not any(e[0] == "client" for e in go2_sdk.events)
+    go2_sdk.publish_initial = True
+    base.connect()
+    base.disconnect()
+
+
+@pytest.mark.parametrize("raise_error", [False, True])
+def test_go2_move_send_failure_requests_stop(go2_sdk, raise_error):
+    from rlinf.robotics.parts.mobility import Go2Base
+
+    base = Go2Base("fake-go2", enable_motion=True)
+    base.connect()
+    go2_sdk.move_error = raise_error
+    go2_sdk.move_code = 7
+    try:
+        with pytest.raises((OSError, RuntimeError)):
+            base.send_action({"velocity": [0.3, 0, 0]})
+        assert go2_sdk.events[-1] == ("stop",)
+    finally:
+        base.disconnect()
+
+
+def test_go2_stop_failure_is_reported_and_subscriber_still_closes(go2_sdk):
+    from rlinf.robotics.parts.mobility import Go2Base
+
+    base = Go2Base("fake-go2", enable_motion=True)
+    base.connect()
+    go2_sdk.stop_code = 9
+    with pytest.raises(RuntimeError, match="remote emergency stop"):
+        base.disconnect()
+    assert not base.is_connected
+    assert go2_sdk.events[-1] == ("close",)
+    base.disconnect()
+
+
+def test_go2_rejects_duplicate_controller_without_closing_first(go2_sdk):
+    from rlinf.robotics.parts.mobility import Go2Base
+
+    base = Go2Base("fake-go2")
+    other = Go2Base("fake-go2", enable_motion=True)
+    base.connect()
+    try:
+        with pytest.raises(RuntimeError, match="Only one"):
+            other.connect()
+        assert base.is_connected
+        base.get_observation()
+        assert not any(e[0] == "close" for e in go2_sdk.events)
+    finally:
+        base.disconnect()
+
+
+def test_go2_env_hardware_truncation_reset_and_close(go2_sdk):
+    from rlinf.envs.real.go2 import Go2DriveEnv
+    from rlinf.robotics import Go2Config
+    from rlinf.robotics.discovery import RobotInfo
+
+    info = RobotInfo(
+        type="UnitreeGo2",
+        model="UnitreeGo2",
+        config=Go2Config(node_rank=0, interface="fake-go2", enable_motion=True),
+    )
+    env = Go2DriveEnv({"step_frequency": 100, "max_num_steps": 1}, robot_info=info)
+    try:
+        obs, _ = env.reset()
+        assert env.observation_space.contains(obs)
+        obs, reward, terminated, truncated, _ = env.step(np.array([0.3, 0, 0]))
+        assert env.observation_space.contains(obs)
+        assert (reward, terminated, truncated) == (0.0, False, True)
+        assert go2_sdk.events[-1] == ("stop",)
+        with pytest.raises(RuntimeError, match="Reset"):
+            env.step(np.array([0.3, 0, 0]))
+    finally:
+        env.close()
+    assert go2_sdk.events[-1] == ("close",)
+
+
+def test_go2_dummy_and_registration_never_import_sdk():
+    import gymnasium as gym
+
+    from rlinf.envs.real.go2 import Go2DriveEnv
+
+    assert gym.spec("Go2DriveEnv-v1") is not None
+    env = Go2DriveEnv({"is_dummy": True, "step_frequency": 100})
+    try:
+        obs, _ = env.reset(seed=7)
+        assert env.observation_space.contains(obs)
+        with pytest.raises(ValueError):
+            env.step(np.array([np.nan, 0, 0]))
+        with pytest.raises(RuntimeError, match="Reset"):
+            env.step(np.zeros(3))
+    finally:
+        env.close()
+
+
+def test_go2_close_cannot_be_followed_by_a_racing_move(go2_sdk):
+    from rlinf.robotics.parts.mobility import Go2Base
+
+    base = Go2Base("fake-go2", enable_motion=True)
+    base.connect()
+    go2_sdk.close_release.clear()
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        closed = pool.submit(base.disconnect)
+        try:
+            assert go2_sdk.close_entered.wait(1)
+            with pytest.raises(RuntimeError, match="closing"):
+                base.send_action({"velocity": [0.3, 0, 0]})
+            assert not any(e[0] == "move" for e in go2_sdk.events)
+        finally:
+            go2_sdk.close_release.set()
+            closed.result(timeout=2)
+    assert not base.is_connected
+
+
+@pytest.mark.parametrize(
+    "direction,expected",
+    [
+        ("forward", (0.3, 0, 0)),
+        ("backward", (-0.3, 0, 0)),
+        ("left", (0, 0.3, 0)),
+        ("right", (0, -0.3, 0)),
+        ("turn_left", (0, 0, 0.5)),
+        ("turn_right", (0, 0, -0.5)),
+    ],
+)
+def test_go2_sport_six_directions_use_original_sdk(go2_sdk, direction, expected):
+    from examples.embodiment.go2_sport.run import COMMANDS
+    from rlinf.envs.real.go2 import Go2DriveEnv
+    from rlinf.robotics import Go2Config, RobotDiscovery
+
+    config = Go2Config(node_rank=0, interface="fake-go2", enable_motion=True)
+    info = (
+        RobotDiscovery.registry["UnitreeGo2"]
+        .discovery_cls.enumerate(0, [config])
+        .infos[0]
+    )
+    env = Go2DriveEnv({"step_frequency": 100, "max_num_steps": 1}, robot_info=info)
+    try:
+        env.reset()
+        _, reward, terminated, truncated, _ = env.step(
+            np.asarray(COMMANDS[direction], dtype=np.float32)
+        )
+        assert (reward, terminated, truncated) == (0.0, False, True)
+    finally:
+        env.close()
+    assert [e[1:] for e in go2_sdk.events if e[0] == "move"] == [
+        pytest.approx(expected)
+    ]
+    assert go2_sdk.events[-2:] == [("stop",), ("close",)]
+
+
+@pytest.mark.parametrize("direction", [None, "forward"])
+def test_go2_sport_manual_check_records_observations_and_closes(go2_sdk, direction):
+    from examples.embodiment.go2_sport.run import run_check
+
+    with go2_sdk.streaming():
+        report = run_check("fake-go2", direction, 1)
+    assert report["errors"] == []
+    assert report["close_completed"]
+    assert len(report["steps"]) == 10
+    assert all(row["observation_valid"] for row in report["steps"])
+    assert report["operator_confirmed_motion_and_stop"] is None
+    assert report["uses_ppo"] is False
+    if direction:
+        assert report["sdk_stop_estimate"] == "below_thresholds"
+        assert sum(e[0] == "move" for e in go2_sdk.events) == 10
+        assert go2_sdk.events[-1] == ("sport_close",)
+    else:
+        assert not any(e[0] in ("client", "move", "stop") for e in go2_sdk.events)
+
+
+@pytest.mark.parametrize("failure", ["move", "feedback"])
+def test_go2_sport_manual_failures_preserve_report_and_cleanup(go2_sdk, failure):
+    from examples.embodiment.go2_sport.run import run_check
+
+    go2_sdk.move_error = failure == "move"
+    go2_sdk.publish_sport = failure != "feedback"
+    with go2_sdk.streaming():
+        report = run_check("fake-go2", "forward", 1)
+    assert report["errors"]
+    assert report["close_completed"]
+    assert ("stop",) in go2_sdk.events
+    assert ("close",) in go2_sdk.events
+    assert ("sport_close",) in go2_sdk.events
+    if failure == "feedback":
+        assert not any(e[0] == "move" for e in go2_sdk.events)
+
+
+@pytest.mark.parametrize("mode", ["dry-run", "cancel"])
+def test_go2_sport_preview_and_cancel_never_open_sdk(
+    monkeypatch, go2_sdk, tmp_path, mode
+):
+    from examples.embodiment.go2_sport.run import main
+
+    output = tmp_path / "report.json"
+    argv = [
+        "go2-sport",
+        "--interface",
+        "fake-go2",
+        "--direction",
+        "forward",
+        "--output",
+        str(output),
+    ]
+    if mode == "dry-run":
+        argv += ["--dry-run"]
+    else:
+        monkeypatch.setattr("builtins.input", lambda _: "CANCEL")
+    monkeypatch.setattr(sys, "argv", argv)
+    main()
+    assert go2_sdk.events == []
+    assert not output.exists()
+
+
+def test_go2_sport_speed_estimates_require_fresh_stationary_window(monkeypatch):
+    from examples.embodiment.go2_sport.run import SpeedLog
+
+    now = [10.0]
+    monkeypatch.setattr(time, "monotonic", lambda: now[0])
+    speeds = SpeedLog()
+    for index in range(7):
+        now[0] = 10 + index * 0.1
+        speeds.callback(SimpleNamespace(velocity=[0, 0, 0], yaw_speed=0))
+    assert speeds.stopped(10)
+    speeds.callback(SimpleNamespace(velocity=[float("nan"), 0, 0], yaw_speed=0))
+    assert len(speeds.snapshot()) == 7
+    now[0] += 0.21
+    assert not speeds.fresh()
+    assert not speeds.stopped(10)
+    speeds.callback(SimpleNamespace(velocity=[0.3, 0, 0], yaw_speed=0))
+    assert speeds.fresh()
+    assert not speeds.stopped(10)
+
+
+def test_go2_sport_historical_evidence_is_complete():
+    import hashlib
+
+    root = Path(__file__).resolve().parents[2]
+    evidence = root / "artifacts/go2_sport_20261116"
+    manifest = json.loads((evidence / "manifest.json").read_text())
+    for name, record in manifest["files"].items():
+        assert (
+            hashlib.sha256((evidence / name).read_bytes()).hexdigest()
+            == record["sha256"]
+        )
+    acceptance = json.loads(
+        (evidence / "basic_control_acceptance_20261116.json").read_text()
+    )
+    assert {r["direction"] for r in acceptance["records"]} == {
+        "forward",
+        "backward",
+        "left",
+        "right",
+        "turn_left",
+        "turn_right",
+    }
+    assert all(r["operator_confirmed_motion_and_stop"] for r in acceptance["records"])
+    assert all((evidence / r["report"]).is_file() for r in acceptance["records"])
+    assert not acceptance["quantitative_acceptance_complete"]
+    assert not manifest["migration_hardware_retest"]

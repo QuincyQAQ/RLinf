@@ -47,6 +47,8 @@ The branch starts from upstream RLinf `dcf00fd6`. The generic KL scheduler is a 
 
 For observation assembly, motor conversion and SDK2 integration, see [Motion Control](MOTION.md).
 
+[Go2 six-direction hardware control](../go2_sport/README.md) and its historical acceptance records are also included in this branch.
+
 ## Limitations
 
 The table records runs on RLinf `5aa29ec`. At `e8815cac`, two independent C RLinf-Huber continuations produced identical tensors at all 20 saved checkpoints and identical 2048 evaluation records: tracking 100%, stair passage 45.1660%. A/B validation is in progress. The historical 76.5625% policy evaluation was reproduced, but its training score has not been reproduced. Exact agreement is verified for the recorded A40 runtime and recipe, not arbitrary hardware or dependencies.

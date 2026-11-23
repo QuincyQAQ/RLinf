@@ -1,0 +1,248 @@
+{
+  "scope": "RLinf high-level control using original SportClient, not PPO deployment",
+  "quantitative_acceptance_complete": false,
+  "records": [
+    {
+      "direction": "forward",
+      "report": "rlinf_forward_20261116_170103_668926.json",
+      "operator_confirmed_motion_and_stop": true,
+      "source": "User observation in conversation",
+      "quantitative_summary": null
+    },
+    {
+      "direction": "left",
+      "report": "reviewed_left_20261116_172253_067734.json",
+      "operator_confirmed_motion_and_stop": true,
+      "source": "User observation in conversation",
+      "command": [
+        0.0,
+        0.3,
+        0.0
+      ],
+      "errors": [],
+      "sdk_stop": "SDK estimated speed below thresholds; operator confirmation required",
+      "quantitative_summary": {
+        "measurement_source": "SDK position/IMU estimates, not external ground truth",
+        "nominal_seconds": null,
+        "nominal_body_displacement_m": null,
+        "nominal_yaw_rad": null,
+        "nominal_yaw_deg": null,
+        "operator_stop_confirmed": null,
+        "physical_stop_status": "SDK estimated speed below thresholds; operator confirmation required",
+        "warnings": [
+          "IMU yaw absent; integrated yaw-speed is not substituted as ground truth.",
+          "SDK position absent; actual distance unavailable. Do not use commanded speed as measured distance.",
+          "IMU yaw change alone cannot distinguish stepping rotation from planted-foot body twisting; operator observation is required."
+        ],
+        "external_measurement": null,
+        "automatic_pass_fail": "not assigned; no distance/angle acceptance threshold defined",
+        "move_send_count": 10,
+        "stop_return_codes": [
+          0,
+          0
+        ],
+        "command_window_seconds": 1.0017292639240623,
+        "command_window_reference_body_m": [
+          0.0,
+          0.30051877917721864
+        ],
+        "command_window_reference_yaw_deg": 0.0,
+        "measurement_window_seconds": 1.889785586972721,
+        "baseline_age_at_first_move_s": 0.001250170054845512,
+        "endpoint_includes_stopping_tail": true,
+        "max_state_reception_gap_s": 0.005891672917641699
+      }
+    },
+    {
+      "direction": "right",
+      "report": "reviewed_right_20261116_172723_510920.json",
+      "operator_confirmed_motion_and_stop": true,
+      "source": "User observation in conversation",
+      "command": [
+        0.0,
+        -0.3,
+        0.0
+      ],
+      "errors": [],
+      "sdk_stop": "SDK estimated speed below thresholds; operator confirmation required",
+      "quantitative_summary": {
+        "measurement_source": "SDK position/IMU estimates, not external ground truth",
+        "nominal_seconds": null,
+        "nominal_body_displacement_m": null,
+        "nominal_yaw_rad": null,
+        "nominal_yaw_deg": null,
+        "operator_stop_confirmed": null,
+        "physical_stop_status": "SDK estimated speed below thresholds; operator confirmation required",
+        "warnings": [
+          "IMU yaw absent; integrated yaw-speed is not substituted as ground truth.",
+          "SDK position absent; actual distance unavailable. Do not use commanded speed as measured distance.",
+          "IMU yaw change alone cannot distinguish stepping rotation from planted-foot body twisting; operator observation is required."
+        ],
+        "external_measurement": null,
+        "automatic_pass_fail": "not assigned; no distance/angle acceptance threshold defined",
+        "move_send_count": 10,
+        "stop_return_codes": [
+          0,
+          0
+        ],
+        "command_window_seconds": 1.0022278380347416,
+        "command_window_reference_body_m": [
+          0.0,
+          -0.3006683514104225
+        ],
+        "command_window_reference_yaw_deg": 0.0,
+        "measurement_window_seconds": 1.7896190370665863,
+        "baseline_age_at_first_move_s": 0.0014733719872310758,
+        "endpoint_includes_stopping_tail": true,
+        "max_state_reception_gap_s": 0.00694692600518465
+      }
+    },
+    {
+      "direction": "turn_left",
+      "report": "reviewed_turn_left_20261116_174834_838196.json",
+      "operator_confirmed_motion_and_stop": true,
+      "source": "User observation in conversation",
+      "command": [
+        0.0,
+        0.0,
+        0.5
+      ],
+      "errors": [],
+      "sdk_stop": "SDK estimated speed below thresholds; operator confirmation required",
+      "quantitative_summary": {
+        "measurement_source": "SDK position/IMU estimates, not external ground truth",
+        "nominal_seconds": 2,
+        "nominal_body_displacement_m": [
+          0.0,
+          0.0
+        ],
+        "nominal_yaw_rad": 1.0,
+        "nominal_yaw_deg": 57.29577951308232,
+        "operator_stop_confirmed": null,
+        "physical_stop_status": "SDK estimated speed below thresholds; operator confirmation required",
+        "warnings": [
+          "SDK position absent; actual distance unavailable. Do not use commanded speed as measured distance.",
+          "IMU yaw change alone cannot distinguish stepping rotation from planted-foot body twisting; operator observation is required."
+        ],
+        "external_measurement": null,
+        "automatic_pass_fail": "not assigned; no distance/angle acceptance threshold defined",
+        "move_send_count": 20,
+        "stop_return_codes": [
+          0,
+          0
+        ],
+        "command_window_seconds": 2.00440511200577,
+        "command_window_reference_body_m": [
+          0.0,
+          0.0
+        ],
+        "command_window_reference_yaw_deg": 57.42197667618884,
+        "measurement_window_seconds": 2.753232604940422,
+        "baseline_age_at_first_move_s": 0.0015574569115415215,
+        "endpoint_includes_stopping_tail": true,
+        "max_state_reception_gap_s": 0.018494289950467646,
+        "sdk_net_yaw_rad": 0.4708268642425537,
+        "sdk_net_yaw_deg": 26.9763922024773,
+        "yaw_error_vs_nominal_deg": -30.319387310605023
+      }
+    },
+    {
+      "direction": "turn_right",
+      "report": "reviewed_turn_right_20261116_175033_553901.json",
+      "operator_confirmed_motion_and_stop": true,
+      "source": "User observation in conversation",
+      "command": [
+        0.0,
+        0.0,
+        -0.5
+      ],
+      "errors": [],
+      "sdk_stop": "SDK estimated speed below thresholds; operator confirmation required",
+      "quantitative_summary": {
+        "measurement_source": "SDK position/IMU estimates, not external ground truth",
+        "nominal_seconds": 2,
+        "nominal_body_displacement_m": [
+          0.0,
+          0.0
+        ],
+        "nominal_yaw_rad": -1.0,
+        "nominal_yaw_deg": -57.29577951308232,
+        "operator_stop_confirmed": null,
+        "physical_stop_status": "SDK estimated speed below thresholds; operator confirmation required",
+        "warnings": [
+          "SDK position absent; actual distance unavailable. Do not use commanded speed as measured distance.",
+          "IMU yaw change alone cannot distinguish stepping rotation from planted-foot body twisting; operator observation is required."
+        ],
+        "external_measurement": null,
+        "automatic_pass_fail": "not assigned; no distance/angle acceptance threshold defined",
+        "move_send_count": 20,
+        "stop_return_codes": [
+          0,
+          0
+        ],
+        "command_window_seconds": 2.004515665001236,
+        "command_window_reference_body_m": [
+          0.0,
+          0.0
+        ],
+        "command_window_reference_yaw_deg": -57.4251437862152,
+        "measurement_window_seconds": 2.8163598029641435,
+        "baseline_age_at_first_move_s": 0.0033416789956390858,
+        "endpoint_includes_stopping_tail": true,
+        "max_state_reception_gap_s": 0.015121324104256928,
+        "sdk_net_yaw_rad": -0.4504876136779785,
+        "sdk_net_yaw_deg": -25.811038986668066,
+        "yaw_error_vs_nominal_deg": 31.484740526414257
+      }
+    },
+    {
+      "direction": "backward",
+      "report": "reviewed_backward_20261116_175129_194941.json",
+      "operator_confirmed_motion_and_stop": true,
+      "source": "User observation in conversation",
+      "command": [
+        -0.3,
+        0.0,
+        0.0
+      ],
+      "errors": [],
+      "sdk_stop": "SDK estimated speed below thresholds; operator confirmation required",
+      "quantitative_summary": {
+        "measurement_source": "SDK position/IMU estimates, not external ground truth",
+        "nominal_seconds": 2,
+        "nominal_body_displacement_m": [
+          -0.6,
+          0.0
+        ],
+        "nominal_yaw_rad": 0.0,
+        "nominal_yaw_deg": 0.0,
+        "operator_stop_confirmed": null,
+        "physical_stop_status": "SDK estimated speed below thresholds; operator confirmation required",
+        "warnings": [
+          "SDK position absent; actual distance unavailable. Do not use commanded speed as measured distance.",
+          "IMU yaw change alone cannot distinguish stepping rotation from planted-foot body twisting; operator observation is required."
+        ],
+        "external_measurement": null,
+        "automatic_pass_fail": "not assigned; no distance/angle acceptance threshold defined",
+        "move_send_count": 20,
+        "stop_return_codes": [
+          0,
+          0
+        ],
+        "command_window_seconds": 2.0046457030111924,
+        "command_window_reference_body_m": [
+          -0.6013937109033577,
+          0.0
+        ],
+        "command_window_reference_yaw_deg": 0.0,
+        "measurement_window_seconds": 2.7927596570225433,
+        "baseline_age_at_first_move_s": 0.0023434150498360395,
+        "endpoint_includes_stopping_tail": true,
+        "max_state_reception_gap_s": 0.013140578987076879,
+        "sdk_net_yaw_rad": 0.12337970733642578,
+        "sdk_net_yaw_deg": 7.069136507936477,
+        "yaw_error_vs_nominal_deg": 7.069136507936477
+      }
+    }
+  ]
+}

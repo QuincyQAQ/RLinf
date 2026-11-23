@@ -1,0 +1,67 @@
+"""Manually compare RLinf Go2DriveEnv with the validated official Move command."""
+import argparse
+import json
+import time
+from pathlib import Path
+from datetime import datetime
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--interface', default='enp2s0')
+    args = parser.parse_args()
+    raise RuntimeError('Motion test suspended after reported unintended continuous movement. Do not run until stop-path diagnosis and review are complete.')
+    print('RLinf Go2DriveEnv: forward 0.3 m/s for approximately 1 second; then StopMove.')
+    if input('Robot standing, clear space, remote in hand: type GO to run: ').strip() != 'GO':
+        print('Cancelled; no robot connection or motion command created.')
+        return
+    import numpy as np
+    import gymnasium as gym
+    import rlinf.envs.real.go2
+    from rlinf.robotics import Go2Config
+    from rlinf.robotics.discovery.registry import RobotDiscovery
+
+    report = {'interface': args.interface, 'velocity_command': [0.3, 0., 0.],
+              'planned_seconds': 1., 'uses_ppo': False, 'posture_transition': False,
+              'steps': [], 'errors': [], 'close_completed': False,
+              'physical_result': 'Await operator observation; API success is not physical confirmation.'}
+    output = Path(__file__).parent / ('rlinf_forward_' + datetime.now().strftime('%Y%m%d_%H%M%S_%f') + '.json')
+    env = None
+    try:
+        cfg = Go2Config(node_rank=0, interface=args.interface, enable_motion=True,
+                        state_timeout=.5, command_timeout=.5, rpc_timeout=2.)
+        resource = RobotDiscovery.registry['UnitreeGo2'].discovery_cls.enumerate(0, [cfg])
+        env = gym.make('Go2DriveEnv-v1', override_cfg={'is_dummy': False, 'step_frequency': 10., 'max_num_steps': 10},
+                       worker_info=None, robot_info=resource.infos[0], env_idx=0, env_cfg={})
+        env.reset()
+        started = time.monotonic()
+        for i in range(10):
+            _, _, terminated, truncated, _ = env.step(np.array([.3, 0., 0.], dtype=np.float32))
+            row = {'step': i+1, 'elapsed_s': time.monotonic()-started,
+                   'terminated': bool(terminated), 'truncated': bool(truncated)}
+            report['steps'].append(row)
+            print(json.dumps(row), flush=True)
+            if terminated or truncated:
+                break
+        report['stop_at_episode_end_completed'] = bool(truncated)
+    except BaseException as exc:
+        report['errors'].append(f'{type(exc).__name__}: {exc}')
+        raise
+    finally:
+        if env is not None:
+            try:
+                env.close()
+                report['close_completed'] = True
+            except BaseException as exc:
+                report['errors'].append(f'close: {type(exc).__name__}: {exc}')
+                raise
+            finally:
+                output.write_text(json.dumps(report, indent=2)+'\n')
+        else:
+            output.write_text(json.dumps(report, indent=2)+'\n')
+        print('Report:', output)
+    print('Motion loop ended; stop requests completed. Confirm physical stop with operator.')
+
+
+if __name__ == '__main__':
+    main()

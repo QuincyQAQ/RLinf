@@ -4,6 +4,8 @@
 
 Use the nine ABC policies through a shared observation and motor interface. Velocity commands enter the 235-value observation; the policy outputs twelve joint-position offsets. The recorded DC-motor model converts them to SDK2 motor torques.
 
+[Operator-confirmed six-direction control](../go2_sport/README.md) uses the original SportClient and has a separate entry point and acceptance archive.
+
 ## Control Contract
 
 The adapter preserves the simulator's joint order, default posture, action scale `0.25`, gains `25/0.5`, and torque-speed limits `23.5 Nm / 30 rad/s`. Policy inference runs every four 5-ms motor steps. SDK messages disable position PD to avoid applying the gains twice.

@@ -1,0 +1,100 @@
+Go2 高层运动控制
+================
+
+读取 Go2 EDU 状态，并通过宇树原厂控制器检查六个运动方向。2026-11-16 的归档实验已获操作者现场确认运动和停稳；迁移版本已做离线回归检查，尚待重新验证真机。
+
+概览
+----
+
+.. grid:: 2 4 4 4
+
+   .. grid-item-card:: 模型
+
+      手动速度指令。
+
+   .. grid-item-card:: 算法
+
+      无训练流程。
+
+   .. grid-item-card:: 任务
+
+      状态接收与六方向检查。
+
+   .. grid-item-card:: 硬件
+
+      Go2 EDU 与 Linux 控制电脑。
+
+任务
+~~~~
+
+.. list-table::
+   :header-rows: 1
+
+   * - 检查项
+     - 结果
+   * - 只读
+     - 接收状态，不发送运动指令。
+   * - 单方向
+     - 前进、后退、左移、右移、左转或右转，随后请求停止。
+
+观测与动作
+~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+
+   * - 字段
+     - 约定
+   * - 观测
+     - 姿态、角速度、12 关节位置与速度、电池电压、四个原始足力值。
+   * - 动作
+     - 机身速度，单位依次为 m/s、m/s、rad/s，绝对值上限依次为 0.3、0.3、0.5。
+   * - 奖励
+     - 固定为零，此检查不训练 policy。
+
+安装
+----
+
+按 :doc:`安装说明 </rst_source/start/installation>` 准备 Python 3.11 的 RLinf 环境。在仓库根目录安装真机检查使用的固定版 SDK：
+
+.. code-block:: bash
+
+   uv pip install -r requirements/embodied/envs/go2_sport.txt
+
+CycloneDDS 依赖和机器人网络配置见固定版本的 `SDK 安装说明 <https://github.com/unitreerobotics/unitree_sdk2_python/tree/814556d15970dd2ecf1c9984e845ca02ab07e206>`_。控制电脑无需 GPU 或 policy 权重。
+
+运行
+----
+
+将 ``<interface>`` 替换为连接 Go2 的网卡名称。先预览指令，此步骤不建立 SDK 通道：
+
+.. code-block:: bash
+
+   python -m examples.embodiment.go2_sport.run --interface <interface> --direction forward --dry-run
+
+预览结果包含 ``hardware_access: false``。随后单独检查状态接收：
+
+.. code-block:: bash
+
+   python -m examples.embodiment.go2_sport.run --interface <interface> --readonly
+
+十次状态检查结果写入 ``outputs/go2_sport/``。运动测试须保持原厂控制器启用，现场确认机器人已站立、场地空旷、遥控器可用，并关闭其他运动程序，再运行单个方向：
+
+.. code-block:: bash
+
+   python -m examples.embodiment.go2_sport.run --interface <interface> --direction forward
+
+完成现场检查后输入 ``GO``。方向可选 ``forward``、``backward``、``left``、``right``、``turn_left``、``turn_right``。每次只测一个方向，默认以 10 Hz 运行 1 秒；``--seconds 2`` 改为 2 秒。``--output <path>`` 可指定日志位置，已有文件不会被覆盖。
+
+.. warning::
+
+   停止请求和 SDK 低速估计均不能证明物理停稳。请直接观察机器人，运动未停止就使用遥控器。网络断开或进程故障可能导致软件无法请求停止。
+
+可视化与结果
+------------
+
+日志分别记录接口错误、SDK 停止估计和操作者确认；程序不会自动判定真机测试通过。距离、转角和停止距离的量化验收尚未完成。
+
+历史六方向汇总见 ``artifacts/go2_sport_20261116/basic_control_acceptance_20261116.json``。同目录保留原始报告和 SHA-256 清单。代码位置和迁移范围见 ``examples/embodiment/go2_sport/README.zh-CN.md``。
+
+ABC policy 使用独立的 12 关节控制链路，说明见 ``examples/embodiment/go2_abc/MOTION.zh-CN.md``。六方向归档不代表该链路已获真机验证。
