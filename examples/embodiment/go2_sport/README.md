@@ -33,7 +33,7 @@ The preview does not connect hardware. Direction names are `forward`, `backward`
 
 This example sends three body velocity values without loading policy weights. [go2_abc](../go2_abc/MOTION.md) loads an ABC policy, produces twelve joint actions, and converts them to motor torque. Its hardware validation is tracked separately.
 
-While connected, the watchdog retries an unconfirmed stop after 200 ms. Even after the SDK acknowledges a retry, motion requires a new connection. Confirm the robot has stopped on site.
+Start the adapter before other SDK2 clients in the same process so it can verify the DDS interface. Use an unquoted boolean for `enable_motion` in YAML. If a `Move` call returns after its host deadline, the driver reports a fault and requests a stop. While connected, the watchdog retries an unconfirmed stop after 200 ms. After a command or state timeout, the fault stays latched through a zero-velocity command or an environment reset. Confirm on site that the robot has stopped, then reconnect before sending another motion command.
 
 ## Limitations
 

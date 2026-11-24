@@ -83,7 +83,7 @@ def test_go2_audit_checks_models_without_result_records(tmp_path, monkeypatch):
     files = []
     checkpoint = tmp_path / "policy.pt"
     torch.save({"model_state_dict": Go2Policy().state_dict()}, checkpoint)
-    checksum = audit.digest(checkpoint)
+    checksum = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
     for task in "ABC":
         for group in ("baseline", "ppo", "rlinf"):
             relative = f"models/{task}/{group}.pt"
@@ -96,9 +96,30 @@ def test_go2_audit_checks_models_without_result_records(tmp_path, monkeypatch):
     monkeypatch.setattr(audit, "HERE", tmp_path)
 
     assert audit.audit(data) == {"models": 9, "device": "cpu", "status": "passed"}
+    # A new optimized process uses the shipped manifest, whose hashes differ.
+    import subprocess
+
+    report = tmp_path / "audit.json"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-O",
+            "-m",
+            "examples.embodiment.go2_abc.audit",
+            "--data",
+            str(data),
+            "--report",
+            str(report),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0 and "SHA256 mismatch" in result.stderr
+    assert not report.exists()
     files[0]["sha256"] = "incorrect"
     manifest.write_text(json.dumps({"files": files}))
-    with pytest.raises(AssertionError, match="models/A/baseline.pt"):
+    with pytest.raises(ValueError, match="models/A/baseline.pt"):
         audit.audit(data)
 
     checkpoint.unlink()
@@ -108,7 +129,7 @@ def test_go2_audit_checks_models_without_result_records(tmp_path, monkeypatch):
     first = data / files[0]["path"]
     first.unlink()
     first.hardlink_to(checkpoint)
-    files[0]["sha256"] = audit.digest(checkpoint)
+    files[0]["sha256"] = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
     manifest.write_text(json.dumps({"files": files}))
     with pytest.raises(RuntimeError, match="Missing key"):
         audit.audit(data)
@@ -118,6 +139,8 @@ def test_go2_audit_checks_models_without_result_records(tmp_path, monkeypatch):
 def test_go2_prepare_task_stages_only_its_baseline(tmp_path, monkeypatch, task):
     from examples.embodiment.go2_abc import prepare_data
 
+    # Weight preparation also runs on Python 3.10 hosts outside the container.
+    monkeypatch.delattr(hashlib, "file_digest", raising=False)
     manifest_dir = tmp_path / "manifest"
     manifest_dir.mkdir()
     source = tmp_path / "source"
@@ -174,6 +197,74 @@ def test_go2_prepare_task_stages_only_its_baseline(tmp_path, monkeypatch, task):
     with pytest.raises(ValueError, match="SHA256 mismatch"):
         prepare_data.main()
     assert not (destination / f"models/{expected_tasks[0]}/baseline.pt").exists()
+
+
+@pytest.mark.parametrize(
+    "interruption", ["disk_full", "identical_winner", "different_winner"]
+)
+def test_go2_prepare_publishes_verified_input_without_clobber(
+    tmp_path, monkeypatch, interruption
+):
+    import errno
+
+    from examples.embodiment.go2_abc import prepare_data
+
+    content = b"complete checkpoint"
+    source = tmp_path / "source.pt"
+    source.write_bytes(content)
+    destination = tmp_path / "data"
+    relative = "models/A/baseline.pt"
+    target = destination / relative
+    manifest = {
+        "files": [
+            {
+                "path": relative,
+                "source": source.name,
+                "sha256": hashlib.sha256(content).hexdigest(),
+            }
+        ]
+    }
+    (tmp_path / "manifest.json").write_text(json.dumps(manifest))
+    monkeypatch.setattr(prepare_data, "HERE", tmp_path)
+    original_copy = shutil.copyfile
+
+    def cross_device(*args):
+        raise OSError(errno.EXDEV, "Simulated cross-device rename")
+
+    def copy_with_interruption(src, dst, **kwargs):
+        dst = Path(dst)
+        if interruption == "disk_full" and dst.is_relative_to(destination):
+            dst.write_bytes(b"partial")
+            raise OSError(errno.ENOSPC, "Simulated full disk")
+        result = original_copy(src, dst, **kwargs)
+        if interruption != "disk_full":
+            target.write_bytes(
+                content if interruption == "identical_winner" else b"keep me"
+            )
+            (tmp_path / "winning-inode").hardlink_to(target)
+        return result
+
+    with monkeypatch.context() as patch:
+        patch.setattr(os, "rename", cross_device)
+        patch.setattr(shutil, "copyfile", copy_with_interruption)
+        if interruption == "disk_full":
+            with pytest.raises(OSError, match="full disk"):
+                prepare_data.prepare(destination, tmp_path, task="A")
+        elif interruption == "different_winner":
+            with pytest.raises(ValueError, match="SHA256 mismatch"):
+                prepare_data.prepare(destination, tmp_path, task="A")
+        else:
+            prepare_data.prepare(destination, tmp_path, task="A")
+
+    if interruption == "disk_full":
+        assert list(target.parent.iterdir()) == []
+        prepare_data.prepare(destination, tmp_path, task="A")
+        assert target.read_bytes() == content
+    else:
+        assert target.samefile(tmp_path / "winning-inode")
+        assert target.read_bytes() == (
+            content if interruption == "identical_winner" else b"keep me"
+        )
 
 
 @pytest.mark.parametrize("task", ["A", "B", "C"])
@@ -238,6 +329,134 @@ def test_go2_run_checks_only_selected_baseline(tmp_path, monkeypatch, task, grou
     baseline.write_bytes(b"corrupt")
     with pytest.raises(ValueError, match="SHA256 mismatch"):
         run.launch(f"{task}_{group}", execute=True)
+
+
+@pytest.mark.parametrize("group", ["baseline", "ppo", "rlinf"])
+def test_go2_train_seed_keeps_evaluation_seeds_fixed(tmp_path, monkeypatch, group):
+    from unittest.mock import Mock
+
+    from examples.embodiment.go2_abc import run
+
+    monkeypatch.setenv("GO2_ABC_DATA", str(tmp_path))
+    monkeypatch.setenv("GO2_ABC_RUNTIME", str(tmp_path / "runtime"))
+    logger = Mock()
+    monkeypatch.setattr(run, "get_logger", lambda: logger)
+    experiment = f"C_{group}"
+    for seed in (0, 2):
+        monkeypatch.setattr(
+            sys, "argv", ["run", "--experiment", experiment, "--train-seed", str(seed)]
+        )
+        run.main()
+        plan = json.loads(logger.info.call_args.args[0])["commands"]
+        assert [stage["stage"] for stage in plan[-2:]] == [
+            "evaluation/23456",
+            "evaluation/34567",
+        ]
+        name = f"{experiment}_s{seed}" if seed else experiment
+        for stage in plan[-2:]:
+            argv = stage["argv"]
+            assert argv[argv.index("--output_dir") + 1] == str(
+                tmp_path / "runs" / name / stage["stage"]
+            )
+        if group == "ppo":
+            argv = plan[0]["argv"]
+            assert argv[argv.index("--seed") + 1] == str(seed)
+            assert argv[argv.index("--experiment_name") + 1] == name
+            assert argv[argv.index("--run_name") + 1] == f"{experiment}_s{seed}"
+        if group == "rlinf" and seed:
+            assert f"actor.seed={seed}" in plan[0]["argv"]
+            assert f"env.train.seed={seed}" in plan[0]["argv"]
+            assert f"runner.logger.experiment_name={name}" in plan[0]["argv"]
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        "success",
+        "empty_exit",
+        "short",
+        "wrong_task",
+        "wrong_summary",
+        "wrong_episode",
+        "missing_passage",
+    ],
+)
+def test_go2_launch_requires_both_evaluation_reports(tmp_path, monkeypatch, case):
+    import rlinf
+    from examples.embodiment.go2_abc import run
+
+    project = tmp_path / "project"
+    here = project / "examples/embodiment/go2_abc"
+    (here / "config").mkdir(parents=True)
+    config_path = Path("config/C_baseline.json")
+    shutil.copyfile(run.HERE / config_path, here / config_path)
+    data = tmp_path / "data"
+    model_path = Path("models/C/baseline.pt")
+    (data / model_path).parent.mkdir(parents=True)
+    (data / model_path).write_bytes(b"weights")
+    (here / "manifest.json").write_text(
+        json.dumps(
+            {
+                "files": [
+                    {
+                        "path": str(model_path),
+                        "sha256": hashlib.sha256(b"weights").hexdigest(),
+                    }
+                ],
+                "benchmark_commit": "revision",
+                "isaaclab_commit": "revision",
+            }
+        )
+    )
+    monkeypatch.setattr(run, "HERE", here)
+    monkeypatch.setattr(rlinf, "__file__", str(project / "rlinf/__init__.py"))
+    monkeypatch.setenv("SLURM_JOB_ID", "test-job")
+    monkeypatch.setenv("GO2_ABC_RUNTIME", str(tmp_path / "runtime"))
+    monkeypatch.setenv("GO2_ABC_DATA", str(data))
+    monkeypatch.setattr(run.subprocess, "check_output", lambda *a, **k: "revision")
+
+    def evaluate(argv, *, env, **kwargs):
+        directory = Path(argv[argv.index("--output_dir") + 1])
+        assert env["GO2_EVAL_SEED"] == directory.name
+        fault = case if directory.name == "34567" else "success"
+        if fault == "empty_exit":
+            return
+        count = 1023 if fault == "short" else 1025
+        task = argv[argv.index("--task") + 1]
+        summary = {
+            "train_task": "B2_stairs_s0",
+            "eval_task": "wrong" if fault == "wrong_task" else task,
+            "num_episodes": count,
+            "success_rate": 1.0,
+            "physical_measured_episodes": count,
+            "physical_passage_successes": count,
+            "physical_obstacle_passage_rate": 1.0,
+            "required_obstacle_metrics_complete": fault != "missing_passage",
+        }
+        episode = {
+            "task_id": 2 if fault == "wrong_episode" else 3,
+            "family_id": 1,
+            "episode_success": True,
+            "physical_obstacle_passage": True,
+        }
+        folder = directory / "B2_stairs_s0"
+        folder.mkdir()
+        (folder / "B2_stairs.json").write_text(
+            json.dumps({"summary": summary, "episodes": [episode] * count})
+        )
+        (folder / "summary.json").write_text(
+            json.dumps({"B2_stairs": {} if fault == "wrong_summary" else summary})
+        )
+
+    monkeypatch.setattr(run.subprocess, "run", evaluate)
+    result = data / "runs/C_baseline_s2/commands.json"
+    if case == "success":
+        run.launch("C_baseline", execute=True, train_seed=2)
+        assert result.is_file()
+    else:
+        with pytest.raises((FileNotFoundError, ValueError)):
+            run.launch("C_baseline", execute=True, train_seed=2)
+        assert not result.exists()
 
 
 def test_embodied_entry_registers_external_models_before_validation(tmp_path):
@@ -317,6 +536,69 @@ def test_hf_rollout_training_seed_controls_checkpoint_sampling(tmp_path):
         assert not torch.equal(actions[0], actions[2])
     finally:
         set_rng_state(previous_rng)
+
+
+@pytest.mark.parametrize("status", [0, 7, 143])
+def test_go2_container_data_bind_and_scratch_cleanup(tmp_path, monkeypatch, status):
+    import subprocess
+
+    from examples.embodiment.go2_abc import prepare_data
+
+    project = tmp_path / "project"
+    script = project / "examples/embodiment/go2_abc/container.sh"
+    script.parent.mkdir(parents=True)
+    shutil.copyfile(prepare_data.HERE / "container.sh", script)
+    scratch = tmp_path / "scratch"
+    scratch.mkdir()
+    marker = scratch / "unrelated"
+    marker.touch()
+    data = tmp_path / "external data" if status else project / "data/go2_abc"
+    data.mkdir(parents=True)
+    (data / "weights").touch()
+
+    engine = tmp_path / "engine"
+    engine.write_text(
+        "#!/usr/bin/env bash\n"
+        "printf '%s\\0' \"$@\" > argv\n"
+        "if [[ $TEST_STATUS == 143 ]]; then\n"
+        "  trap 'wait; exit 0' TERM\n"
+        "  sleep 60 &\n"
+        '  echo "$$ $!" > pids\n'
+        "  wait\n"
+        "fi\n"
+        'exit "$TEST_STATUS"\n'
+    )
+    engine.chmod(0o755)
+    monkeypatch.delenv("SLURM_JOB_ID", raising=False)
+    monkeypatch.delenv("GO2_ABC_DATA", raising=False)
+    if status:
+        monkeypatch.setenv("GO2_ABC_DATA", str(data))
+    monkeypatch.setenv("GO2_ABC_RUNTIME", str(tmp_path))
+    monkeypatch.setenv("GO2_ABC_CONTAINER", str(engine))
+    monkeypatch.setenv("SLURM_TMPDIR", str(scratch))
+    monkeypatch.setenv("TEST_STATUS", str(status))
+    with subprocess.Popen(["bash", str(script)], cwd=tmp_path) as process:
+        if status == 143:
+            deadline = time.monotonic() + 5
+            while not (tmp_path / "pids").exists():
+                assert process.poll() is None and time.monotonic() < deadline
+                time.sleep(0.01)
+            process.terminate()  # Signal the launcher only, as Slurm can.
+        assert process.wait(timeout=12) == status
+
+    argv = (tmp_path / "argv").read_bytes().decode().split("\0")
+    assert "GO2_ABC_DATA=/workspace/project/data/go2_abc" in argv
+    if status:
+        assert f"{data}:/workspace/project/data/go2_abc" in argv
+    else:
+        assert f"{project}:/workspace/project" in argv
+    if status == 143:
+        for pid in (tmp_path / "pids").read_text().split():
+            with pytest.raises(ProcessLookupError):
+                os.kill(int(pid), 0)
+    assert list(scratch.iterdir()) == [marker]
+    assert (data / "weights").is_file()
+    assert list((data / "container").glob("*/logs"))
 
 
 def test_go2_checkpoint_rejects_pickled_module(tmp_path):

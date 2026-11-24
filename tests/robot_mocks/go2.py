@@ -19,6 +19,31 @@ import sys
 from types import ModuleType, SimpleNamespace
 
 
+def factory_members(on_initialize):
+    """Model SDK2's first-writer-wins initialization and stored topic QoS."""
+
+    class ChannelFactory:
+        __initialized = False
+        __qos = None
+
+        def Init(self, domain, interface, qos=None):
+            cls = type(self)
+            if not cls.__initialized:
+                on_initialize(domain, interface)
+                cls.__qos = qos
+                cls.__initialized = True
+            return True
+
+    def initialize(domain, interface):
+        ChannelFactory().Init(domain, interface)
+
+    return {
+        "ChannelFactory": ChannelFactory,
+        "ChannelFactoryInitialize": initialize,
+        "Qos": object,
+    }
+
+
 class FakeGo2SDK:
     """Record DDS operations and expose a scripted mode and write result."""
 
@@ -27,6 +52,7 @@ class FakeGo2SDK:
         self.mode = ""
         self.write_ok = True
         self.callback = None
+        self.publish_initial = True
 
     @staticmethod
     def command():
@@ -75,11 +101,16 @@ class FakeGo2SDK:
 
             def Init(self, callback, queue_length):
                 sdk.callback = callback
+                if sdk.publish_initial:
+                    callback(sdk.state(tick=0))
 
             def Close(self):
                 sdk.events.append(("reader_close",))
 
         class Switcher:
+            def __init__(self):
+                sdk.events.append(("switcher",))
+
             def SetTimeout(self, timeout):
                 pass
 
@@ -96,8 +127,10 @@ class FakeGo2SDK:
 
         modules = {
             "unitree_sdk2py.core.channel": {
-                "ChannelFactoryInitialize": lambda domain, interface: sdk.events.append(
-                    ("initialize", interface)
+                **factory_members(
+                    lambda domain, interface: sdk.events.append(
+                        ("initialize", interface)
+                    )
                 ),
                 "ChannelPublisher": Publisher,
                 "ChannelSubscriber": Subscriber,

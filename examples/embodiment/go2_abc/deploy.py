@@ -17,6 +17,7 @@
 import argparse
 import json
 import math
+import tempfile
 import time
 from collections.abc import Callable
 from pathlib import Path
@@ -26,7 +27,7 @@ import numpy as np
 from rlinf.utils.logging import get_logger
 
 from .control import Go2Control, JointState, Perception, vector
-from .prepare_data import DEFAULT_DATA
+from .prepare_data import data_directory
 from .sdk2 import Go2SDK2, StandingWindow
 
 
@@ -43,12 +44,14 @@ def run_control_loop(
     Perception must supply synchronized body velocity and the measured terrain
     grid. Motion requires a supervisor that can take over and maintain standing.
     """
-    started = deadline = time.monotonic()
     first = True
     settling = None
-    try:
+    with transport.control_loop():
         if not math.isfinite(duration) or duration <= 0:
             raise ValueError("Expected a finite positive control duration")
+        if not transport.enable_motion:
+            transport.wait_for_state()
+        started = deadline = time.monotonic()
         while True:
             now = time.monotonic()
             stopping = now - started >= duration
@@ -99,8 +102,6 @@ def run_control_loop(
             time.sleep(max(0.0, remaining))
         if transport.enable_motion:
             transport.finish_standing()
-    finally:
-        transport.close()
 
 
 def main() -> None:
@@ -108,7 +109,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--task", required=True, choices=list("ABC"))
     parser.add_argument("--group", required=True, choices=["baseline", "ppo", "rlinf"])
-    parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
+    parser.add_argument("--data", type=Path, default=data_directory())
     parser.add_argument("--frames", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -118,28 +119,33 @@ def main() -> None:
         args.data / f"models/{args.task}/{args.group}.pt", args.task
     )
     count = 0
-    with args.frames.open() as frames, args.output.open("x") as output:
-        for line in frames:
-            frame = json.loads(line)
-            result = controller.step(
-                JointState(**frame["state"]),
-                Perception(**frame["perception"]),
-                frame["command"],
-                frame["time"],
-            )
-            output.write(
-                json.dumps(
-                    {
-                        "time": frame["time"],
-                        "target_q_sdk": result["target_q_sdk"].tolist(),
-                        "torque_sdk": result["torque_sdk"].tolist(),
-                    }
+    if args.output.exists():
+        raise FileExistsError(f"Replay output already exists: {args.output}")
+    with tempfile.TemporaryDirectory(dir=args.output.parent) as temporary:
+        staged = Path(temporary) / args.output.name
+        with args.frames.open() as frames, staged.open("x") as output:
+            for line in frames:
+                frame = json.loads(line)
+                result = controller.step(
+                    JointState(**frame["state"]),
+                    Perception(**frame["perception"]),
+                    frame["command"],
+                    frame["time"],
                 )
-                + "\n"
-            )
-            count += 1
-    if not count:
-        raise ValueError("Expected at least one sensor frame")
+                output.write(
+                    json.dumps(
+                        {
+                            "time": frame["time"],
+                            "target_q_sdk": result["target_q_sdk"].tolist(),
+                            "torque_sdk": result["torque_sdk"].tolist(),
+                        }
+                    )
+                    + "\n"
+                )
+                count += 1
+        if not count:
+            raise ValueError("Expected at least one sensor frame")
+        args.output.hardlink_to(staged)
     get_logger().info("Replayed %s frames on CPU; SDK2 channels opened: 0", count)
 
 

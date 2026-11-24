@@ -29,10 +29,24 @@ HERE = Path(__file__).resolve().parent
 DEFAULT_DATA = HERE.parents[2] / "data/go2_abc"
 
 
+def data_directory() -> Path:
+    """Return the data directory used by the ABC command-line tools."""
+    return Path(os.environ.get("GO2_ABC_DATA", DEFAULT_DATA))
+
+
 def digest(path: Path) -> str:
     """Return a file's SHA256 without loading it into memory."""
+    checksum = hashlib.sha256()
     with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
+        while chunk := stream.read(1024 * 1024):
+            checksum.update(chunk)
+    return checksum.hexdigest()
+
+
+def verify_digest(path: Path, expected: str) -> None:
+    """Raise if the file content differs from its manifest entry."""
+    if digest(path) != expected:
+        raise ValueError(f"SHA256 mismatch: {path}")
 
 
 def baseline_input(manifest: dict, task: str) -> dict:
@@ -60,31 +74,36 @@ def prepare(
             if not target.resolve().is_relative_to(destination.resolve()):
                 raise ValueError(f"Input escapes data directory: {item['path']}")
             if target.exists():
-                if digest(target) != item["sha256"]:
-                    raise ValueError(f"SHA256 mismatch: {target}")
+                verify_digest(target, item["sha256"])
                 continue
             target.parent.mkdir(parents=True, exist_ok=True)
-            staged = Path(temporary) / "input"
-            if source is not None:
-                shutil.copyfile(source / item["source"], staged)
-            elif "url" in item:
-                urllib.request.urlretrieve(item["url"], staged)
-            else:
-                if not archive.exists():
-                    urllib.request.urlretrieve(manifest["archive"]["url"], archive)
-                    if digest(archive) != manifest["archive"]["sha256"]:
-                        raise ValueError("Weight archive SHA256 mismatch")
-                with tarfile.open(archive) as bundle:
-                    member = bundle.getmember(item["archive_member"])
-                    if not member.isfile():
-                        raise ValueError(
-                            f"Expected a regular weight file: {member.name}"
-                        )
-                    with bundle.extractfile(member) as stream, staged.open("wb") as out:
-                        shutil.copyfileobj(stream, out)
-            if digest(staged) != item["sha256"]:
-                raise ValueError(f"SHA256 mismatch: {item['path']}")
-            shutil.move(staged, target)
+            with tempfile.TemporaryDirectory(dir=target.parent) as staging:
+                staged = Path(staging) / target.name
+                if source is not None:
+                    shutil.copyfile(source / item["source"], staged)
+                elif "url" in item:
+                    urllib.request.urlretrieve(item["url"], staged)
+                else:
+                    if not archive.exists():
+                        urllib.request.urlretrieve(manifest["archive"]["url"], archive)
+                        verify_digest(archive, manifest["archive"]["sha256"])
+                    with tarfile.open(archive) as bundle:
+                        member = bundle.getmember(item["archive_member"])
+                        if not member.isfile():
+                            raise ValueError(
+                                f"Expected a regular weight file: {member.name}"
+                            )
+                        with (
+                            bundle.extractfile(member) as stream,
+                            staged.open("wb") as out,
+                        ):
+                            shutil.copyfileobj(stream, out)
+                verify_digest(staged, item["sha256"])
+                try:
+                    target.hardlink_to(staged)
+                except FileExistsError:
+                    # Another preparation may have published this input while we copied it.
+                    verify_digest(target, item["sha256"])
     logging.getLogger(__name__).info(
         "Verified %s inputs in %s", len(items), destination
     )
@@ -93,9 +112,7 @@ def prepare(
 def main() -> None:
     """Download inputs or copy them from the frozen experiment workspace."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--data", type=Path, default=Path(os.environ.get("GO2_ABC_DATA", DEFAULT_DATA))
-    )
+    parser.add_argument("--data", type=Path, default=data_directory())
     parser.add_argument("--source", type=Path)
     parser.add_argument("--task", choices=("A", "B", "C"))
     args = parser.parse_args()

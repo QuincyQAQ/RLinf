@@ -19,6 +19,8 @@ export GO2_ABC_CONTAINER=singularity
 
 运行环境包含 Isaac Lab 2.3.2、Isaac Sim 5.1、RSL-RL 3.1.2、benchmark、脚本、依赖包和资产。仿真任务与普通 PPO 使用固定版本的[多任务 benchmark](https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env)。运行环境中的 `benchmark` 和 `IsaacLab` 目录须保留 Git checkout，HEAD 与[清单](manifest.json)一致。其他集群须将这些变量设为各自兼容的运行环境、共享资产、镜像和容器程序路径。公开仓库本身不能独立重建这套运行环境。
 
+权重和运行结果默认保存在 `data/go2_abc/` 下。若要使用其他磁盘，请在准备权重和提交作业前，将 `GO2_ABC_DATA` 导出为计算节点能访问的绝对路径。
+
 按清单准备 A 任务的基线权重。
 
 ```bash
@@ -39,9 +41,11 @@ sbatch --gres gpu:a40:1 --cpus-per-task 4 --mem 64G --time 06:00:00 examples/emb
 
 历史 A、B 续训在正式运行前还分别做了 64 和 2048 环境、各两轮的预检。此入口直接运行完整配置，不包含这些预检。
 
-每组实验都要求 `data/go2_abc/runs/<experiment>/` 输出目录尚不存在。普通 PPO 还需要确保运行环境中的 `benchmark/logs/rsl_rl/<experiment>` 路径尚不存在。启动器会拒绝覆盖已有结果。
+在实验名后加上 `--train-seed 2` 即可复现 seed 2 的实验。RLinf 同时设置环境和 actor 种子，普通 PPO 使用相同的训练种子。基线组沿用原有权重，两次评测分别使用固定种子 23456 和 34567。
 
-运行目录包含各阶段的 `console.log` 和评测结果；续训组还会导出 `policy.pt`。普通 PPO 原始训练日志和 checkpoint 保存在 `$GO2_ABC_RUNTIME/benchmark/logs/rsl_rl/<experiment>/`。Slurm 默认输出文件为 `slurm-<jobid>.out`。
+每组实验都要求所选数据目录下的 `runs/<experiment>/` 尚不存在。普通 PPO 还需要确保运行环境中的 `benchmark/logs/rsl_rl/<experiment>` 路径尚不存在。非零种子会为两处实验目录添加后缀，例如 `C_ppo_s2`。启动器会拒绝覆盖已有结果。
+
+运行目录包含各阶段的 `console.log` 和评测结果；续训组还会导出 `policy.pt`。普通 PPO 原始训练日志和 checkpoint 保存在 `$GO2_ABC_RUNTIME/benchmark/logs/rsl_rl/<experiment>/`。每个评测种子至少须有 1,024 条回合记录，且汇总与逐回合报告一致。两组均通过后，启动器写入 `commands.json`。Slurm 默认输出文件为 `slurm-<jobid>.out`。
 
 ## 配置实验
 

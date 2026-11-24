@@ -49,6 +49,61 @@ def _env(env_type: str, total_num_envs: int, **fields) -> dict:
     }
 
 
+@pytest.mark.parametrize("failure", ["timeout", "eof"])
+def test_go2_isaac_init_failure_reaps_child(monkeypatch, tmp_path, failure):
+    import multiprocessing as mp
+    import time
+    from types import SimpleNamespace
+    from unittest.mock import Mock
+
+    from rlinf.envs.sim.isaaclab import venv
+
+    monkeypatch.setenv("GO2_ABC_RUNTIME", str(tmp_path))
+    from examples.embodiment.go2_abc import environment
+
+    process = mp.get_context("spawn").Process(target=time.sleep, args=(60,))
+    process.start()
+    pid = process.pid
+    transport = SimpleNamespace(
+        isaac_lab_process=process,
+        parent_remote=Mock(),
+        action_queue=Mock(),
+        obs_queue=Mock(),
+        reset_idx=Mock(),
+    )
+    transport.parent_remote.poll.return_value = failure == "eof"
+    transport.parent_remote.recv.side_effect = EOFError
+    times = iter([0, 181])
+    monkeypatch.setattr(
+        environment, "time", SimpleNamespace(monotonic=lambda: next(times))
+    )
+    monkeypatch.setattr(venv, "SubProcIsaacLabEnv", lambda make_env: transport)
+    cpu_zeros = torch.zeros
+    monkeypatch.setattr(
+        environment,
+        "torch",
+        SimpleNamespace(
+            zeros=lambda *a, **kw: cpu_zeros(*a, dtype=kw["dtype"]), long=torch.long
+        ),
+    )
+    try:
+        with pytest.raises(TimeoutError if failure == "timeout" else EOFError):
+            environment.Go2IsaacLabEnv(cfg={}, num_envs=1)
+        assert all(child.pid != pid for child in mp.active_children())
+        for endpoint in (
+            transport.parent_remote,
+            transport.action_queue,
+            transport.obs_queue,
+            transport.reset_idx,
+        ):
+            endpoint.close.assert_called_once()
+    finally:
+        for child in mp.active_children():
+            if child.pid == pid:
+                child.kill()
+                child.join()
+
+
 def _hetero_mode(**envs: dict):
     return OmegaConf.create({"envs": envs})
 

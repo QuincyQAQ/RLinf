@@ -16,10 +16,9 @@
 
 import argparse
 import json
-import os
 from pathlib import Path
 
-from examples.embodiment.go2_abc.prepare_data import DEFAULT_DATA, HERE, digest
+from examples.embodiment.go2_abc.prepare_data import HERE, data_directory, verify_digest
 from rlinf.utils.logging import get_logger
 
 
@@ -37,16 +36,21 @@ def audit(data: Path) -> dict:
         for group in ("baseline", "ppo", "rlinf")
     }
     files = manifest["files"]
-    assert len(files) == 9 and {item["path"] for item in files} == expected
+    if len(files) != len(expected) or {item["path"] for item in files} != expected:
+        raise ValueError(
+            "Expected exactly one manifest entry for each of the nine Go2 policies"
+        )
     generator = torch.Generator().manual_seed(0)
     observations = torch.randn(8, 235, generator=generator)
     for item in files:
         path = data / item["path"]
-        assert digest(path) == item["sha256"], item["path"]
+        verify_digest(path, item["sha256"])
         policy = Go2Policy(str(path), 235, 235)
         state = policy.state_dict()
-        assert all(torch.isfinite(x).all() for x in state.values())
-        assert (policy.std > 0).all()
+        if not all(torch.isfinite(x).all() for x in state.values()):
+            raise ValueError(f"Nonfinite policy parameters: {path}")
+        if not (policy.std > 0).all():
+            raise ValueError(f"Policy standard deviations must be positive: {path}")
         action, rollout = policy.predict_action_batch(
             {"states": observations}, mode="eval"
         )
@@ -66,7 +70,10 @@ def audit(data: Path) -> dict:
         )
         policy.actor[-1].bias.data.add_(0.01)
         shifted = policy.default_forward(rollout["forward_inputs"])["kl_divergence"]
-        assert (shifted > 0).all(), "Analytical KL did not detect a changed policy"
+        if not (torch.isfinite(shifted) & (shifted > 0)).all():
+            raise ValueError(
+                f"Expected finite positive analytical KL after changing the policy: {path}"
+            )
     return {
         "models": len(files),
         "device": "cpu",
@@ -77,9 +84,7 @@ def audit(data: Path) -> dict:
 def main() -> None:
     """Run the CPU audit without starting a simulator or a Ray cluster."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--data", type=Path, default=Path(os.environ.get("GO2_ABC_DATA", DEFAULT_DATA))
-    )
+    parser.add_argument("--data", type=Path, default=data_directory())
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     result = audit(args.data)

@@ -16,6 +16,7 @@
 
 import argparse
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -23,25 +24,116 @@ import sys
 from pathlib import Path
 
 from examples.embodiment.go2_abc.prepare_data import (
-    DEFAULT_DATA,
     HERE,
     baseline_input,
-    digest,
+    data_directory,
+    verify_digest,
 )
 from rlinf.utils.logging import get_logger
 
 
-def launch(experiment: str, execute: bool) -> None:
+def verify_evaluation(directory: Path, task: str, argv: list[str]) -> None:
+    """Verify the benchmark's per-task report and its row in the summary."""
+    eval_name = argv[argv.index("--eval_task") + 1]
+    train_name = argv[argv.index("--report_train_task") + 1]
+    gym_id = argv[argv.index("--task") + 1]
+    minimum = int(argv[argv.index("--num_episodes") + 1])
+    folder = directory / train_name
+    report = json.loads((folder / f"{eval_name}.json").read_text())
+    summary = report["summary"]
+    if json.loads((folder / "summary.json").read_text())[eval_name] != summary:
+        raise ValueError(f"Evaluation summaries disagree in {folder}")
+    episodes = report["episodes"]
+    if (
+        not isinstance(episodes, list)
+        or len(episodes) < minimum
+        or summary["num_episodes"] != len(episodes)
+    ):
+        raise ValueError(
+            f"Incomplete evaluation in {folder}: expected at least {minimum} episodes and a matching count"
+        )
+    if (summary["train_task"], summary["eval_task"]) != (train_name, gym_id):
+        raise ValueError(f"Unexpected evaluation task in {folder}")
+    task_id, family_id = {"A": (1, 0), "B": (2, 1), "C": (3, 1)}[task]
+    if any(
+        (episode["task_id"], episode["family_id"]) != (task_id, family_id)
+        or type(episode["episode_success"]) is not bool
+        for episode in episodes
+    ):
+        raise ValueError(f"Invalid tracking episode in {folder}")
+    success_rate = sum(e["episode_success"] for e in episodes) / len(episodes)
+    if not math.isclose(
+        summary["success_rate"], success_rate, rel_tol=1e-12, abs_tol=1e-12
+    ):
+        raise ValueError(f"Tracking success rate disagrees with episodes in {folder}")
+    if task == "C":
+        passages = [e["physical_obstacle_passage"] for e in episodes]
+        if (
+            any(type(passed) is not bool for passed in passages)
+            or summary["required_obstacle_metrics_complete"] is not True
+            or summary["physical_measured_episodes"] != len(episodes)
+            or summary["physical_passage_successes"] != sum(passages)
+            or not math.isclose(
+                summary["physical_obstacle_passage_rate"],
+                sum(passages) / len(episodes),
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            )
+        ):
+            raise ValueError(f"Incomplete stair passage evaluation in {folder}")
+
+
+def _export_rlinf_policy(checkpoint: Path, initial: Path, destination: Path) -> None:
+    """Verify both networks were updated and export the policy for the benchmark."""
+    import torch
+
+    from examples.embodiment.go2_abc.policy import Go2Policy
+
+    state = torch.load(checkpoint, map_location="cpu", weights_only=True)
+    model = Go2Policy(obs_dim=235, critic_obs_dim=235)
+    model.load_state_dict(state, strict=True)
+    if not all(torch.isfinite(value).all() for value in state.values()):
+        raise ValueError("Nonfinite native policy weights")
+    if not (model.std > 0).all():
+        raise ValueError("Native policy standard deviations must be positive")
+    original = torch.load(initial, map_location="cpu", weights_only=True)[
+        "model_state_dict"
+    ]
+    for prefix in ("actor.", "critic."):
+        if not any(
+            not torch.equal(value, original[key])
+            for key, value in state.items()
+            if key.startswith(prefix)
+        ):
+            raise ValueError(f"No update to {prefix}")
+    torch.save(
+        {
+            "model_state_dict": state,
+            "iter": 1000,
+            "optimizer_state_dict": torch.optim.Adam(model.parameters()).state_dict(),
+            "infos": {
+                "inference_export_only": True,
+                "native_checkpoint": str(checkpoint),
+            },
+        },
+        destination,
+    )
+
+
+def launch(experiment: str, execute: bool, train_seed: int = 0) -> None:
     """Train a continuation when selected, then evaluate both fixed seeds."""
     runtime = Path(os.environ["GO2_ABC_RUNTIME"]).resolve()
-    data = Path(os.environ.get("GO2_ABC_DATA", DEFAULT_DATA)).resolve()
+    data = data_directory().resolve()
     project = HERE.parents[2]
     import rlinf
 
     if Path(rlinf.__file__).resolve().parent.parent != project:
         raise RuntimeError(f"Expected RLinf from {project}, found {rlinf.__file__}")
     task, group = experiment.split("_")
-    directory = data / "runs" / experiment
+    if not 0 <= train_seed < 2**32:
+        raise ValueError("Expected training seed in [0, 2**32)")
+    run_name = experiment if train_seed == 0 else f"{experiment}_s{train_seed}"
+    directory = data / "runs" / run_name
     env = dict(
         os.environ,
         GO2_ABC_DATA=str(data),
@@ -57,12 +149,13 @@ def launch(experiment: str, execute: bool) -> None:
     )
     env.update(
         RAY_ADDRESS="local",
-        RAY_TMPDIR=f"/tmp/abc_{experiment}_{os.environ.get('SLURM_JOB_ID', 'plan')}",
+        RAY_TMPDIR=f"/tmp/abc_{run_name}_{os.environ.get('SLURM_JOB_ID', 'plan')}",
     )
     if task == "B":
         env["GO2_B1_NUMERIC_GUARD"] = "1"
     initial = data / f"models/{task}/baseline.pt"
-    policy = initial
+    policy = initial if group == "baseline" else directory / "policy.pt"
+    ppo_log_dir = runtime / "benchmark/logs/rsl_rl" / run_name
     commands = []
 
     def run(command: list[str], stage: str) -> None:
@@ -104,11 +197,8 @@ def launch(experiment: str, execute: bool) -> None:
             )
         if directory.exists():
             raise FileExistsError(f"Use a fresh output directory: {directory}")
-        if (
-            group == "ppo"
-            and (runtime / f"benchmark/logs/rsl_rl/{experiment}").exists()
-        ):
-            raise FileExistsError(f"Ordinary PPO output already exists: {experiment}")
+        if group == "ppo" and ppo_log_dir.exists():
+            raise FileExistsError(f"Ordinary PPO output already exists: {run_name}")
         manifest = json.loads((HERE / "manifest.json").read_text())
         for name, key in (
             ("benchmark", "benchmark_commit"),
@@ -121,11 +211,18 @@ def launch(experiment: str, execute: bool) -> None:
                 raise RuntimeError(
                     f"Expected {name} at {manifest[key]}, found {revision}"
                 )
-        expected = baseline_input(manifest, task)["sha256"]
-        if digest(initial) != expected:
-            raise ValueError(f"SHA256 mismatch: {initial}")
+        verify_digest(initial, baseline_input(manifest, task)["sha256"])
 
     if group == "rlinf":
+        overrides = []
+        if train_seed:
+            overrides = [
+                f"actor.seed={train_seed}",
+                f"env.train.seed={train_seed}",
+                f"runner.logger.experiment_name={run_name}",
+                f"env.train.validation_output={directory}/environment",
+                f"env.train.video_cfg.video_base_dir={directory}/video",
+            ]
         run(
             [
                 sys.executable,
@@ -134,63 +231,30 @@ def launch(experiment: str, execute: bool) -> None:
                 str(HERE / "config"),
                 "--config-name",
                 experiment,
+                *overrides,
             ],
             "training",
         )
-        checkpoint = (
-            directory
-            / "checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt"
-        )
-        policy = directory / "policy.pt"
         if execute:
-            import torch
-
-            from examples.embodiment.go2_abc.policy import Go2Policy
-
-            state = torch.load(checkpoint, map_location="cpu", weights_only=True)
-            model = Go2Policy(obs_dim=235, critic_obs_dim=235)
-            model.load_state_dict(state, strict=True)
-            assert all(torch.isfinite(value).all() for value in state.values()), (
-                "Nonfinite native policy weights"
+            checkpoint = (
+                directory
+                / "checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt"
             )
-            assert (model.std > 0).all(), (
-                "Native policy standard deviations must be positive"
-            )
-            original = torch.load(initial, map_location="cpu", weights_only=True)[
-                "model_state_dict"
-            ]
-            for prefix in ("actor.", "critic."):
-                assert any(
-                    not torch.equal(value, original[key])
-                    for key, value in state.items()
-                    if key.startswith(prefix)
-                ), f"No update to {prefix}"
-            torch.save(
-                {
-                    "model_state_dict": state,
-                    "iter": 1000,
-                    "optimizer_state_dict": torch.optim.Adam(
-                        model.parameters()
-                    ).state_dict(),
-                    "infos": {
-                        "inference_export_only": True,
-                        "native_checkpoint": str(checkpoint),
-                    },
-                },
-                policy,
-            )
+            _export_rlinf_policy(checkpoint, initial, policy)
     elif group == "ppo":
         config = json.loads((HERE / f"config/{experiment}.json").read_text())
         env.update(config["env"])
+        argv = list(map(resolve, config["argv"]))
+        if train_seed:
+            argv[argv.index("--seed") + 1] = str(train_seed)
+            argv[argv.index("--run_name") + 1] = run_name
+            argv[argv.index("--experiment_name") + 1] = run_name
         run(
-            [sys.executable, resolve(config["entry"]), *map(resolve, config["argv"])],
+            [sys.executable, resolve(config["entry"]), *argv],
             "training",
         )
-        policy = directory / "policy.pt"
         if execute:
-            checkpoints = list(
-                (runtime / f"benchmark/logs/rsl_rl/{experiment}").glob("*/model_*.pt")
-            )
+            checkpoints = list(ppo_log_dir.glob("*/model_*.pt"))
             if not checkpoints or len({path.parent for path in checkpoints}) != 1:
                 raise RuntimeError(
                     f"Expected one {experiment} training run with saved weights, found {checkpoints}"
@@ -204,8 +268,11 @@ def launch(experiment: str, execute: bool) -> None:
         env["GO2_EVAL_SEED"] = str(seed)
         argv = list(map(resolve, config["argv"]))
         argv[argv.index("--checkpoint") + 1] = str(policy)
-        argv += ["--output_dir", str(directory / f"evaluation/{seed}")]
+        stage = directory / f"evaluation/{seed}"
+        argv += ["--output_dir", str(stage)]
         run([sys.executable, resolve(config["entry"]), *argv], f"evaluation/{seed}")
+        if execute:
+            verify_evaluation(stage, task, argv)
     if execute:
         (directory / "commands.json").write_text(json.dumps(commands, indent=2))
     get_logger().info(
@@ -228,9 +295,15 @@ def main() -> None:
             for group in ("baseline", "ppo", "rlinf")
         ],
     )
+    parser.add_argument(
+        "--train-seed",
+        type=int,
+        default=0,
+        help="Continuation training seed (default: 0)",
+    )
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
-    launch(args.experiment, args.execute)
+    launch(args.experiment, args.execute, args.train_seed)
 
 
 if __name__ == "__main__":

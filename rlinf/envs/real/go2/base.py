@@ -165,7 +165,7 @@ class Go2Env(gym.Env):
             if truncated:
                 self._needs_reset = True
                 self._stop()
-            return observation, 0.0, False, truncated, {}
+            return observation, 0.0, False, truncated, {"requires_reset": truncated}
         except BaseException:
             self._needs_reset = True
             self._stop()

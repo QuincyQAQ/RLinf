@@ -7,11 +7,17 @@ ABC_RUNTIME="$(realpath "${GO2_ABC_RUNTIME:?Set GO2_ABC_RUNTIME to the prepared 
 ABC_ENGINE="${GO2_ABC_CONTAINER:-singularity}"
 ABC_IMAGE="${GO2_ABC_IMAGE:-$ABC_RUNTIME/containers/isaac-lab_2.3.2.sif}"
 ABC_SESSION="${SLURM_JOB_ID:-cpu}_${SLURM_ARRAY_TASK_ID:-0}_$$"
-ABC_PRIVATE="$ABC_PROJECT/data/go2_abc/container/$ABC_SESSION"
+ABC_DATA="$(realpath -m -- "${GO2_ABC_DATA:-$ABC_PROJECT/data/go2_abc}")"
+ABC_PRIVATE="$ABC_DATA/container/$ABC_SESSION"
 mkdir -p "$ABC_PRIVATE"/{home,cache,data,logs}
+ABC_DATA_BIND=()
+if [[ -n "${GO2_ABC_DATA:-}" ]]; then
+  # The A40 image may lack an overlay for creating nested bind points.
+  mkdir -p "$ABC_PROJECT/data/go2_abc"
+  ABC_DATA_BIND=(--bind "$ABC_DATA:/workspace/project/data/go2_abc")
+fi
 ABC_TMP_BASE="${SLURM_TMPDIR:-/tmp}"
 if [[ "$(stat -f -c %T "$ABC_TMP_BASE")" =~ gpfs|nfs|lustre ]]; then ABC_TMP_BASE=/tmp; fi
-ABC_TMP="$(mktemp -d "$ABC_TMP_BASE/go2_abc_${ABC_SESSION}_XXXXXX")"
 ABC_ENTRY=(-m examples.embodiment.go2_abc.run)
 if [[ "${1:-}" == --python ]]; then ABC_ENTRY=(); shift; fi
 ABC_SHARED_BINDS=()
@@ -28,15 +34,41 @@ if [[ -n "${SLURM_JOB_ID:-}" ]]; then
     if [[ ${#ABC_NVML_IDS[@]} -eq 1 ]]; then ABC_VISIBLE="${ABC_NVML_IDS[0]}"; fi
     ABC_GPU=(--nv --env "CUDA_VISIBLE_DEVICES=$ABC_VISIBLE" --env "SLURM_JOB_ID=$SLURM_JOB_ID")
 fi
-exec "$ABC_ENGINE" exec --cleanenv --writable-tmpfs "${ABC_GPU[@]}" \
+# Slurm can signal the batch shell alone. Give the engine and its workers
+# their own process group so cancellation reaches them before scratch is removed.
+cancel_container() {
+  trap '' HUP INT TERM
+  local engine_pid="${!:-}"
+  if [[ -n "$engine_pid" ]]; then
+    # If setsid has not run yet, the child still belongs to this shell's group.
+    kill -TERM -- "-$engine_pid" 2>/dev/null || kill -TERM "$engine_pid" 2>/dev/null || true
+    for ((attempt=0; attempt<50; attempt++)); do
+      kill -0 -- "-$engine_pid" 2>/dev/null || break
+      sleep 0.1
+    done
+    kill -KILL -- "-$engine_pid" 2>/dev/null || true
+    wait "$engine_pid" 2>/dev/null || true
+  fi
+  exit "$1"
+}
+
+ABC_TMP="$(mktemp -d "$ABC_TMP_BASE/go2_abc_${ABC_SESSION}_XXXXXX")"
+trap 'rm -rf -- "$ABC_TMP"' EXIT
+trap 'cancel_container 129' HUP
+trap 'cancel_container 130' INT
+trap 'cancel_container 143' TERM
+# With job control off, setsid can become the engine without forking.
+set +m
+setsid "$ABC_ENGINE" exec --cleanenv --writable-tmpfs "${ABC_GPU[@]}" \
   --home "$ABC_PRIVATE/home" --pwd /workspace/project \
   --bind "$ABC_PROJECT:/workspace/project" --bind "$ABC_RUNTIME:/workspace/go2" \
   --bind "$ABC_RUNTIME/IsaacLab:/workspace/isaaclab" --bind "$ABC_TMP:/tmp" \
-  "${ABC_SHARED_BINDS[@]}" \
+  "${ABC_DATA_BIND[@]}" "${ABC_SHARED_BINDS[@]}" \
   --bind "$ABC_PRIVATE/cache:/isaac-sim/kit/cache" \
   --bind "$ABC_PRIVATE/data:/isaac-sim/kit/data" --bind "$ABC_PRIVATE/logs:/isaac-sim/kit/logs" \
   --env ACCEPT_EULA=Y --env PRIVACY_CONSENT=Y --env PYTHONUNBUFFERED=1 --env GO2_RLINF=1 \
   --env "OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK:-4}" --env OPENBLAS_NUM_THREADS=1 \
   --env GO2_ABC_RUNTIME=/workspace/go2 --env GO2_ABC_DATA=/workspace/project/data/go2_abc \
   "$ABC_IMAGE" bash /workspace/go2/a40/container_python.sh \
-  "${ABC_ENTRY[@]}" "$@"
+  "${ABC_ENTRY[@]}" "$@" <&0 &
+wait "$!"

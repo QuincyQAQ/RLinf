@@ -286,11 +286,15 @@ class Go2IsaacLabEnv(gym.Env):
         )
         self.action_space = gym.spaces.Box(-np.inf, np.inf, (12,), np.float32)
         self.env = SubProcIsaacLabEnv(make_env)
-        self.env.parent_remote.send("device")
-        deadline = time.monotonic() + 180
-        while not self.env.parent_remote.poll(1):
-            self._check_child(deadline)
-        self.device = self.env.parent_remote.recv()
+        try:
+            self.env.parent_remote.send("device")
+            deadline = time.monotonic() + 180
+            while not self.env.parent_remote.poll(1):
+                self._check_child(deadline)
+            self.device = self.env.parent_remote.recv()
+        except BaseException:
+            self._close_transport(graceful=False)
+            raise
 
     def _check_child(self, deadline):
         if not self.env.isaac_lab_process.is_alive():
@@ -350,10 +354,37 @@ class Go2IsaacLabEnv(gym.Env):
         return [obs], r[:, None], t[:, None], tr[:, None], [info]
 
     def close(self):
-        if not self.env.isaac_lab_process.is_alive():
+        self._close_transport(graceful=True)
+
+    def _close_transport(self, *, graceful: bool) -> None:
+        transport = self.env
+        if transport is None:
             return
-        self.env.parent_remote.send("close")
-        self.env.isaac_lab_process.join(timeout=30)
-        if self.env.isaac_lab_process.is_alive():
-            self.env.isaac_lab_process.terminate()
-            self.env.isaac_lab_process.join(timeout=10)
+        process = transport.isaac_lab_process
+        try:
+            if graceful and process.is_alive():
+                try:
+                    transport.parent_remote.send("close")
+                except (BrokenPipeError, EOFError, OSError):
+                    pass
+                else:
+                    process.join(timeout=30)
+            if process.is_alive():
+                process.terminate()
+                process.join(timeout=10)
+            if process.is_alive():
+                process.kill()
+            process.join(timeout=10)
+            if process.is_alive():
+                raise TimeoutError("Isaac Lab child did not exit after kill")
+            process.close()
+        finally:
+            transport.parent_remote.close()
+            for channel in (
+                transport.action_queue,
+                transport.obs_queue,
+                transport.reset_idx,
+            ):
+                channel.cancel_join_thread()
+                channel.close()
+            self.env = None

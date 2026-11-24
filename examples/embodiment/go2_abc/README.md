@@ -19,6 +19,8 @@ export GO2_ABC_CONTAINER=singularity
 
 The runtime includes Isaac Lab 2.3.2, Isaac Sim 5.1, RSL-RL 3.1.2, the benchmark, scripts, package overlays, and assets. It uses the pinned [multi-task benchmark](https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env) for simulator tasks and ordinary PPO. The runtime's `benchmark` and `IsaacLab` directories must remain Git checkouts with HEADs matching [manifest.json](manifest.json). On another cluster, set these variables to your own compatible runtime, shared assets, image, and container executable. The public repository alone does not reconstruct this runtime.
 
+Weights and run results use `data/go2_abc/` by default. To use another disk, export `GO2_ABC_DATA` with an absolute path accessible to the compute nodes before preparing weights and submitting jobs.
+
 Prepare the A baseline from the pinned manifest.
 
 ```bash
@@ -39,9 +41,11 @@ Use `A_baseline` for baseline evaluation or `A_ppo` for ordinary PPO continuatio
 
 The historical A and B continuations also ran two-update checks with 64 and 2,048 environments before the full run. This entry point runs the full configuration directly and does not include those checks.
 
-Every experiment requires a fresh `data/go2_abc/runs/<experiment>/` directory. For ordinary PPO, also use a runtime with a fresh `benchmark/logs/rsl_rl/<experiment>` path. The runner refuses to overwrite existing outputs.
+Append `--train-seed 2` after the experiment name to reproduce the seed 2 runs. This sets both the RLinf actor and environment seeds, or the ordinary PPO training seed. The baseline reuses its frozen weights. Both evaluation seeds stay fixed at 23456 and 34567.
 
-The run directory contains stage `console.log` files and evaluation outputs; continuations also export `policy.pt`. Ordinary PPO's original training logs and checkpoints remain under `$GO2_ABC_RUNTIME/benchmark/logs/rsl_rl/<experiment>/`. Slurm's default output is `slurm-<jobid>.out`.
+Every experiment requires a fresh `runs/<experiment>/` directory under the selected data directory. For ordinary PPO, also use a runtime with a fresh `benchmark/logs/rsl_rl/<experiment>` path. Nonzero seeds add a suffix to both run directories, for example `C_ppo_s2`. The runner refuses to overwrite existing outputs.
+
+The run directory contains stage `console.log` files and evaluation outputs; continuations also export `policy.pt`. Ordinary PPO's original training logs and checkpoints remain under `$GO2_ABC_RUNTIME/benchmark/logs/rsl_rl/<experiment>/`. The runner writes the final `commands.json` after each seed's summary agrees with its per-episode report and at least 1,024 episodes were recorded per seed. Slurm's default output is `slurm-<jobid>.out`.
 
 ## Configure Experiments
 

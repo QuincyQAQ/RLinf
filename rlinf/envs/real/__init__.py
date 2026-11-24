@@ -37,6 +37,7 @@ _ROBOT_PACKAGES = (
     ".dosw1",
     ".franka",
     ".gim_arm",
+    ".go2",
     ".lekiwi",
     ".piper",
     ".r2",

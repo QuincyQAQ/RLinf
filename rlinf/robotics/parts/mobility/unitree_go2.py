@@ -21,9 +21,11 @@ through a broken network or after this process is killed.
 
 from __future__ import annotations
 
+import copy
 import threading
 import time
 from contextlib import ExitStack
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
@@ -42,6 +44,15 @@ STATE_SHAPES = {
     "battery_voltage": (1,),
     "foot_force_raw": (4,),
 }
+
+
+@lru_cache(maxsize=1)
+def _sport_transport(client_type: type) -> Any:
+    # SDK2's SportClient creates a reply-reader thread and offers no close method.
+    # The process-wide DDS lease pins the interface across reconnects.
+    client = client_type()
+    client.Init()
+    return client
 
 
 @MobileBase.register("unitree_go2")
@@ -72,6 +83,8 @@ class Go2Base(MobileBase):
         state_timeout: float = 0.5,
         rpc_timeout: float = 1.0,
     ) -> None:
+        if not isinstance(enable_motion, bool):
+            raise TypeError("enable_motion must be a boolean")
         if not interface.strip():
             raise ValueError("Go2 requires an explicit network interface.")
         for name, value in (
@@ -87,6 +100,7 @@ class Go2Base(MobileBase):
         self.state_timeout = state_timeout
         self.rpc_timeout = rpc_timeout
         self._lock = threading.RLock()
+        self._send_lock = threading.Lock()
         self._dds = ExitStack()
         self._state_lock = threading.Lock()
         self._state: Observation | None = None
@@ -96,6 +110,7 @@ class Go2Base(MobileBase):
         self._thread: threading.Thread | None = None
         self._subscriber: Any = None
         self._client: Any = None
+        self._move_client: Any = None
         self._deadline: float | None = None
         self._retry_stop_at: float | None = None
         self._fault: str | None = None
@@ -157,11 +172,13 @@ class Go2Base(MobileBase):
                 raise TimeoutError(
                     "No valid Go2 lowstate received; motion stays disabled."
                 )
-            if self.enable_motion:
-                self._client = SportClient()
+            if self.enable_motion is True:
+                self._client = _sport_transport(SportClient)
                 self._client.SetTimeout(self.rpc_timeout)
-                self._client.Init()
                 self._stop()
+                # Share the pinned SDK's RPC stub and writer. The shallow copy owns
+                # its Move timeout and identifies this connection's pending calls.
+                self._move_client = copy.copy(self._client)
                 self._thread = threading.Thread(
                     target=self._watchdog, name="go2-command-watchdog", daemon=True
                 )
@@ -171,7 +188,15 @@ class Go2Base(MobileBase):
             self._cleanup()
             raise
 
+    def _motion_expired(self, now: float) -> bool:
+        if self._deadline is None:
+            return False
+        with self._state_lock:
+            return now >= self._deadline or now - self._received_at > self.state_timeout
+
     def _stop(self) -> None:
+        if self._fault is None and self._motion_expired(time.monotonic()):
+            self._fault = "Command or state timed out; reconnect before motion."
         self._deadline = None
         if self._client is None:
             return
@@ -187,8 +212,8 @@ class Go2Base(MobileBase):
             raise RuntimeError(self._fault) from exc
         self._retry_stop_at = None
 
-    def _trip(self, reason: str) -> None:
-        if self._retry_stop_at is not None:
+    def _trip(self, reason: str, *, retry_now: bool = False) -> None:
+        if self._retry_stop_at is not None and not retry_now:
             return
         self._fault = reason
         self._stop()
@@ -202,11 +227,7 @@ class Go2Base(MobileBase):
                         if now >= self._retry_stop_at:
                             self._stop()
                         continue
-                    if self._deadline is None:
-                        continue
-                    with self._state_lock:
-                        state_age = now - self._received_at
-                    if now >= self._deadline or state_age > self.state_timeout:
+                    if self._motion_expired(now):
                         self._trip(
                             "Command or state timed out; reconnect before motion."
                         )
@@ -216,8 +237,8 @@ class Go2Base(MobileBase):
                     )
 
     def reset(self) -> None:
-        """Request StopMove; faults remain latched until reconnect."""
-        with self._lock:
+        """Request StopMove after pending sends; faults remain latched until reconnect."""
+        with self._send_lock, self._lock:
             self._stop()
 
     def get_observation(self) -> Observation:
@@ -239,13 +260,16 @@ class Go2Base(MobileBase):
 
     def send_action(self, action: Action) -> Observation:
         """Send a bounded velocity; returned values are commands, not feedback."""
+        move_client = self._move_client
+        command_deadline = time.monotonic() + self.command_timeout
         if not self.is_connected:
             raise RuntimeError("Connect Go2 before sending actions.")
-        with self._lock:
-            if self._shutdown.is_set():
+        with self._send_lock:
+            if self._shutdown.is_set() or self._move_client is not move_client:
                 raise RuntimeError(
                     "Go2 connection is closing; no actions are permitted."
                 )
+            dispatched = False
             try:
                 if set(action) != {"velocity"}:
                     raise ValueError("Go2 action must contain only 'velocity'.")
@@ -259,27 +283,57 @@ class Go2Base(MobileBase):
                     raise ValueError(
                         "Expected finite velocity (3,) within [0.3, 0.3, 0.5]."
                     )
-                if not np.any(velocity):
-                    self._stop()
-                    return {"velocity": velocity.copy()}
-                if not self.enable_motion:
-                    raise PermissionError("Go2 is read-only; enable_motion is false.")
-                if self._fault is not None:
-                    raise RuntimeError(self._fault)
-                if self._deadline is not None and time.monotonic() >= self._deadline:
-                    raise TimeoutError("Go2 command expired; reconnect before motion.")
-                self.get_observation()
-                self._deadline = time.monotonic() + self.command_timeout
-                code = self._client.Move(*(float(v) for v in velocity))
-                if code != 0:
-                    raise RuntimeError(f"Move send returned {code}.")
+                with self._lock:
+                    if not np.any(velocity):
+                        self._stop()
+                        return {"velocity": velocity.copy()}
+                    if self.enable_motion is not True:
+                        raise PermissionError(
+                            "Go2 is read-only; enable_motion is false."
+                        )
+                    if self._fault is not None:
+                        raise RuntimeError(self._fault)
+                    now = time.monotonic()
+                    if self._deadline is not None and now >= self._deadline:
+                        raise TimeoutError(
+                            "Go2 command expired; reconnect before motion."
+                        )
+                    with self._state_lock:
+                        state_deadline = self._received_at + self.state_timeout
+                    expires = min(
+                        command_deadline, state_deadline, now + self.rpc_timeout
+                    )
+                    # The pinned SDK checks DDS matches in 100 ms polls. With at most
+                    # one poll it rejects an unmatched Move even if discovery completes late.
+                    if now >= expires:
+                        raise TimeoutError("Go2 Move expired before dispatch.")
+                    move_client.SetTimeout(min(expires - now, self.rpc_timeout, 0.1))
+                    self._deadline = expires
+                if time.monotonic() >= expires:
+                    raise TimeoutError("Go2 Move expired before dispatch.")
+                dispatched = True
+                code = move_client.Move(*(float(v) for v in velocity))
+                with self._lock:
+                    if self._deadline is None or time.monotonic() >= expires:
+                        raise TimeoutError(
+                            "Go2 Move expired or stopped during dispatch."
+                        )
+                    if code != 0:
+                        raise RuntimeError(f"Move send returned {code}.")
+                    self._deadline = command_deadline
                 return {"velocity": velocity.copy()}
             except BaseException:
-                self._trip("Go2 action failed; reconnect before motion.")
+                # A prior watchdog stop may have preceded a stalled SDK write.
+                with self._lock:
+                    self._trip(
+                        "Go2 action failed; reconnect before motion.",
+                        retry_now=dispatched,
+                    )
                 raise
 
     def _cleanup(self) -> None:
-        with self._lock:
+        # Let the watchdog cover an in-flight write until its final stop has run.
+        with self._send_lock, self._lock:
             self._shutdown.set()
         if self._thread is not None:
             self._thread.join()
@@ -294,6 +348,7 @@ class Go2Base(MobileBase):
             finally:
                 self._subscriber = None
                 self._client = None
+                self._move_client = None
                 self._dds.close()
 
     def _release(self, device: Any) -> None:

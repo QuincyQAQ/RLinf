@@ -19,6 +19,8 @@ from contextlib import contextmanager
 from types import ModuleType, SimpleNamespace
 from typing import Any
 
+from .go2 import factory_members
+
 
 def lowstate() -> SimpleNamespace:
     """Return deterministic Go2 lowstate data with twelve joints."""
@@ -126,7 +128,7 @@ class FakeGo2SDK:
 
         definitions = {
             "unitree_sdk2py.core.channel": {
-                "ChannelFactoryInitialize": initialize,
+                **factory_members(initialize),
                 "ChannelSubscriber": Subscriber,
             },
             "unitree_sdk2py.go2.sport.sport_client": {"SportClient": Client},

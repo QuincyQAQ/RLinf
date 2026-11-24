@@ -26,7 +26,7 @@ _active = False
 @contextmanager
 def go2_dds_session(interface: str) -> Iterator[None]:
     """Own the shared Go2 factory until local channels have closed."""
-    from unitree_sdk2py.core.channel import ChannelFactoryInitialize
+    from unitree_sdk2py.core.channel import ChannelFactory, Qos
 
     global _active, _interface
     with _lock:
@@ -35,7 +35,18 @@ def go2_dds_session(interface: str) -> Iterator[None]:
                 "Only one Go2 connection can have exclusive DDS ownership."
             )
         if _interface is None:
-            ChannelFactoryInitialize(0, interface)
+            factory = ChannelFactory()
+            default_qos = Qos()
+            if not factory.Init(0, interface, default_qos):
+                raise RuntimeError(f"Go2 SDK2 failed to initialize DDS on {interface}.")
+            # SDK2 814556d also returns success when a different caller won
+            # initialization. Only the winner's QoS object is retained, so
+            # verify ownership even when the native SDK races this call.
+            if getattr(factory, "_ChannelFactory__qos", None) is not default_qos:
+                raise RuntimeError(
+                    "Cannot verify the SDK2 DDS interface. Start a fresh process "
+                    "and connect the Go2 adapter before other SDK2 clients."
+                )
             _interface = interface
         elif interface != _interface:
             raise RuntimeError(
