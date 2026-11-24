@@ -249,6 +249,7 @@ If you are starting from "I want to train on benchmark *X*", this is the right e
    Behavior <embodied/behavior>
    MetaWorld <embodied/metaworld>
    IsaacLab <embodied/isaaclab>
+   Go2 ABC <embodied/go2_abc>
    CALVIN <embodied/calvin>
    RoboCasa <embodied/robocasa>
    RoboCasa365 <embodied/robocasa365>

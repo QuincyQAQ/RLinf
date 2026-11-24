@@ -36,7 +36,7 @@ import pytest
 import torch
 from omegaconf import OmegaConf
 
-from rlinf.algorithms.losses import compute_ppo_critic_loss
+from rlinf.algorithms.losses import compute_ppo_actor_loss, compute_ppo_critic_loss
 from rlinf.algorithms.prefix_off_policy import build_prefix_off_policy_algorithm
 from rlinf.algorithms.refl_scorers import build_refl_scorer, register_refl_scorer
 from rlinf.config import SupportedModel, validate_embodied_cfg
@@ -79,6 +79,143 @@ from rlinf.utils.env_helpers.delay_sampler import (
 )
 from rlinf.workers.rollout.phyai import phyai_rollout_worker
 from rlinf.workers.rollout.phyai.phyai_rollout_worker import PhyAIRolloutWorker
+
+
+@pytest.mark.parametrize("seeded", [False, True])
+def test_hf_rollout_training_seed_controls_checkpoint_sampling(tmp_path, seeded):
+    from rlinf.models.embodiment.go2_policy import Go2Policy
+    from rlinf.utils.utils import get_rng_state, set_rng_state
+    from rlinf.workers.rollout.hf.huggingface_worker import MultiStepRolloutWorker
+
+    checkpoint = tmp_path / "policy.pt"
+    torch.save({"model_state_dict": Go2Policy().state_dict()}, checkpoint)
+    cfg = OmegaConf.create(
+        {
+            "actor": {"seed": 0},
+            "runner": {},
+            "rollout": {"model": {}},
+        }
+    )
+    model_cfg = OmegaConf.create(
+        {
+            "model_type": "go2_policy",
+            "precision": "32",
+            "is_lora": False,
+            "load_to_device": False,
+            "model_path": str(checkpoint),
+            "distribution_safety_patch": False,
+        }
+    )
+    if seeded:
+        cfg.rollout.seed = "${actor.seed}"
+    previous_rng = get_rng_state()
+    try:
+        actions = []
+        for rank, inherited_seed in ((0, 111), (0, 222), (1, 111)):
+            torch.manual_seed(inherited_seed)
+            worker = object.__new__(MultiStepRolloutWorker)
+            worker._rank = rank
+            worker.device = 0
+            worker.cfg = cfg
+            worker.model_cfg = model_cfg
+            worker.algorithm_cfg = {}
+            worker.enable_train = True
+            worker.enable_opd = worker.enable_dagger = False
+            worker.enable_prefix = worker.enable_rlt = worker.enable_offload = False
+            worker.enable_cuda_graph = worker.value_only_bootstrap = False
+            worker.expert_model = worker.rlt_feature_model = None
+            worker.init_worker()
+            sampled, _ = worker.hf_model.predict_action_batch(
+                {"states": torch.zeros(4, 235)}
+            )
+            actions.append(sampled)
+        assert torch.equal(actions[0], actions[1]) == seeded
+        assert torch.equal(actions[0], actions[2]) != seeded
+    finally:
+        set_rng_state(previous_rng)
+
+
+def test_go2_worker_uses_deterministic_evaluation_unless_sampling_is_requested():
+    from rlinf.models.embodiment.go2_policy import Go2Policy
+    from rlinf.workers.rollout.hf.huggingface_worker import MultiStepRolloutWorker
+
+    worker = object.__new__(MultiStepRolloutWorker)
+    worker._accelerator_type = None
+    worker._timer_metrics = {}
+    worker.model_cfg = OmegaConf.create({"model_type": "go2_policy"})
+    worker.algorithm_cfg = {}
+    worker.hf_model = Go2Policy()
+    worker.expert_model = None
+    worker.enable_dagger = False
+    worker._eval_sampling_params = {}
+    obs = {"states": torch.zeros(4, 235)}
+    mean = worker.hf_model.actor(obs["states"]).unsqueeze(1)
+    deterministic, _ = worker.predict(obs, mode="eval")
+    torch.testing.assert_close(deterministic, mean, rtol=0, atol=0)
+    worker._eval_sampling_params = {"do_sample": True}
+    sampled, _ = worker.predict(obs, mode="eval")
+    assert not torch.equal(sampled, mean)
+
+
+def test_go2_checkpoint_rejects_pickled_module(tmp_path):
+    import pickle
+
+    from rlinf.models.embodiment.go2_policy import Go2Policy
+
+    checkpoint = tmp_path / "policy.pt"
+    torch.save(
+        {"model_state_dict": Go2Policy().state_dict(), "extra": torch.nn.Identity()},
+        checkpoint,
+    )
+    with pytest.raises(pickle.UnpicklingError):
+        Go2Policy(str(checkpoint))
+
+
+@pytest.mark.parametrize("wrapped", [True, False], ids=["rsl", "rlinf"])
+def test_go2_checkpoint_supports_ppo_update_and_analytical_kl(tmp_path, wrapped):
+    from rlinf.models.embodiment.go2_policy import Go2Policy
+
+    policy = Go2Policy()
+    checkpoint = tmp_path / "policy.pt"
+    weights = policy.state_dict()
+    torch.save({"model_state_dict": weights} if wrapped else weights, checkpoint)
+    restored = Go2Policy(str(checkpoint))
+    for actual, expected in zip(
+        restored.parameters(), policy.parameters(), strict=True
+    ):
+        torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    observations = torch.randn(8, 235)
+    _, rollout = restored.predict_action_batch({"states": observations})
+    batch = {key: value.clone() for key, value in rollout["forward_inputs"].items()}
+    output = restored(forward_inputs=batch)
+    torch.testing.assert_close(output["kl_divergence"], torch.zeros(8))
+    actor_loss, _ = compute_ppo_actor_loss(
+        output["logprobs"].sum(-1),
+        rollout["prev_logprobs"].clone().sum(-1),
+        0.2,
+        0.2,
+        torch.ones(8),
+    )
+    previous = rollout["prev_values"].clone()
+    critic_loss, _ = compute_ppo_critic_loss(
+        output["values"], previous + 1, previous, 0.2, 10.0
+    )
+    optimizer = torch.optim.Adam(restored.parameters(), lr=3e-4)
+    (actor_loss + critic_loss).backward()
+    optimizer.step()
+    for actual_component, initial_component in (
+        (restored.actor, policy.actor),
+        (restored.critic, policy.critic),
+    ):
+        assert any(
+            not torch.equal(actual, expected)
+            for actual, expected in zip(
+                actual_component.parameters(),
+                initial_component.parameters(),
+                strict=True,
+            )
+        ), "PPO did not update both actor and critic"
+    assert (restored(forward_inputs=batch)["kl_divergence"] > 0).all()
 
 
 @pytest.mark.parametrize("layout", ["hwc", "chw"])
