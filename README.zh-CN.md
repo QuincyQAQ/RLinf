@@ -34,6 +34,7 @@ RLinf 是一个灵活且可扩展的开源框架，专为具身智能和智能�
 
 ## 最新动态
 
+- [2026/11] 🔥 RLinf 新增宇树 Go2 示例，支持[在 Isaac Lab 中用 PPO 训练运动策略](https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/go2_abc.html)，也可[通过 Go2 EDU 的高层接口控制真机运动](https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/go2.html)。
 - [2026/11] 🔥 RLinf 新增 FlexRLT，可直接用冻结 VLA 的特征训练小型 actor 和 critic，并分别选择特征表示、网络、AC/TD3 算法及 STEAM 门控。文档：[FlexRLT](https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/flexrlt.html)。
 - [2026/11] 🔥 RLinf 支持在 [DexJoCo](https://github.com/brave-eai/dexjoco) 灵巧操作基准上用 SFT 和 PPO 训练 CNN 和 π₀.₅ policy。PPO 将 π₀.₅ 在 `water_plant` 上的成功率从 SFT 后的 78.1% 提升至 98.4%。文档：[基于 DexJoCo 的强化学习训练](https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/dexjoco.html)。
 - [2026/11] 🔥 RLinf 支持奖励反馈学习（ReFL），使用 ImageReward 微调 SD3.5 Medium。文档：[ReFL](https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/refl.html)。
@@ -212,7 +213,7 @@ RLinf 支持 World Action Model（WAM）和 Vision-Language-Action Model（VLA�
           <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/roboverse.html">RoboVerse</a> ✅</li>
           <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/behavior.html">BEHAVIOR</a> ✅</li>
           <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/metaworld.html">MetaWorld</a> ✅</li>
-          <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/isaaclab.html">IsaacLab</a> ✅</li>
+          <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/isaaclab.html">IsaacLab</a>（<a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/go2_abc.html">Go2 运动策略训练</a>）✅</li>
           <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/calvin.html">CALVIN</a> ✅</li>
           <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/robocasa.html">RoboCasa</a> ✅</li>
           <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/robocasa365.html">RoboCasa365</a> ✅</li>
@@ -345,6 +346,7 @@ RLinf 支持 World Action Model（WAM）和 Vision-Language-Action Model（VLA�
           <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/so101.html">SO101</a> ✅</li>
           <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/r2.html">Robbyant R2</a> ✅</li>
           <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/lekiwi.html">LeKiwi</a> ✅</li>
+          <li><a href="https://rlinf.readthedocs.io/zh-cn/latest/rst_source/examples/embodied/go2.html">宇树 Go2 EDU</a>（高层运动控制）</li>
           <li>More...</li>
         </ul>
       </td>

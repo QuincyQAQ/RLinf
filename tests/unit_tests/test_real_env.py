@@ -1409,10 +1409,11 @@ def test_shipped_configs_use_the_new_key():
 _REAL = _ROOT / "rlinf" / "envs" / "real"
 
 
-_ROBOTS = ("franka", "dosw1", "gim_arm", "xsquare")
+_ROBOTS = ("franka", "dosw1", "gim_arm", "go2", "xsquare")
 
 
 EXPECTED_IDS = {
+    "Go2DriveEnv-v1",
     "FrankaEnv-v1",
     "PegInsertionEnv-v1",
     "FrankaBinRelocationEnv-v1",
@@ -1436,6 +1437,88 @@ def test_every_robot_folder_has_a_base():
     missing = [name for name in _ROBOTS if not (_REAL / name / "base.py").exists()]
 
     assert missing == []
+
+
+@pytest.mark.parametrize("auto_reset", [False, True])
+def test_go2_chunk_stops_at_the_last_executed_action(monkeypatch, auto_reset):
+    from rlinf.envs.real.env import RealWorldEnv
+
+    monkeypatch.setattr(RealWorldEnv, "realworld_setup", staticmethod(lambda: None))
+    cfg = OmegaConf.load(
+        _ROOT / "tests/e2e_tests/evaluations/go2_drive_dummy_mlp_eval.yaml"
+    ).env.eval
+    cfg.override_cfg.max_num_steps = 3
+    cfg.override_cfg.step_frequency = 1000
+    cfg.max_episode_steps = None
+    cfg.auto_reset = auto_reset
+    env = RealWorldEnv(
+        cfg, num_envs=1, seed_offset=0, total_num_processes=1, worker_info=None
+    )
+    try:
+        robot = env.env.envs[0].unwrapped
+        step = Mock(wraps=robot.step)
+        reset = Mock(wraps=robot.reset)
+        monkeypatch.setattr(robot, "step", step)
+        monkeypatch.setattr(robot, "reset", reset)
+        actions = np.zeros((1, 2, 3), dtype=np.float32)
+        initial, _ = env.reset()
+        assert set(initial) == {"states", "task_descriptions"}
+        assert initial["states"].shape == (1, 35)
+        obs, _, _, _, infos = env.chunk_step(actions)
+        torch.testing.assert_close(obs[0]["states"], initial["states"])
+        assert infos[-1]["executed_mask"].tolist() == [[True, True]]
+
+        obs, rewards, terminated, truncated, infos = env.chunk_step(actions)
+        assert step.call_count == 3
+        assert reset.call_count == 1 + int(auto_reset)
+        assert len(obs) == len(infos) == 2
+        assert rewards.tolist() == [[0, 0]] and not terminated.any()
+        assert truncated.tolist() == [[not auto_reset, auto_reset]]
+        assert infos[-1]["executed_mask"].tolist() == [[True, False]]
+        assert torch.equal(infos[-1]["executed_mask"], infos[-1]["valid_action_mask"])
+        end_info = infos[-1]["final_info"] if auto_reset else infos[-1]
+        assert end_info["episode"]["episode_len"].item() == 3
+        assert end_info["intervene_action"].shape == (1, 6)
+        end_obs = infos[-1]["final_observation"] if auto_reset else obs[-1]
+        torch.testing.assert_close(end_obs["states"], obs[0]["states"])
+
+        if not auto_reset:
+            with pytest.raises(RuntimeError, match="Reset"):
+                env.step(actions[:, 0])
+            _, rewards, terminated, truncated, infos = env.chunk_step(actions)
+            assert not rewards.any() and not terminated.any() and not truncated.any()
+            assert infos[-1]["executed_mask"].tolist() == [[False, False]]
+            assert env.elapsed_steps.tolist() == [3]
+            assert step.call_count == 3 and reset.call_count == 1
+            env.reset()
+        env.chunk_step(actions)
+        assert step.call_count == 5 and reset.call_count == 2
+        assert env.elapsed_steps.tolist() == [2]
+    finally:
+        env.close()
+
+
+def test_piper_wrapper_preserves_configured_camera_and_episode_limit(monkeypatch):
+    from rlinf.envs.real.env import RealWorldEnv
+
+    monkeypatch.setattr(RealWorldEnv, "realworld_setup", staticmethod(lambda: None))
+    cfg = OmegaConf.load(_ROOT / "examples/embodiment/config/env/piper_reach.yaml")
+    cfg.override_cfg = {"is_dummy": True, "max_num_steps": 1, "step_frequency": 1000}
+    cfg.max_episode_steps = 2
+    env = RealWorldEnv(
+        cfg, num_envs=1, seed_offset=0, total_num_processes=1, worker_info=None
+    )
+    try:
+        with pytest.raises(KeyError, match="frames"):
+            env.reset()
+        env.main_image_key = None
+        env.reset()
+        action = np.zeros((1, env.action_space.shape[-1]), dtype=np.float32)
+        for expected in (False, True):
+            _, _, _, truncated, _ = env.step(action, auto_reset=False)
+            assert truncated.item() == expected
+    finally:
+        env.close()
 
 
 def test_all_task_ids_are_registered():
@@ -1465,9 +1548,11 @@ def test_every_entry_point_resolves():
 
 
 def test_task_tables_cover_the_wrapped_robots():
-    from rlinf.envs.real import dosw1, franka, xsquare
+    from rlinf.envs.real import dosw1, franka, go2, xsquare
 
-    declared = set(franka.TASKS) | set(dosw1.TASKS) | set(xsquare.TASKS)
+    declared = (
+        set(franka.TASKS) | set(dosw1.TASKS) | set(go2.TASKS) | set(xsquare.TASKS)
+    )
 
     # GimArm registers its environment class without a wrapper factory.
     assert declared == EXPECTED_IDS - {"GimArmPegInsertionEnv-v1"}

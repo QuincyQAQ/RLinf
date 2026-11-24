@@ -49,6 +49,155 @@ def _env(env_type: str, total_num_envs: int, **fields) -> dict:
     }
 
 
+@pytest.mark.parametrize("failure", ["timeout", "eof"])
+def test_isaaclab_startup_failure_reaps_subprocess(failure):
+    import multiprocessing as mp
+    import time
+
+    from rlinf.envs.sim.isaaclab.venv import SubProcIsaacLabEnv
+
+    def make_env():
+        if failure == "timeout":
+            time.sleep(60)
+        raise RuntimeError("simulator initialization failed")
+
+    env = SubProcIsaacLabEnv(make_env, timeout=0.1 if failure == "timeout" else 30)
+    pid = env.isaac_lab_process.pid
+    try:
+        with pytest.raises(
+            TimeoutError if failure == "timeout" else (EOFError, ConnectionResetError)
+        ):
+            env.device()
+        assert all(child.pid != pid for child in mp.active_children())
+    finally:
+        env.close()
+
+
+def test_isaaclab_subprocess_transports_steps_and_closes_once(tmp_path):
+    from rlinf.envs.sim.isaaclab.venv import SubProcIsaacLabEnv
+
+    class Simulator:
+        device = "cpu"
+
+        def reset(self, seed, env_ids=None):
+            return seed, env_ids
+
+        def step(self, action):
+            return action
+
+        def close(self):
+            (tmp_path / "task_closed").touch(exist_ok=False)
+
+    class App:
+        def close(self):
+            (tmp_path / "app_closed").touch(exist_ok=False)
+
+    env = SubProcIsaacLabEnv(lambda: (Simulator(), App()))
+    try:
+        assert env.device() == "cpu"
+        seed, ids = env.reset(seed=3, env_ids=torch.tensor([1, 2]))
+        assert seed == 3 and ids.tolist() == [1, 2]
+        action = torch.randn(2, 12)
+        assert torch.equal(env.step(action), action)
+    finally:
+        env.close()
+    env.close()
+    assert (tmp_path / "task_closed").exists() and (tmp_path / "app_closed").exists()
+
+
+@pytest.mark.parametrize(
+    "auto_reset,ignore_terminations", [(False, False), (True, True)]
+)
+def test_go2_rejects_episode_modes_its_simulator_cannot_honor(
+    auto_reset, ignore_terminations
+):
+    from rlinf.envs.sim.isaaclab.tasks.go2 import Go2IsaacLabEnv
+
+    cfg = OmegaConf.create(
+        {"auto_reset": auto_reset, "ignore_terminations": ignore_terminations}
+    )
+    with pytest.raises(
+        ValueError, match="auto_reset=true and ignore_terminations=false"
+    ):
+        Go2IsaacLabEnv(cfg, 2)
+
+
+def test_go2_rough_action_boundary_and_terminal_observation(monkeypatch):
+    import sys
+    from types import SimpleNamespace
+
+    from rlinf.envs import get_env_cls
+    from rlinf.envs.sim.isaaclab.tasks.go2 import ROUGH, Go2IsaacLabEnv, _make_go2_env
+
+    cfg = OmegaConf.create({"seed": 0, "init_params": {"id": ROUGH}})
+    assert get_env_cls("isaaclab", cfg) is Go2IsaacLabEnv
+
+    class Manager:
+        def __init__(self, cfg):
+            self.device = "cpu"
+            self.episode_length_buf = torch.zeros(2, dtype=torch.long)
+            self.action_manager = SimpleNamespace(total_action_dim=12)
+            self.observation_manager = SimpleNamespace(
+                group_obs_dim={"policy": (235,)}, compute=self.compute
+            )
+            self.cfg = cfg
+
+        def compute(self, update_history):
+            assert not update_history
+            torch.rand(1)
+            return {"policy": torch.full((2, 235), 7.0)}
+
+        def _reset_idx(self, ids):
+            self.episode_length_buf[ids] = 0
+
+        def reset(self, env_ids):
+            return {"policy": torch.zeros(2, 235)}, {}
+
+        def step(self, actions):
+            self._reset_idx(torch.tensor([0]))
+            obs = {"policy": torch.zeros(2, 235)}
+            return (
+                obs,
+                actions[:, 0],
+                torch.tensor([True, False]),
+                torch.zeros(2, dtype=torch.bool),
+                {},
+            )
+
+    task_cfg = SimpleNamespace(
+        scene=SimpleNamespace(), sim=SimpleNamespace(dt=0.005), decimation=4
+    )
+    modules = {
+        "isaaclab.app": SimpleNamespace(
+            AppLauncher=lambda **kw: SimpleNamespace(app=None)
+        ),
+        "envs.registry": SimpleNamespace(register_tasks=lambda: None),
+        "isaaclab.envs": SimpleNamespace(ManagerBasedRLEnv=Manager),
+        "isaaclab_tasks.utils": SimpleNamespace(
+            load_cfg_from_registry=lambda *args: task_cfg
+        ),
+    }
+    for name, module in modules.items():
+        monkeypatch.setitem(sys.modules, name, module)
+
+    task, _ = _make_go2_env(cfg.init_params, cfg.seed, 2, max_episode_steps=7)
+    assert task.task.max_episode_length == 7
+    assert task.task.cfg.episode_length_s == pytest.approx(0.14)
+    task.reset()
+    assert (task.task.episode_length_buf < 7).all()
+    state = torch.get_rng_state()
+    actions = torch.tensor([[-150.0] * 12, [145.0] * 12])
+    obs, reward, _, _, info = task.step(actions)
+    assert torch.equal(torch.get_rng_state(), state)
+    assert reward.tolist() == [-100.0, 100.0]
+    assert obs["states"].eq(0).all()
+    assert info["final_observation"]["states"][0].eq(7).all()
+    assert info["_final_observation"].tolist() == [True, False]
+    actions[1, 0] = float("nan")
+    with pytest.raises(FloatingPointError):
+        task.step(actions)
+
+
 def _hetero_mode(**envs: dict):
     return OmegaConf.create({"envs": envs})
 
