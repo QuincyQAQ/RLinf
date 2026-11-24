@@ -1,0 +1,64 @@
+{
+  "benchmark_commit": "743ac04d9543b04b7854f1100bfa0cc69c993106",
+  "isaaclab_commit": "37ddf626871758333d6ed89cf64ad702aef127d0",
+  "archive": {
+    "url": "https://raw.githubusercontent.com/QuincyQAQ/RLinf/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/artifacts/benchmark_runtime.tar.gz",
+    "sha256": "6ccf9a2c33bf84e90a6f8bffb5d56786909f755588fdc6ff980d12fd646c033a"
+  },
+  "files": [
+    {
+      "path": "models/A/baseline.pt",
+      "source": "benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/model_1499.pt",
+      "sha256": "3bead8f500d495b299b72724c8ac1e998d525f2d7984826916638bcfbd99a463",
+      "archive_member": "benchmark/logs/rsl_rl/unitree_go2_a2_baseline_2048_seeds/2026-11-19_20-27-02_A2_omni_2048_s0/model_1499.pt"
+    },
+    {
+      "path": "models/A/ppo.pt",
+      "source": "benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_training/2026-11-20_11-32-33_A2_omni_2048_s0/model_999.pt",
+      "sha256": "f2e50853d4bacf88e24f5de608e1e4f5f9b327f133ae274469519e34bd4243f0",
+      "archive_member": "benchmark/logs/rsl_rl/a2_postbaseline_14029743_rsl_control_training/2026-11-20_11-32-33_A2_omni_2048_s0/model_999.pt"
+    },
+    {
+      "path": "models/A/rlinf.pt",
+      "source": "outputs/fullppo_huber_A2_14029743/rlinf_huber/training/policy.pt",
+      "sha256": "88884798cd6ba7885a5a9dfcff4db5b0d3a83f15ad9fbf253c27716ee98afc39",
+      "url": "https://raw.githubusercontent.com/QuincyQAQ/RLinf/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/outputs/fullppo_huber_A2_14029743/rlinf_huber/training/policy.pt"
+    },
+    {
+      "path": "models/B/baseline.pt",
+      "source": "benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/model_2999.pt",
+      "sha256": "75ce9c0f82178884444dd40331ecf34905b162e29f45b5a40d54cab3ad8891f3",
+      "archive_member": "benchmark/logs/rsl_rl/b1_diagnostic_14032252/2026-11-20_13-43-23_B1_rough_2048_s0/model_2999.pt"
+    },
+    {
+      "path": "models/B/ppo.pt",
+      "source": "benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_training/2026-11-20_15-38-00_B1_rough_2048_s0/model_999.pt",
+      "sha256": "6896797e4c2c944357b54e3d48e6ba743108fc72d257fcbdc08a76285ba85012",
+      "archive_member": "benchmark/logs/rsl_rl/b1_postbaseline_14032301_rsl_control_training/2026-11-20_15-38-00_B1_rough_2048_s0/model_999.pt"
+    },
+    {
+      "path": "models/B/rlinf.pt",
+      "source": "outputs/fullppo_huber_B1_14032301/rlinf_huber/training/policy.pt",
+      "sha256": "83f15a745391a34388b1e3cfcecc2833dcfec9313c7a1a384964855cbf1f65ba",
+      "url": "https://raw.githubusercontent.com/QuincyQAQ/RLinf/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/outputs/fullppo_huber_B1_14032301/rlinf_huber/training/policy.pt"
+    },
+    {
+      "path": "models/C/baseline.pt",
+      "source": "benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_2112.pt",
+      "sha256": "c9cd3187d058b1ff1ae172c5a947adfff6b60922de451aa4184408b6ba67aff1",
+      "archive_member": "benchmark/logs/rsl_rl/unitree_go2_b2_posture_apr15_refined_1024_seeds/2026-11-19_20-31-52_B2_stairs_posture_apr15_refined_1024_s0/model_2112.pt"
+    },
+    {
+      "path": "models/C/ppo.pt",
+      "source": "benchmark/logs/rsl_rl/b2_postbaseline_14025574_rsl_control_training/2026-11-20_02-21-33_B2_stairs_posture_apr15_refined_1024_s0/model_960.pt",
+      "sha256": "aa5b5ca30f514403c2d2a4748a32679dbdec777d5b619e8a501738acbac0aa5d",
+      "archive_member": "benchmark/logs/rsl_rl/b2_postbaseline_14025574_rsl_control_training/2026-11-20_02-21-33_B2_stairs_posture_apr15_refined_1024_s0/model_960.pt"
+    },
+    {
+      "path": "models/C/rlinf.pt",
+      "source": "outputs/b2_postbaseline_14025574/rlinf_conservative_huber/training/policy.pt",
+      "sha256": "a721c3e5d94758f9b9277d93b80e04ae2aee2eebbea391f1c5e282238b4e39a5",
+      "url": "https://raw.githubusercontent.com/QuincyQAQ/RLinf/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/outputs/b2_postbaseline_14025574/rlinf_conservative_huber/training/policy.pt"
+    }
+  ]
+}

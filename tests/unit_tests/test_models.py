@@ -18,13 +18,16 @@ from __future__ import annotations
 
 import asyncio
 import copy
+import hashlib
 import importlib.util
 import inspect
+import json
 import logging
 import math
 import os
 import pickle
 import random
+import shutil
 import sys
 import time
 from pathlib import Path
@@ -36,7 +39,7 @@ import pytest
 import torch
 from omegaconf import OmegaConf
 
-from rlinf.algorithms.losses import compute_ppo_critic_loss
+from rlinf.algorithms.losses import compute_ppo_actor_loss, compute_ppo_critic_loss
 from rlinf.algorithms.refl_scorers import build_refl_scorer, register_refl_scorer
 from rlinf.config import SupportedModel, validate_embodied_cfg
 from rlinf.hybrid_engines.fsdp.utils import get_fsdp_wrap_policy
@@ -70,6 +73,309 @@ from rlinf.utils.env_helpers.delay_sampler import (
 )
 from rlinf.workers.rollout.phyai import phyai_rollout_worker
 from rlinf.workers.rollout.phyai.phyai_rollout_worker import PhyAIRolloutWorker
+
+
+def test_go2_audit_checks_models_without_result_records(tmp_path, monkeypatch):
+    from examples.embodiment.go2_abc import audit
+    from examples.embodiment.go2_abc.policy import Go2Policy
+
+    data = tmp_path / "data"
+    files = []
+    checkpoint = tmp_path / "policy.pt"
+    torch.save({"model_state_dict": Go2Policy().state_dict()}, checkpoint)
+    checksum = audit.digest(checkpoint)
+    for task in "ABC":
+        for group in ("baseline", "ppo", "rlinf"):
+            relative = f"models/{task}/{group}.pt"
+            target = data / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.hardlink_to(checkpoint)
+            files.append({"path": relative, "sha256": checksum})
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(json.dumps({"files": files}))
+    monkeypatch.setattr(audit, "HERE", tmp_path)
+
+    assert audit.audit(data) == {"models": 9, "device": "cpu", "status": "passed"}
+    files[0]["sha256"] = "incorrect"
+    manifest.write_text(json.dumps({"files": files}))
+    with pytest.raises(AssertionError, match="models/A/baseline.pt"):
+        audit.audit(data)
+
+    checkpoint.unlink()
+    incomplete = Go2Policy().state_dict()
+    incomplete.pop("actor.0.weight")
+    torch.save({"model_state_dict": incomplete}, checkpoint)
+    first = data / files[0]["path"]
+    first.unlink()
+    first.hardlink_to(checkpoint)
+    files[0]["sha256"] = audit.digest(checkpoint)
+    manifest.write_text(json.dumps({"files": files}))
+    with pytest.raises(RuntimeError, match="Missing key"):
+        audit.audit(data)
+
+
+@pytest.mark.parametrize("task", [None, "A", "B", "C"])
+def test_go2_prepare_task_stages_only_its_baseline(tmp_path, monkeypatch, task):
+    from examples.embodiment.go2_abc import prepare_data
+
+    manifest_dir = tmp_path / "manifest"
+    manifest_dir.mkdir()
+    source = tmp_path / "source"
+    files = []
+    for name in "ABC":
+        content = f"baseline {name}".encode()
+        source_file = source / f"{name}.pt"
+        source_file.parent.mkdir(exist_ok=True)
+        source_file.write_bytes(content)
+        files.append(
+            {
+                "path": f"models/{name}/baseline.pt",
+                "source": source_file.name,
+                "sha256": hashlib.sha256(content).hexdigest(),
+            }
+        )
+    (source / "history.json").write_bytes(b"history")
+    files.append(
+        {
+            "path": "raw/A/baseline/23456.json",
+            "source": "history.json",
+            "sha256": hashlib.sha256(b"history").hexdigest(),
+        }
+    )
+    (manifest_dir / "manifest.json").write_text(json.dumps({"files": files}))
+    monkeypatch.setattr(prepare_data, "HERE", manifest_dir)
+    destination = tmp_path / "data"
+    argv = ["prepare_data", "--data", str(destination), "--source", str(source)]
+    if task:
+        argv += ["--task", task]
+    monkeypatch.setattr(sys, "argv", argv)
+    prepare_data.main()
+    expected_tasks = task or "ABC"
+    expected_paths = [f"models/{name}/baseline.pt" for name in expected_tasks]
+    if task is None:
+        expected_paths.append("raw/A/baseline/23456.json")
+    assert (
+        sorted(
+            path.relative_to(destination).as_posix()
+            for path in destination.rglob("*")
+            if path.is_file()
+        )
+        == expected_paths
+    )
+    for name in expected_tasks:
+        assert (
+            destination / f"models/{name}/baseline.pt"
+        ).read_bytes() == f"baseline {name}".encode()
+    (destination / f"models/{expected_tasks[0]}/baseline.pt").write_bytes(b"corrupt")
+    with pytest.raises(ValueError, match="SHA256 mismatch"):
+        prepare_data.main()
+    (destination / f"models/{expected_tasks[0]}/baseline.pt").unlink()
+    (source / f"{expected_tasks[0]}.pt").write_bytes(b"corrupt")
+    with pytest.raises(ValueError, match="SHA256 mismatch"):
+        prepare_data.main()
+    assert not (destination / f"models/{expected_tasks[0]}/baseline.pt").exists()
+
+
+@pytest.mark.parametrize("task", ["A", "B", "C"])
+@pytest.mark.parametrize("group", ["baseline", "ppo", "rlinf"])
+def test_go2_run_checks_only_selected_baseline(tmp_path, monkeypatch, task, group):
+    import rlinf
+    from examples.embodiment.go2_abc import run
+
+    project = tmp_path / "project"
+    here = project / "examples/embodiment/go2_abc"
+    here.mkdir(parents=True)
+    data = tmp_path / "data"
+    baseline = data / f"models/{task}/baseline.pt"
+    baseline.parent.mkdir(parents=True)
+    baseline.write_bytes(b"baseline")
+    manifest = {
+        "files": [
+            {
+                "path": f"models/{task}/baseline.pt",
+                "sha256": hashlib.sha256(b"baseline").hexdigest(),
+            }
+        ],
+        "benchmark_commit": "benchmark-revision",
+        "isaaclab_commit": "isaaclab-revision",
+    }
+    (here / "manifest.json").write_text(json.dumps(manifest))
+    (here / "config").mkdir()
+    config = {"entry": "eval.py", "argv": ["--checkpoint", "initial"], "env": {}}
+    (here / f"config/{task}_baseline.json").write_text(json.dumps(config))
+    (here / f"config/{task}_ppo.json").write_text(json.dumps(config))
+    monkeypatch.setattr(run, "HERE", here)
+    monkeypatch.setattr(rlinf, "__file__", str(project / "rlinf/__init__.py"))
+    monkeypatch.setenv("GO2_ABC_DATA", str(data))
+    monkeypatch.setenv("GO2_ABC_RUNTIME", str(tmp_path / "runtime"))
+    monkeypatch.delenv("SLURM_JOB_ID", raising=False)
+    with pytest.raises(RuntimeError, match="allocated A40 Slurm job"):
+        run.launch(f"{task}_{group}", execute=True)
+    monkeypatch.setenv("SLURM_JOB_ID", "123")
+
+    def revision(command, **kwargs):
+        return {"benchmark": "benchmark-revision", "IsaacLab": "isaaclab-revision"}[
+            Path(command[2]).name
+        ]
+
+    monkeypatch.setattr(run.subprocess, "check_output", lambda *args, **kwargs: "wrong")
+    with pytest.raises(RuntimeError, match="Expected benchmark at"):
+        run.launch(f"{task}_{group}", execute=True)
+    monkeypatch.setattr(run.subprocess, "check_output", revision)
+
+    class ReachedExecution(Exception):
+        pass
+
+    def stop_before_execution(*args, **kwargs):
+        if task == "B":
+            assert kwargs["env"]["GO2_B1_NUMERIC_GUARD"] == "1"
+        raise ReachedExecution
+
+    monkeypatch.setattr(run.subprocess, "run", stop_before_execution)
+    with pytest.raises(ReachedExecution):
+        run.launch(f"{task}_{group}", execute=True)
+    shutil.rmtree(data / "runs")
+    baseline.write_bytes(b"corrupt")
+    with pytest.raises(ValueError, match="SHA256 mismatch"):
+        run.launch(f"{task}_{group}", execute=True)
+
+
+def test_embodied_entry_registers_external_models_before_validation(tmp_path):
+    import subprocess
+
+    project = Path(__file__).resolve().parents[2]
+    environment = dict(
+        os.environ,
+        RLINF_EXT_MODULE="examples.embodiment.go2_abc.extension",
+        GO2_ABC_RUNTIME=str(tmp_path),
+    )
+    script = """
+import examples.embodiment.train_embodied_agent
+from rlinf.config import EMBODIED_MODEL, SupportedModel
+from rlinf.envs.sim.isaaclab import REGISTER_ISAACLAB_ENVS
+assert SupportedModel('go2_policy') in EMBODIED_MODEL
+assert 'MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0' in REGISTER_ISAACLAB_ENVS
+"""
+    subprocess.run(
+        [sys.executable, "-c", script],
+        cwd=project,
+        env=environment,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+
+def test_hf_rollout_training_seed_controls_checkpoint_sampling(tmp_path):
+    from examples.embodiment.go2_abc.extension import build_policy
+    from examples.embodiment.go2_abc.policy import Go2Policy
+    from rlinf.utils.utils import get_rng_state, set_rng_state
+    from rlinf.workers.rollout.hf.huggingface_worker import MultiStepRolloutWorker
+
+    register_model("go2_policy", build_policy, force=True)
+    checkpoint = tmp_path / "policy.pt"
+    torch.save({"model_state_dict": Go2Policy().state_dict()}, checkpoint)
+    cfg = OmegaConf.create(
+        {
+            "actor": {"seed": 0},
+            "runner": {},
+            "rollout": {"model": {}},
+        }
+    )
+    model_cfg = OmegaConf.create(
+        {
+            "model_type": "go2_policy",
+            "precision": "32",
+            "is_lora": False,
+            "load_to_device": False,
+            "initial_checkpoint": str(checkpoint),
+            "distribution_safety_patch": False,
+        }
+    )
+    previous_rng = get_rng_state()
+    try:
+        actions = []
+        for rank, inherited_seed in ((0, 111), (0, 222), (1, 111)):
+            torch.manual_seed(inherited_seed)
+            worker = object.__new__(MultiStepRolloutWorker)
+            worker._rank = rank
+            worker.cfg = cfg
+            worker.model_cfg = model_cfg
+            worker.algorithm_cfg = {}
+            worker.enable_train = True
+            worker.enable_opd = worker.enable_dagger = False
+            worker.enable_rlt = worker.enable_offload = False
+            worker.enable_cuda_graph = worker.value_only_bootstrap = False
+            worker.expert_model = worker.rlt_feature_model = None
+            worker.init_worker()
+            sampled, _ = worker.hf_model.predict_action_batch(
+                {"states": torch.zeros(4, 235)}
+            )
+            actions.append(sampled)
+        torch.testing.assert_close(actions[0], actions[1], rtol=0, atol=0)
+        assert not torch.equal(actions[0], actions[2])
+    finally:
+        set_rng_state(previous_rng)
+
+
+def test_go2_checkpoint_rejects_pickled_module(tmp_path):
+    import pickle
+
+    from examples.embodiment.go2_abc.policy import Go2Policy
+
+    checkpoint = tmp_path / "policy.pt"
+    torch.save(
+        {"model_state_dict": Go2Policy().state_dict(), "extra": torch.nn.Identity()},
+        checkpoint,
+    )
+    with pytest.raises(pickle.UnpicklingError):
+        Go2Policy(str(checkpoint))
+
+
+def test_go2_checkpoint_supports_ppo_update_and_analytical_kl(tmp_path):
+    from examples.embodiment.go2_abc.policy import Go2Policy
+
+    policy = Go2Policy()
+    checkpoint = tmp_path / "policy.pt"
+    torch.save({"model_state_dict": policy.state_dict()}, checkpoint)
+    restored = Go2Policy(str(checkpoint))
+    for actual, expected in zip(
+        restored.parameters(), policy.parameters(), strict=True
+    ):
+        torch.testing.assert_close(actual, expected, rtol=0, atol=0)
+    observations = torch.randn(8, 235)
+    _, rollout = restored.predict_action_batch({"states": observations})
+    batch = {key: value.clone() for key, value in rollout["forward_inputs"].items()}
+    output = restored(forward_inputs=batch)
+    torch.testing.assert_close(output["kl_divergence"], torch.zeros(8))
+    actor_loss, _ = compute_ppo_actor_loss(
+        output["logprobs"].sum(-1),
+        rollout["prev_logprobs"].clone().sum(-1),
+        0.2,
+        0.2,
+        torch.ones(8),
+    )
+    previous = rollout["prev_values"].clone()
+    critic_loss, _ = compute_ppo_critic_loss(
+        output["values"], previous + 1, previous, 0.2, 10.0
+    )
+    optimizer = torch.optim.Adam(restored.parameters(), lr=3e-4)
+    (actor_loss + critic_loss).backward()
+    optimizer.step()
+    for actual_component, initial_component in (
+        (restored.actor, policy.actor),
+        (restored.critic, policy.critic),
+    ):
+        assert any(
+            not torch.equal(actual, expected)
+            for actual, expected in zip(
+                actual_component.parameters(),
+                initial_component.parameters(),
+                strict=True,
+            )
+        ), "PPO did not update both actor and critic"
+    assert (restored(forward_inputs=batch)["kl_divergence"] > 0).all()
 
 
 @pytest.mark.parametrize("layout", ["hwc", "chw"])

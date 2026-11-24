@@ -1,0 +1,20 @@
+defaults:
+- _common
+- _self_
+env:
+  train:
+    task_key: B
+    init_params:
+      id: MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0
+    validation_output: ${oc.env:GO2_ABC_DATA}/runs/B_rlinf/environment
+    video_cfg:
+      video_base_dir: ${oc.env:GO2_ABC_DATA}/runs/B_rlinf/video
+    continuation_start_iteration: 3000
+    b1_numeric_guard: true
+actor:
+  model:
+    initial_checkpoint: ${oc.env:GO2_ABC_DATA}/models/B/baseline.pt
+    distribution_safety_patch: true
+runner:
+  logger:
+    experiment_name: B_rlinf

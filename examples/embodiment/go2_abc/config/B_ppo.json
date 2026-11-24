@@ -1,0 +1,31 @@
+{
+  "id": "B_ppo",
+  "entry": "${GO2_ABC_RUNTIME}/a40/train_continuation_rsl.py",
+  "argv": [
+    "--task",
+    "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0",
+    "--headless",
+    "--seed",
+    "0",
+    "--num_envs",
+    "2048",
+    "--max_iterations",
+    "1000",
+    "--no-stand_reward_anneal",
+    "--no-posture_reward_anneal",
+    "--distribution_safety_patch",
+    "--plot_learning_curves",
+    "--plot_smoothing",
+    "25",
+    "--experiment_name",
+    "B_ppo",
+    "--run_name",
+    "B_ppo_s0",
+    "--kit_args=--/app/extensions/excluded/0=omni.kit.telemetry --/persistent/isaac/asset_root/cloud=/workspace/go2/assets/isaac_sim_5.1",
+    "--pretrained_checkpoint",
+    "${GO2_ABC_DATA}/models/B/baseline.pt"
+  ],
+  "env": {
+    "GO2_B1_NUMERIC_GUARD": "1"
+  }
+}

@@ -1,0 +1,21 @@
+defaults:
+- _common
+- _self_
+env:
+  train:
+    task_key: C
+    total_num_envs: 1024
+    init_params:
+      id: MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0
+    validation_output: ${oc.env:GO2_ABC_DATA}/runs/C_rlinf/environment
+    video_cfg:
+      video_base_dir: ${oc.env:GO2_ABC_DATA}/runs/C_rlinf/video
+    continuation_start_iteration: 2200
+actor:
+  model:
+    initial_checkpoint: ${oc.env:GO2_ABC_DATA}/models/C/baseline.pt
+  micro_batch_size: 6144
+  global_batch_size: 6144
+runner:
+  logger:
+    experiment_name: C_rlinf
