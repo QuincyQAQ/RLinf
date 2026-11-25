@@ -49,7 +49,11 @@ def evaluation_args(
     kit = "--/app/extensions/excluded/0=omni.kit.telemetry"
     if asset_root is not None:
         kit += f" --/persistent/isaac/asset_root/cloud={asset_root.resolve()}"
-    return [*argv, f"--kit_args={kit}"]
+    return [
+        *argv,
+        f"--kit_args={kit}",
+        "env.rewards.base_height.func=rlinf.envs.sim.isaaclab.tasks.go2:terrain_base_height_l2",
+    ]
 
 
 def main() -> None:
@@ -85,7 +89,12 @@ def main() -> None:
     for seed in (23456, 34567):
         directory = output / str(seed)
         argv = evaluation_args(config, policy, directory, args.asset_root)
-        env = dict(os.environ, GO2_EVAL_SEED=str(seed))
+        imports = [str(PROJECT), str(RUNTIME / "benchmark")]
+        if os.environ.get("PYTHONPATH"):
+            imports.append(os.environ["PYTHONPATH"])
+        env = dict(
+            os.environ, GO2_EVAL_SEED=str(seed), PYTHONPATH=os.pathsep.join(imports)
+        )
         subprocess.run([sys.executable, str(entry), *argv], env=env, check=True)
         _reference_python(
             "run.verify_evaluation(Path(sys.argv[1]), 'C', sys.argv[2:])",

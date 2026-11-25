@@ -214,13 +214,16 @@ def test_go2_rough_action_boundary_and_terminal_observation(go2_manager_cfg):
         task.step(actions)
 
 
-def test_go2_rough_base_height_uses_ground_returns(go2_manager_cfg):
+@pytest.mark.parametrize("task_name", ["FLAT", "ROUGH", "STAIRS"])
+def test_go2_base_height_uses_ground_returns(go2_manager_cfg, task_name):
     from types import SimpleNamespace
 
-    from rlinf.envs.sim.isaaclab.tasks.go2 import ROUGH, _make_go2_env
+    from rlinf.envs.sim.isaaclab.tasks import go2
 
-    task, _ = _make_go2_env(OmegaConf.create({"id": ROUGH}), 0, 3, 1000)
+    params = OmegaConf.create({"id": getattr(go2, task_name)})
+    task, _ = go2._make_go2_env(params, 0, 3, 1000)
     term = task.task.cfg.rewards.base_height
+    assert term.func is go2.terrain_base_height_l2
     generator = torch.Generator().manual_seed(41)
     hits = torch.randn(3, 187, 3, generator=generator)
     root = torch.randn(3, 3, generator=generator)
@@ -248,16 +251,10 @@ def test_go2_rough_base_height_uses_ground_returns(go2_manager_cfg):
     root[2, 0] = torch.nan
     with pytest.raises(FloatingPointError, match="root position"):
         term.func(task.task, **term.params)
-
-
-@pytest.mark.parametrize("task_name", ["FLAT", "STAIRS"])
-def test_go2_other_tasks_keep_registered_height_reward(go2_manager_cfg, task_name):
-    from rlinf.envs.sim.isaaclab.tasks import go2
-
-    params = OmegaConf.create({"id": getattr(go2, task_name)})
-    original = go2_manager_cfg.rewards.base_height.func
-    task, _ = go2._make_go2_env(params, 0, 2, 1000)
-    assert task.task.cfg.rewards.base_height.func is original
+    root[2, 0] = 0
+    root[0, 2] = 1e30
+    with pytest.raises(FloatingPointError, match="height penalty"):
+        term.func(task.task, **term.params)
 
 
 def test_go2_bootstrap_observation_mixes_terminal_and_continuing_rows():

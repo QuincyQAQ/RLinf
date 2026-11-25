@@ -89,6 +89,8 @@
 PPO 参考实验结果
 ----------------
 
+直接运行参考实现的 RSL-RL 训练或评测脚本时，将当前 RLinf 仓库加入 ``PYTHONPATH``，并在命令末尾加上 ``env.rewards.base_height.func=rlinf.envs.sim.isaaclab.tasks.go2:terrain_base_height_l2``，即可与 RLinf PPO 使用同一个地形高度奖励。
+
 在 `A40 参考实验 <https://github.com/QuincyQAQ/RLinf/blob/23f16691d4dede5dab949a5cbf7934f6021e7ddf/examples/embodiment/go2_abc/README.zh-CN.md#结果与离线检查>`_ 中，两种 PPO 都从各任务的同一份基线权重续训 1,000 次。表中列出成功率，括号内为成功回合数与总回合数，合并了评测种子 23456 和 34567 的全部回合。两组训练种子共用冻结的基线。任务 C 分别统计速度跟踪和仿真楼梯通过率。
 
 .. list-table::

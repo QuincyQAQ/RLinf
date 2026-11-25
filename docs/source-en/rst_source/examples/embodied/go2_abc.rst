@@ -89,6 +89,8 @@ The evaluator exports your trained weights to ``stairs-eval/policy.pt`` and runs
 Reference PPO Results
 ---------------------
 
+When running the reference RSL-RL trainer or evaluator directly, put this RLinf checkout on ``PYTHONPATH`` and append ``env.rewards.base_height.func=rlinf.envs.sim.isaaclab.tasks.go2:terrain_base_height_l2`` to the command to use the same terrain reward as RLinf PPO.
+
 In the `A40 reference experiments <https://github.com/QuincyQAQ/RLinf/blob/23f16691d4dede5dab949a5cbf7934f6021e7ddf/examples/embodiment/go2_abc/README.md#results-and-offline-checks>`_, both PPO methods continued from the same task-specific baseline for 1,000 updates. Each cell gives the success rate and the number of successful episodes out of all episodes pooled across evaluation seeds 23456 and 34567. Both training seeds use the same frozen baseline. Task C measures velocity tracking and crossing the simulated stairs separately.
 
 .. list-table::
