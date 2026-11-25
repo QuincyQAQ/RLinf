@@ -52,50 +52,61 @@ Go2 高层运动控制
    * - 奖励
      - 固定为零，此检查不训练 policy。
 
-安装
-----
+安装与运行
+----------
 
-按 :doc:`安装说明 </rst_source/start/installation>` 准备 Python 3.11 的 RLinf 环境。在仓库根目录安装真机检查使用的固定版 SDK：
+.. tab-set::
 
-.. code-block:: bash
+   .. tab-item:: Go2 EDU
 
-   bash requirements/install.sh embodied --env go2_sport
-   source .venv/bin/activate
+      **1. 安装 SDK**
 
-CycloneDDS 依赖和机器人网络配置见固定版本的 `SDK 安装说明 <https://github.com/unitreerobotics/unitree_sdk2_python/tree/814556d15970dd2ecf1c9984e845ca02ab07e206>`_。控制电脑无需 GPU 或 policy 权重。
+      按 :doc:`安装说明 </rst_source/start/installation>` 准备 Python 3.11 的 RLinf 环境。在仓库根目录安装真机检查使用的固定版 SDK：
 
-运行
-----
+      .. code-block:: bash
 
-将 ``<interface>`` 替换为连接 Go2 的网卡名称。先预览指令，此步骤不建立 SDK 通道：
+         bash requirements/install.sh embodied --env go2_sport
+         source .venv/bin/activate
 
-.. code-block:: bash
+      CycloneDDS 依赖和机器人网络配置见固定版本的 `SDK 安装说明 <https://github.com/unitreerobotics/unitree_sdk2_python/tree/814556d15970dd2ecf1c9984e845ca02ab07e206>`_。控制电脑无需 GPU 或 policy 权重。
 
-   python -m examples.embodiment.go2_sport.run --interface <interface> --direction forward --dry-run
+      **2. 检查状态与运动**
 
-预览结果包含 ``hardware_access: false``。随后单独检查状态接收：
+      将 ``<interface>`` 替换为连接 Go2 的网卡名称。先预览指令，此步骤不建立 SDK 通道：
 
-.. code-block:: bash
+      .. code-block:: bash
 
-   python -m examples.embodiment.go2_sport.run --interface <interface> --readonly
+         python -m examples.embodiment.go2_sport.run --interface <interface> --direction forward --dry-run
 
-十次状态检查结果写入 ``outputs/go2_sport/``。如需从 ``rt/lowstate`` 读取一帧通过校验的关节和 IMU 数据，在新进程中启动只读订阅程序。
+      预览结果包含 ``hardware_access: false``。随后单独检查状态接收：
 
-.. code-block:: bash
+      .. code-block:: bash
 
-   python -m examples.embodiment.go2_abc.sdk2 --interface <interface>
+         python -m examples.embodiment.go2_sport.run --interface <interface> --readonly
 
-运动测试须保持原厂控制器启用，现场确认机器人已站立、场地空旷、遥控器可用，并关闭其他运动程序，再运行单个方向：
+      十次状态检查结果写入 ``outputs/go2_sport/``。如需从 ``rt/lowstate`` 读取一帧通过校验的关节和 IMU 数据，在新进程中启动只读订阅程序。
 
-.. code-block:: bash
+      .. code-block:: bash
 
-   python -m examples.embodiment.go2_sport.run --interface <interface> --direction forward
+         python -m examples.embodiment.go2_abc.sdk2 --interface <interface>
 
-完成现场检查后输入 ``GO``。方向可选 ``forward``、``backward``、``left``、``right``、``turn_left``、``turn_right``。每次只测一个方向，默认以 10 Hz 运行 1 秒；``--seconds 2`` 改为 2 秒。``--output <path>`` 可指定日志位置，已有文件不会被覆盖。
+      运动测试须保持原厂控制器启用，现场确认机器人已站立、场地空旷、遥控器可用，并关闭其他运动程序，再运行单个方向：
 
-.. warning::
+      .. code-block:: bash
 
-   停止请求和 SDK 低速估计均不能证明物理停稳。请直接观察机器人，运动未停止就使用遥控器。网络断开或进程故障可能导致软件无法请求停止。
+         python -m examples.embodiment.go2_sport.run --interface <interface> --direction forward
+
+      完成现场检查后输入 ``GO``。
+
+      平移方向可选 ``forward``、``backward``、``left`` 或 ``right``。
+
+      转向可选 ``turn_left`` 或 ``turn_right``。
+
+      每次只测一个方向，默认以 10 Hz 运行 1 秒。``--seconds 2`` 改为 2 秒。``--output <path>`` 可指定日志位置，已有文件不会被覆盖。
+
+      .. warning::
+
+         停止请求和 SDK 低速估计均不能证明物理停稳。请直接观察机器人，运动未停止就使用遥控器。网络断开或进程故障可能导致软件无法请求停止。
 
 可视化与结果
 ------------

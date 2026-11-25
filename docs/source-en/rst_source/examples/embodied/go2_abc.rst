@@ -3,51 +3,59 @@ Go2 Locomotion with PPO
 
 Train a 12-joint Go2 policy in Isaac Lab with RLinf PPO. Task A tracks body velocity on flat ground, B walks over rough terrain, and C climbs stairs. Each policy uses 48 proprioceptive and command values plus 187 terrain height samples.
 
-Installation
-------------
+**Prerequisites:** Prepare RLinf on an NVIDIA GPU machine using the :doc:`installation guide </rst_source/start/installation>`.
 
-Install the Go2 runtime (Isaac Lab 2.3.2 and Isaac Sim 5.1), then install the three task definitions from the pinned `Go2 locomotion benchmark <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env>`_ in the activated environment:
+Setup and Run
+-------------
 
-.. code-block:: bash
+.. tab-set::
 
-   bash requirements/install.sh embodied --env go2_abc
-   source .venv/bin/activate
-   uv pip install -r requirements/embodied/envs/go2_abc.txt
+   .. tab-item:: Isaac Lab
 
-Run ``python -c "import isaacsim"`` in the activated environment to answer the `NVIDIA license prompt <https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_python.html#running-isaac-sim>`_. For a batch job, you can set ``OMNI_KIT_ACCEPT_EULA=YES`` in the job environment after accepting the terms.
+      **1. Install the Go2 runtime**
 
-Prepare the Starting Weights
-----------------------------
+      Install the Go2 runtime (Isaac Lab 2.3.2 and Isaac Sim 5.1), then install the three task definitions from the pinned `Go2 locomotion benchmark <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env>`_ in the activated environment:
 
-The stairs recipe starts from the C baseline. Unzip the `reference experiment <https://github.com/QuincyQAQ/RLinf/archive/23f16691d4dede5dab949a5cbf7934f6021e7ddf.zip>`_ and move the extracted project directory to ``../go2-reference``. From the RLinf repository root, download and verify the weights.
+      .. code-block:: bash
 
-.. code-block:: bash
+         bash requirements/install.sh embodied --env go2_abc
+         source .venv/bin/activate
+         uv pip install -r requirements/embodied/envs/go2_abc.txt
 
-   python ../go2-reference/examples/embodiment/go2_abc/prepare_data.py --task C --data "${GO2_ABC_DATA:-$PWD/data/go2_abc}"
+      Run ``python -c "import isaacsim"`` in the activated environment to answer the `NVIDIA license prompt <https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_python.html#running-isaac-sim>`_. For a batch job, you can set ``OMNI_KIT_ACCEPT_EULA=YES`` in the job environment after accepting the terms.
 
-The C recipe reads ``models/C/baseline.pt`` under ``GO2_ABC_DATA`` (default ``data/go2_abc``). Use ``--task A`` or ``--task B`` for the other baselines. To use your own weights, set ``actor.model.model_path`` to a checkpoint with a 235-input, 12-action actor and matching critic. Set it to ``null`` to train from scratch.
+      **2. Prepare the starting weights**
 
-Run It
-------
+      The stairs recipe starts from the C baseline. Unzip the `reference experiment <https://github.com/QuincyQAQ/RLinf/archive/23f16691d4dede5dab949a5cbf7934f6021e7ddf.zip>`_ and move the extracted project directory to ``../go2-reference``. From the RLinf repository root, download and verify the weights.
 
-From the RLinf repository root, continue training the stairs policy.
+      .. code-block:: bash
 
-.. code-block:: bash
+         python ../go2-reference/examples/embodiment/go2_abc/prepare_data.py --task C --data "${GO2_ABC_DATA:-$PWD/data/go2_abc}"
 
-   bash examples/embodiment/run_embodiment.sh isaaclab_go2_c_ppo
+      The C recipe reads ``models/C/baseline.pt`` under ``GO2_ABC_DATA`` (default ``data/go2_abc``). Use ``--task A`` or ``--task B`` for the other baselines.
 
-Choose ``isaaclab_go2_a_ppo`` for flat ground or ``isaaclab_go2_b_ppo`` for rough terrain. By default A and B use 2,048 environments and C uses 1,024. The runner saves actor checkpoints every 50 updates for 1,000 updates. The launch log and run directory are under ``logs/``.
+      To use your own weights, set ``actor.model.model_path`` to a checkpoint with a 235-input, 12-action actor and matching critic. Set it to ``null`` to train from scratch.
 
-The Go2 actor and critic train together from the first update and share the learning rate set by ``actor.optim.lr``.
+      **3. Train the policy**
 
-For a local Isaac Sim 5.1 asset mirror, launch the same configuration with Hydra. Replace the asset path with the directory on your machine.
+      From the RLinf repository root, continue training the stairs policy.
 
-.. code-block:: bash
+      .. code-block:: bash
 
-   export GO2_ASSET_ROOT=/absolute/path/to/isaac_sim_5.1
-   python -m examples.embodiment.train_embodied_agent \
-     --config-path "$PWD/examples/embodiment/config" --config-name isaaclab_go2_c_ppo \
-     "env.train.init_params.asset_root=$GO2_ASSET_ROOT" "runner.logger.log_path=$PWD/logs/go2-stairs"
+         bash examples/embodiment/run_embodiment.sh isaaclab_go2_c_ppo
+
+      Choose ``isaaclab_go2_a_ppo`` for flat ground or ``isaaclab_go2_b_ppo`` for rough terrain. By default A and B use 2,048 environments and C uses 1,024. The runner saves actor checkpoints every 50 updates for 1,000 updates. The launch log and run directory are under ``logs/``.
+
+      The Go2 actor and critic train together from the first update and share the learning rate set by ``actor.optim.lr``.
+
+      For a local Isaac Sim 5.1 asset mirror, launch the same configuration with Hydra. Replace the asset path with the directory on your machine.
+
+      .. code-block:: bash
+
+         export GO2_ASSET_ROOT=/absolute/path/to/isaac_sim_5.1
+         python -m examples.embodiment.train_embodied_agent \
+           --config-path "$PWD/examples/embodiment/config" --config-name isaaclab_go2_c_ppo \
+           "env.train.init_params.asset_root=$GO2_ASSET_ROOT" "runner.logger.log_path=$PWD/logs/go2-stairs"
 
 Evaluate Your Stairs Checkpoint
 -------------------------------
@@ -143,7 +151,9 @@ Run the C baseline on the four synthetic frames from ``go2-reference``. Choose a
      --frames ../go2-reference/examples/embodiment/go2_abc/frames.example.jsonl \
      --output commands.jsonl
 
-For a trained RLinf actor or an RSL-RL checkpoint, replace ``--group baseline`` with ``--checkpoint path/to/policy.pt`` and select its task. To load weights by group (``baseline``, ``ppo``, or ``rlinf``), pass ``--data`` to override ``GO2_ABC_DATA``.
+For a trained RLinf actor or an RSL-RL checkpoint, replace ``--group baseline`` with ``--checkpoint path/to/policy.pt`` and select its task.
+
+To load weights by group (``baseline``, ``ppo``, or ``rlinf``), pass ``--data`` to override ``GO2_ABC_DATA``.
 
 To replay your own recording, follow the `sample frame format <https://github.com/QuincyQAQ/RLinf/blob/23f16691d4dede5dab949a5cbf7934f6021e7ddf/examples/embodiment/go2_abc/frames.example.jsonl>`_. Supply joint and IMU data plus measured body velocity and terrain heights. Record timestamps on one monotonic clock at 5 ms intervals. The policy updates every fourth frame. Express base and ground heights in the same world frame. Sample the yaw-aligned grid in 0.1 m steps, with y from −0.5 to 0.5 m and x from −0.8 to 0.8 m within each row.
 
