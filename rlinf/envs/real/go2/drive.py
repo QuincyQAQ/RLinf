@@ -14,7 +14,7 @@
 
 """Registered Go2 high-level drive task."""
 
-from typing import Any
+from typing import Any, Mapping
 
 from rlinf.robotics import Go2Config, RobotInfo
 from rlinf.scheduler import WorkerInfo
@@ -24,6 +24,20 @@ from .base import Go2Env, Go2EnvConfig
 
 class Go2DriveEnv(Go2Env):
     """Exercise state reception and body velocity commands without training."""
+
+    @staticmethod
+    def validate_env_config(
+        override_cfg: Mapping[str, Any], env_cfg: Mapping[str, Any]
+    ) -> None:
+        """Require the robot's stop to occur by the outer episode boundary."""
+        outer = env_cfg.get("max_episode_steps")
+        inner = override_cfg.get("max_num_steps", Go2EnvConfig.max_num_steps)
+        if outer is not None and isinstance(inner, int) and outer < inner:
+            raise ValueError(
+                f"Go2 max_episode_steps={outer} ends before the stop at "
+                f"max_num_steps={inner}. Set max_episode_steps to null or at "
+                "least max_num_steps."
+            )
 
     def __init__(
         self,

@@ -272,7 +272,7 @@ class Go2Base(MobileBase):
             try:
                 if set(action) != {"velocity"}:
                     raise ValueError("Go2 action must contain only 'velocity'.")
-                velocity = np.asarray(action["velocity"], dtype=np.float32)
+                velocity = np.array(action["velocity"], dtype=np.float32, copy=True)
                 limit = np.asarray([0.3, 0.3, 0.5], dtype=np.float32)
                 if (
                     velocity.shape != (3,)
@@ -285,7 +285,7 @@ class Go2Base(MobileBase):
                 with self._lock:
                     if not np.any(velocity):
                         self._stop()
-                        return {"velocity": velocity.copy()}
+                        return {"velocity": velocity}
                     if self.enable_motion is not True:
                         raise PermissionError(
                             "Go2 is read-only; enable_motion is false."
@@ -319,7 +319,7 @@ class Go2Base(MobileBase):
                     if code != 0:
                         raise RuntimeError(f"Move send returned {code}.")
                     self._deadline = command_deadline
-                return {"velocity": velocity.copy()}
+                return {"velocity": velocity}
             except BaseException:
                 # A prior watchdog stop may have preceded a stalled SDK write.
                 with self._lock:

@@ -129,11 +129,14 @@ class _Go2Task:
         episode = {"return": self.returns.clone(), "episode_len": self.lengths.clone()}
         info = {"episode": episode}
         if done.any():
-            terminal = self.task.terminal_observation
+            # Rollout-end value prediction uses the full batch, including continuing rows.
+            final_states = torch.where(
+                done[:, None], self.task.terminal_observation, obs["policy"]
+            )
             info.update(
                 final_observation={
-                    "states": terminal,
-                    "critic_states": terminal,
+                    "states": final_states,
+                    "critic_states": final_states,
                 },
                 final_info={"episode": episode},
                 _final_observation=done,

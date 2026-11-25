@@ -13,17 +13,12 @@
 # limitations under the License.
 
 import copy
-import os
-import pathlib
-import time
 from functools import partial
 from typing import Any, Mapping, Optional, OrderedDict, Union
 
 import gymnasium as gym
 import numpy as np
-import psutil
 import torch
-from filelock import FileLock
 from omegaconf import DictConfig, OmegaConf
 from torch import Tensor
 
@@ -114,27 +109,6 @@ class RealWorldEnv(gym.Env):
             env_cfg=self.cfg,
         )
         return env
-
-    @staticmethod
-    def realworld_setup() -> None:
-        """Run node-level setup before creating real-world environments.
-
-        The setup is serialized because ROS permits only one core per node.
-        Existing ROS core processes are stopped before environments start.
-        """
-        # Serialize setup across environment processes on the same node.
-        node_lock_file = "/tmp/.realworld.lock"
-        # Fall back to the user directory if the temporary path is unavailable.
-        if not os.path.exists(os.path.dirname(node_lock_file)):
-            node_lock_file = os.path.join(pathlib.Path.home(), ".realworld.lock")
-        node_lock = FileLock(node_lock_file)
-
-        with node_lock:
-            ros_proc_names = ["roscore", "rosmaster", "rosout"]
-            for proc in psutil.process_iter():
-                if proc.name() in ros_proc_names:
-                    proc.kill()
-                    time.sleep(0.5)
 
     def _init_env(self) -> None:
         env_fns = [

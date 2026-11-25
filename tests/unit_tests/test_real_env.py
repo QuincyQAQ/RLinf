@@ -1439,17 +1439,45 @@ def test_every_robot_folder_has_a_base():
     assert missing == []
 
 
+def test_go2_startup_leaves_host_processes_alone(monkeypatch):
+    import psutil
+
+    from rlinf.envs import get_env_cls, real
+
+    # Exercise first-time registration even if a previous test loaded the tasks.
+    monkeypatch.setattr(real, "_loaded", False)
+    monkeypatch.setattr(
+        psutil,
+        "process_iter",
+        Mock(side_effect=AssertionError("Go2 startup scanned host processes")),
+    )
+    cfg = OmegaConf.load(
+        _ROOT / "tests/e2e_tests/evaluations/go2_drive_dummy_mlp_eval.yaml"
+    ).env.eval
+    env_cls = get_env_cls(cfg.env_type, cfg)
+    env = env_cls(
+        cfg, num_envs=1, seed_offset=0, total_num_processes=1, worker_info=None
+    )
+    try:
+        obs, _ = env.reset()
+        assert obs["states"].shape == (1, 35)
+    finally:
+        env.close()
+
+
+@pytest.mark.parametrize("max_episode_steps", [None, 3, 4])
 @pytest.mark.parametrize("auto_reset", [False, True])
-def test_go2_chunk_stops_at_the_last_executed_action(monkeypatch, auto_reset):
+def test_go2_chunk_stops_at_the_last_executed_action(
+    monkeypatch, auto_reset, max_episode_steps
+):
     from rlinf.envs.real.env import RealWorldEnv
 
-    monkeypatch.setattr(RealWorldEnv, "realworld_setup", staticmethod(lambda: None))
     cfg = OmegaConf.load(
         _ROOT / "tests/e2e_tests/evaluations/go2_drive_dummy_mlp_eval.yaml"
     ).env.eval
     cfg.override_cfg.max_num_steps = 3
     cfg.override_cfg.step_frequency = 1000
-    cfg.max_episode_steps = None
+    cfg.max_episode_steps = max_episode_steps
     cfg.auto_reset = auto_reset
     env = RealWorldEnv(
         cfg, num_envs=1, seed_offset=0, total_num_processes=1, worker_info=None
@@ -1498,10 +1526,31 @@ def test_go2_chunk_stops_at_the_last_executed_action(monkeypatch, auto_reset):
         env.close()
 
 
-def test_piper_wrapper_preserves_configured_camera_and_episode_limit(monkeypatch):
+@pytest.mark.parametrize("auto_reset", [False, True])
+@pytest.mark.parametrize("max_episode_steps", [0, 1])
+def test_go2_short_outer_limit_is_refused_before_hardware_setup(
+    auto_reset, max_episode_steps
+):
     from rlinf.envs.real.env import RealWorldEnv
 
-    monkeypatch.setattr(RealWorldEnv, "realworld_setup", staticmethod(lambda: None))
+    cfg = OmegaConf.load(
+        _ROOT / "tests/e2e_tests/evaluations/go2_drive_dummy_mlp_eval.yaml"
+    ).env.eval
+    cfg.override_cfg.is_dummy = False
+    cfg.auto_reset = auto_reset
+    cfg.max_episode_steps = max_episode_steps
+    with pytest.raises(
+        ValueError,
+        match=rf"max_episode_steps={max_episode_steps}.*max_num_steps=2",
+    ):
+        RealWorldEnv(
+            cfg, num_envs=1, seed_offset=0, total_num_processes=1, worker_info=None
+        )
+
+
+def test_piper_wrapper_preserves_configured_camera_and_episode_limit():
+    from rlinf.envs.real.env import RealWorldEnv
+
     cfg = OmegaConf.load(_ROOT / "examples/embodiment/config/env/piper_reach.yaml")
     cfg.override_cfg = {"is_dummy": True, "max_num_steps": 1, "step_frequency": 1000}
     cfg.max_episode_steps = 2

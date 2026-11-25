@@ -20,6 +20,8 @@ from .base import Go2Env, Go2EnvConfig
 from .drive import Go2DriveEnv
 
 TASKS = {"Go2DriveEnv-v1": Go2DriveEnv}
-_ENTRY_POINTS = register_tasks(__name__, globals(), TASKS)
+_ENTRY_POINTS = register_tasks(
+    __name__, globals(), TASKS, validate_config=Go2DriveEnv.validate_env_config
+)
 
 __all__ = ["TASKS", "Go2Env", "Go2EnvConfig", "Go2DriveEnv", *_ENTRY_POINTS]

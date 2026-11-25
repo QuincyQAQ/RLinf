@@ -9696,6 +9696,28 @@ def test_go2_motion_preserves_sdk_units_and_stops_on_reset_and_close(go2_sdk):
     assert go2_sdk.events[-1] == ("close",)
 
 
+def test_go2_dispatches_the_validated_velocity_snapshot(
+    go2_sdk, connect_go2, monkeypatch
+):
+    from unitree_sdk2py.go2.sport.sport_client import SportClient
+
+    base = connect_go2()
+    velocity = np.array([0.1, 0, 0], dtype=np.float32)
+    set_timeout = SportClient.SetTimeout
+
+    def reuse_input(client, timeout):
+        velocity[0] = 1.0
+        set_timeout(client, timeout)
+
+    monkeypatch.setattr(SportClient, "SetTimeout", reuse_input)
+    sent = base.send_action({"velocity": velocity})
+    assert velocity[0] == 1.0
+    assert next(e[1:] for e in go2_sdk.events if e[0] == "move") == pytest.approx(
+        (0.1, 0, 0)
+    )
+    np.testing.assert_allclose(sent["velocity"], [0.1, 0, 0])
+
+
 @pytest.mark.parametrize(
     "limiting_timeout",
     ["command_timeout", "state_timeout", "rpc_timeout", "match_poll"],

@@ -198,6 +198,35 @@ def test_go2_rough_action_boundary_and_terminal_observation(monkeypatch):
         task.step(actions)
 
 
+def test_go2_bootstrap_observation_mixes_terminal_and_continuing_rows():
+    from types import SimpleNamespace
+
+    from rlinf.envs.sim.isaaclab.tasks.go2 import STAIRS, _Go2Task
+
+    terminal = torch.arange(3 * 235, dtype=torch.float32).reshape(3, 235)
+    next_states = terminal + 1000
+
+    class Simulator:
+        device = "cpu"
+        observation_manager = SimpleNamespace(group_obs_dim={"policy": (235,)})
+        action_manager = SimpleNamespace(total_action_dim=12)
+
+        def step(self, actions):
+            self.terminal_observation = terminal
+            terminated = torch.tensor([False, False, True])
+            truncated = torch.tensor([True, False, False])
+            return {"policy": next_states}, torch.zeros(3), terminated, truncated, {}
+
+    task = _Go2Task(Simulator(), SimpleNamespace(id=STAIRS), 3)
+    obs, _, _, _, info = task.step(torch.zeros(3, 12))
+
+    assert info["_final_observation"].tolist() == [True, False, True]
+    expected = torch.stack([terminal[0], next_states[1], terminal[2]])
+    for key in ("states", "critic_states"):
+        torch.testing.assert_close(obs[key], next_states)
+        torch.testing.assert_close(info["final_observation"][key], expected)
+
+
 def _hetero_mode(**envs: dict):
     return OmegaConf.create({"envs": envs})
 
