@@ -122,20 +122,15 @@ def test_go2_rejects_episode_modes_its_simulator_cannot_honor(
         Go2IsaacLabEnv(cfg, 2)
 
 
-def test_go2_rough_action_boundary_and_terminal_observation(monkeypatch):
+@pytest.fixture
+def go2_manager_cfg(monkeypatch):
     import sys
     from types import SimpleNamespace
-
-    from rlinf.envs import get_env_cls
-    from rlinf.envs.sim.isaaclab.tasks.go2 import ROUGH, Go2IsaacLabEnv, _make_go2_env
-
-    cfg = OmegaConf.create({"seed": 0, "init_params": {"id": ROUGH}})
-    assert get_env_cls("isaaclab", cfg) is Go2IsaacLabEnv
 
     class Manager:
         def __init__(self, cfg):
             self.device = "cpu"
-            self.episode_length_buf = torch.zeros(2, dtype=torch.long)
+            self.episode_length_buf = torch.zeros(cfg.scene.num_envs, dtype=torch.long)
             self.action_manager = SimpleNamespace(total_action_dim=12)
             self.observation_manager = SimpleNamespace(
                 group_obs_dim={"policy": (235,)}, compute=self.compute
@@ -165,7 +160,20 @@ def test_go2_rough_action_boundary_and_terminal_observation(monkeypatch):
             )
 
     task_cfg = SimpleNamespace(
-        scene=SimpleNamespace(), sim=SimpleNamespace(dt=0.005), decimation=4
+        scene=SimpleNamespace(),
+        sim=SimpleNamespace(dt=0.005),
+        decimation=4,
+        rewards=SimpleNamespace(
+            base_height=SimpleNamespace(
+                func=torch.square,
+                weight=-10.0,
+                params={
+                    "target_height": 0.38,
+                    "asset_cfg": SimpleNamespace(name="robot"),
+                    "sensor_cfg": SimpleNamespace(name="height_scanner"),
+                },
+            )
+        ),
     )
     modules = {
         "isaaclab.app": SimpleNamespace(
@@ -179,7 +187,15 @@ def test_go2_rough_action_boundary_and_terminal_observation(monkeypatch):
     }
     for name, module in modules.items():
         monkeypatch.setitem(sys.modules, name, module)
+    return task_cfg
 
+
+def test_go2_rough_action_boundary_and_terminal_observation(go2_manager_cfg):
+    from rlinf.envs import get_env_cls
+    from rlinf.envs.sim.isaaclab.tasks.go2 import ROUGH, Go2IsaacLabEnv, _make_go2_env
+
+    cfg = OmegaConf.create({"seed": 0, "init_params": {"id": ROUGH}})
+    assert get_env_cls("isaaclab", cfg) is Go2IsaacLabEnv
     task, _ = _make_go2_env(cfg.init_params, cfg.seed, 2, max_episode_steps=7)
     assert task.task.max_episode_length == 7
     assert task.task.cfg.episode_length_s == pytest.approx(0.14)
@@ -196,6 +212,52 @@ def test_go2_rough_action_boundary_and_terminal_observation(monkeypatch):
     actions[1, 0] = float("nan")
     with pytest.raises(FloatingPointError):
         task.step(actions)
+
+
+def test_go2_rough_base_height_uses_ground_returns(go2_manager_cfg):
+    from types import SimpleNamespace
+
+    from rlinf.envs.sim.isaaclab.tasks.go2 import ROUGH, _make_go2_env
+
+    task, _ = _make_go2_env(OmegaConf.create({"id": ROUGH}), 0, 3, 1000)
+    term = task.task.cfg.rewards.base_height
+    generator = torch.Generator().manual_seed(41)
+    hits = torch.randn(3, 187, 3, generator=generator)
+    root = torch.randn(3, 3, generator=generator)
+    task.task.scene = {
+        "robot": SimpleNamespace(data=SimpleNamespace(root_pos_w=root)),
+        "height_scanner": SimpleNamespace(data=SimpleNamespace(ray_hits_w=hits)),
+    }
+    original = torch.square(root[:, 2] - (0.38 + torch.mean(hits[..., 2], dim=1)))
+    assert torch.equal(term.func(task.task, **term.params), original)
+    assert term.weight == -10.0
+
+    hits[1, :-2] = torch.inf
+    hits[1, -2:, 2] = torch.tensor([1.0, 3.0])
+    hits[2] = torch.inf
+    penalty = term.func(task.task, **term.params)
+    assert torch.equal(penalty[0], original[0])
+    assert torch.equal(penalty[1], (root[1, 2] - 2.38).square())
+    assert penalty[2].item() == 0.0
+
+    for invalid in (torch.nan, -torch.inf, 0.0):
+        hits[2, 0, 0] = invalid
+        with pytest.raises(FloatingPointError, match="terrain hit"):
+            term.func(task.task, **term.params)
+    hits[2] = torch.inf
+    root[2, 0] = torch.nan
+    with pytest.raises(FloatingPointError, match="root position"):
+        term.func(task.task, **term.params)
+
+
+@pytest.mark.parametrize("task_name", ["FLAT", "STAIRS"])
+def test_go2_other_tasks_keep_registered_height_reward(go2_manager_cfg, task_name):
+    from rlinf.envs.sim.isaaclab.tasks import go2
+
+    params = OmegaConf.create({"id": getattr(go2, task_name)})
+    original = go2_manager_cfg.rewards.base_height.func
+    task, _ = go2._make_go2_env(params, 0, 2, 1000)
+    assert task.task.cfg.rewards.base_height.func is original
 
 
 def test_go2_bootstrap_observation_mixes_terminal_and_continuing_rows():

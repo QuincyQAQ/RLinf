@@ -27,6 +27,35 @@ ROUGH = "MTL-Velocity-Rough-Unitree-Go2-B1-RoughWalk-v0"
 STAIRS = "MTL-Velocity-Rough-Unitree-Go2-B2-StairClimb-v0"
 
 
+def _rough_base_height_l2(
+    env, target_height: float, asset_cfg, sensor_cfg
+) -> torch.Tensor:
+    """Measure base height above the terrain sampled by the B1 height scanner."""
+    root_pos = env.scene[asset_cfg.name].data.root_pos_w
+    hits = env.scene[sensor_cfg.name].data.ray_hits_w
+    hit_z = hits[..., 2]
+    valid = torch.isfinite(hits).all(dim=-1)
+    root_valid = torch.isfinite(root_pos).all()
+    # Keep Isaac Lab's original reduction on the original strided tensor.
+    target_z = target_height + torch.mean(hit_z, dim=1)
+    if not (valid.all() & root_valid):
+        if not root_valid:
+            raise FloatingPointError("Nonfinite Go2 rough-terrain root position")
+        missed = torch.isposinf(hits).all(dim=-1)
+        if not (valid | missed).all():
+            raise FloatingPointError(
+                "Expected a finite terrain hit or a (+inf, +inf, +inf) ray miss"
+            )
+        count = valid.sum(dim=1)
+        observed_z = hit_z.masked_fill(missed, 0.0).sum(dim=1) / count.clamp_min(1)
+        target_z = torch.where(
+            count < hit_z.shape[1], target_height + observed_z, target_z
+        )
+        # Without a ground reference the height term contributes zero.
+        target_z = torch.where(count == 0, root_pos[:, 2], target_z)
+    return torch.square(root_pos[:, 2] - target_z)
+
+
 def _make_go2_env(params, seed: int, num_envs: int, max_episode_steps: int):
     from isaaclab.app import AppLauncher
 
@@ -64,6 +93,8 @@ def _make_go2_env(params, seed: int, num_envs: int, max_episode_steps: int):
 
         register_tasks()
         cfg = load_cfg_from_registry(params.id, "env_cfg_entry_point")
+        if params.id == ROUGH:
+            cfg.rewards.base_height.func = _rough_base_height_l2
         cfg.seed = seed
         cfg.scene.num_envs = num_envs
         cfg.episode_length_s = max_episode_steps * (cfg.sim.dt * cfg.decimation)
