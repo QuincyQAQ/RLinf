@@ -14,7 +14,7 @@ Setup and Run
 
       **1. Install the Go2 runtime**
 
-      The Go2 installer sets up Isaac Lab 2.3.2, Isaac Sim 5.1, and the three task definitions from the `Go2 locomotion benchmark <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env>`_.
+      The Go2 installer sets up Isaac Lab 2.3.2, Isaac Sim 5.1, RSL-RL 3.1.2 for evaluation, and the three task definitions from the `Go2 locomotion benchmark <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env>`_.
 
       .. code-block:: bash
 
@@ -59,11 +59,10 @@ Setup and Run
 Evaluate a Trained Policy
 -------------------------
 
-From the RLinf repository root, install the RSL-RL checkpoint loader and fetch the evaluation scripts for tasks A, B, and C.
+From the RLinf repository root, fetch the evaluation scripts for tasks A, B, and C.
 
 .. code-block:: bash
 
-   uv pip install "rsl-rl-lib==3.1.2"
    (
      set -e
      runtime=../public-evaluator
@@ -96,6 +95,8 @@ Select your task’s ``*_ppo.json`` file from the `training recipes <https://git
 Add this RLinf checkout to ``PYTHONPATH`` and append ``env.rewards.base_height.func=rlinf.envs.sim.isaaclab.tasks.go2:terrain_base_height_l2`` to both training and evaluation commands.
 
 For evaluation, use the same task's ``*_baseline.json`` with ``evaluate_continuation.py``. Set ``--checkpoint`` to the frozen input or the final RSL-RL checkpoint (``model_999.pt`` for A and B, ``model_960.pt`` for C after its 1,000 updates).
+
+For any RSL-RL task trained with seed 2, replace the ``_s0`` suffix with ``_s2`` in both the training run name and the evaluation report label. For example, train task A with ``--seed 2 --run_name A_ppo_s2`` and evaluate that checkpoint with ``--report_train_task A2_omni_s2``.
 
 Set ``GO2_EVAL_SEED`` to 23456 for the first evaluation and 34567 for the second. Pass a fresh ``--output_dir`` for each.
 
@@ -158,16 +159,17 @@ Each cell shows the success rate and the number of successful episodes out of al
 Replay on CPU
 -------------
 
-Replay one synthetic frame from the control test fixture with your trained checkpoint. The output records the timestamp, twelve joint targets (rad), and twelve motor torques (N·m) in SDK order.
+Use the frozen weights from step 2 to replay one synthetic sensor frame. The output records the timestamp, twelve joint targets (rad), and twelve motor torques (N·m) in SDK order.
 
 .. code-block:: bash
 
-   REPLAY_DIR=$(mktemp -d "$RUN_DIR/replay.XXXXXX")
+   TASK=C
+   REPLAY_DIR=$(mktemp -d)
    python -c 'import json; print(json.dumps(json.load(open("tests/fixtures/go2_control_reference.json"))["frame"]))' > "$REPLAY_DIR/frame.jsonl"
-   python -m examples.embodiment.go2_abc.deploy --task "$TASK" --checkpoint "$CHECKPOINT" \
+   python -m examples.embodiment.go2_abc.deploy --task "$TASK" --group baseline \
      --frames "$REPLAY_DIR/frame.jsonl" --output "$REPLAY_DIR/commands.jsonl"
 
-To replay the frozen starting weights from step 2, replace ``--checkpoint "$CHECKPOINT"`` with ``--group baseline``. The optional ``--data`` argument selects the data root for group-based loading.
+To replay a trained policy, set ``TASK`` to its task and replace ``--group baseline`` with ``--checkpoint "$CHECKPOINT"``. The optional ``--data`` argument selects the data root for group-based loading.
 
 For your own recording, follow the structure of ``frame.jsonl``. Supply joint and IMU data plus measured body velocity and terrain heights. Record timestamps on one monotonic clock at 5 ms intervals. The policy updates every fourth frame. Express base and ground heights in the same world frame. Sample the yaw-aligned grid in 0.1 m steps, with y from −0.5 to 0.5 m and x from −0.8 to 0.8 m within each row.
 

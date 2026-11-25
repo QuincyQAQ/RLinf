@@ -61,14 +61,14 @@ Go2 高层运动控制
 
       **1. 安装 SDK**
 
-      按 :doc:`安装说明 </rst_source/start/installation>` 准备 Python 3.11 的 RLinf 环境。在仓库根目录安装可选的宇树 SDK：
+      在 Linux 控制电脑上按 `宇树 SDK 安装说明 <https://github.com/unitreerobotics/unitree_sdk2_python/tree/814556d15970dd2ecf1c9984e845ca02ab07e206>`_ 安装 CycloneDDS 0.10.x 原生库，并导出 ``CYCLONEDDS_HOME``。Python 3.11 的绑定需要这个库才能编译。在同一终端进入 RLinf 仓库根目录，安装 SDK：
 
       .. code-block:: bash
 
          bash requirements/install.sh embodied --env go2_sport
          source .venv/bin/activate
 
-      CycloneDDS 依赖和机器人网络配置见固定版本的 `SDK 安装说明 <https://github.com/unitreerobotics/unitree_sdk2_python/tree/814556d15970dd2ecf1c9984e845ca02ab07e206>`_。控制电脑无需 GPU 或 policy 权重。
+      按 SDK 说明配置机器人网卡。控制电脑无需 GPU 或 policy 权重。
 
       **2. 检查状态与运动**
 

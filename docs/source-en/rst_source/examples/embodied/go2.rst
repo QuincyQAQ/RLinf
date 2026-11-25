@@ -61,14 +61,14 @@ Setup and Run
 
       **1. Install the SDK**
 
-      Prepare a Python 3.11 RLinf environment using :doc:`Installation </rst_source/start/installation>`. From the repository root, install the optional Unitree SDK:
+      On the Linux controller, follow the `Unitree SDK instructions <https://github.com/unitreerobotics/unitree_sdk2_python/tree/814556d15970dd2ecf1c9984e845ca02ab07e206>`_ to install native CycloneDDS 0.10.x and export ``CYCLONEDDS_HOME`` in your shell. The Python 3.11 bindings build against this library. From the RLinf repository root, install the SDK in the same shell:
 
       .. code-block:: bash
 
          bash requirements/install.sh embodied --env go2_sport
          source .venv/bin/activate
 
-      Follow the pinned `SDK installation guide <https://github.com/unitreerobotics/unitree_sdk2_python/tree/814556d15970dd2ecf1c9984e845ca02ab07e206>`_ for CycloneDDS prerequisites and robot networking. The controller computer needs no GPU or policy weights.
+      Configure the network interface as described in the SDK instructions. The controller computer needs no GPU or policy weights.
 
       **2. Check state and motion**
 

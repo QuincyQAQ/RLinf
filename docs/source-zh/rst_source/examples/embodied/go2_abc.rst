@@ -14,7 +14,7 @@
 
       **1. 安装 Go2 运行环境**
 
-      安装脚本会准备 Isaac Lab 2.3.2、Isaac Sim 5.1，以及 `Go2 运动基准库 <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env>`_ 中的三项仿真任务。
+      安装脚本会准备 Isaac Lab 2.3.2、Isaac Sim 5.1、评测所需的 RSL-RL 3.1.2，以及 `Go2 运动基准库 <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env>`_ 中的三项仿真任务。
 
       .. code-block:: bash
 
@@ -59,11 +59,10 @@
 评测训练好的策略
 ----------------
 
-在 RLinf 仓库根目录安装 RSL-RL 权重加载器，并下载 A、B、C 三项任务的评测脚本。
+在 RLinf 仓库根目录下载 A、B、C 三项任务的评测脚本。
 
 .. code-block:: bash
 
-   uv pip install "rsl-rl-lib==3.1.2"
    (
      set -e
      runtime=../public-evaluator
@@ -96,6 +95,8 @@
 将当前 RLinf 仓库加入 ``PYTHONPATH``，并在训练和评测命令末尾添加 ``env.rewards.base_height.func=rlinf.envs.sim.isaaclab.tasks.go2:terrain_base_height_l2``，使两种 PPO 使用相同的地形高度奖励。
 
 评测时，用同一任务的 ``*_baseline.json`` 启动 ``evaluate_continuation.py``。将 ``--checkpoint`` 指向冻结输入，或指向完成 1,000 次更新后保存的 RSL-RL 权重（A、B 为 ``model_999.pt``，C 为 ``model_960.pt``）。
+
+三个任务用种子 2 训练 RSL-RL 策略时，都要把训练目录名和评测报告标签的后缀从 ``_s0`` 改为 ``_s2``。例如，任务 A 训练时用 ``--seed 2 --run_name A_ppo_s2``，评测这份权重时用 ``--report_train_task A2_omni_s2``。
 
 两次评测分别将 ``GO2_EVAL_SEED`` 设为 23456 和 34567，每次用 ``--output_dir`` 指定新的输出目录。
 
@@ -158,16 +159,17 @@
 在 CPU 上回放
 -------------
 
-使用本次训练得到的权重，回放控制测试中的一帧合成传感器数据。输出记录时间戳、12 个目标关节角（rad）和 12 个电机力矩（N·m），均按 SDK 关节顺序排列。
+使用步骤 2 下载的冻结权重，回放一帧合成传感器数据。输出记录时间戳、12 个目标关节角（rad）和 12 个电机力矩（N·m），均按 SDK 关节顺序排列。
 
 .. code-block:: bash
 
-   REPLAY_DIR=$(mktemp -d "$RUN_DIR/replay.XXXXXX")
+   TASK=C
+   REPLAY_DIR=$(mktemp -d)
    python -c 'import json; print(json.dumps(json.load(open("tests/fixtures/go2_control_reference.json"))["frame"]))' > "$REPLAY_DIR/frame.jsonl"
-   python -m examples.embodiment.go2_abc.deploy --task "$TASK" --checkpoint "$CHECKPOINT" \
+   python -m examples.embodiment.go2_abc.deploy --task "$TASK" --group baseline \
      --frames "$REPLAY_DIR/frame.jsonl" --output "$REPLAY_DIR/commands.jsonl"
 
-回放步骤 2 的冻结初始权重时，将 ``--checkpoint "$CHECKPOINT"`` 换成 ``--group baseline``。按组别加载权重时可使用 ``--data`` 指定数据根目录。
+要回放训练后的策略，将 ``TASK`` 设为对应任务，并将 ``--group baseline`` 换成 ``--checkpoint "$CHECKPOINT"``。按组别加载权重时可使用 ``--data`` 指定数据根目录。
 
 回放自己的记录时，按 ``frame.jsonl`` 的格式提供关节和 IMU 数据、实测机身线速度及地形高度。所有时间戳使用同一单调时钟，每 5 ms 采样一次，policy 每四帧更新一次。机身与地面高度使用同一世界坐标系。高度网格随机身偏航角旋转，间距为 0.1 m，按 y 从 −0.5 到 0.5 m 排列各行，每行按 x 从 −0.8 到 0.8 m 排列。
 

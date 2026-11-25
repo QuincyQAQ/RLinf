@@ -9941,6 +9941,25 @@ def test_go2_missing_initial_state_rolls_back_connection(go2_sdk):
     base.disconnect()
 
 
+def test_go2_watchdog_start_failure_releases_connection(go2_sdk, monkeypatch):
+    base = Go2Base("fake-go2", enable_motion=True)
+    unavailable = RuntimeError("can't start new thread")
+    with monkeypatch.context() as patch:
+        patch.setattr(threading.Thread, "start", mock.Mock(side_effect=unavailable))
+        with pytest.raises(RuntimeError) as failure:
+            base.connect()
+    assert failure.value is unavailable
+    assert not base.is_connected
+    assert go2_sdk.events[-3:] == [("stop",), ("stop",), ("close",)]
+
+    reader = Go2Base("fake-go2")
+    reader.connect()
+    try:
+        assert reader.get_observation()["joint_position"].shape == (12,)
+    finally:
+        reader.disconnect()
+
+
 @pytest.mark.parametrize("raise_error", [False, True])
 def test_go2_move_send_failure_requests_stop(go2_sdk, connect_go2, raise_error):
     base = connect_go2()

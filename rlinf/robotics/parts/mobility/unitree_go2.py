@@ -333,12 +333,14 @@ class Go2Base(MobileBase):
         # Let the watchdog cover an in-flight write until its final stop has run.
         with self._send_lock, self._lock:
             self._shutdown.set()
-        if self._thread is not None:
-            self._thread.join()
-            self._thread = None
         try:
-            with self._lock:
-                self._stop()
+            try:
+                if self._thread is not None and self._thread.is_alive():
+                    self._thread.join()
+            finally:
+                self._thread = None
+                with self._lock:
+                    self._stop()
         finally:
             try:
                 if self._subscriber is not None:
