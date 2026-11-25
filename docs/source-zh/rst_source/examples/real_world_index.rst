@@ -214,6 +214,12 @@
 .. grid:: 1 2 3 3
    :gutter: 3
 
+   .. grid-item-card:: Go2 EDU
+      :link: embodied/go2
+      :link-type: doc
+
+      读取状态，通过宇树原厂控制器检查六个运动方向。
+
    .. grid-item-card:: LeKiwi
       :link: embodied/lekiwi
       :link-type: doc
