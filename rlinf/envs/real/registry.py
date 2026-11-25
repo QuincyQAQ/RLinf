@@ -21,9 +21,11 @@ from typing import Any, Callable, Mapping
 import gymnasium as gym
 from gymnasium.envs.registration import register
 
-from .wrappers import build_stack
+from rlinf.utils.logging import get_logger
 
-ConfigValidator = Callable[[Mapping[str, Any], Mapping[str, Any]], None]
+from .wrappers import WrapperStack
+
+ConfigValidator = Callable[[Mapping[str, Any], Mapping[str, Any]], list[Any] | None]
 
 
 def task_factory(
@@ -38,15 +40,27 @@ def task_factory(
         env_idx: int,
         env_cfg: Mapping[str, Any],
     ) -> gym.Env:
+        devices = None
         if validate_config is not None:
-            validate_config(override_cfg, env_cfg)
+            devices = validate_config(override_cfg, env_cfg)
         env = env_cls(
             override_cfg=override_cfg,
             worker_info=worker_info,
             robot_info=robot_info,
             env_idx=env_idx,
         )
-        return build_stack(env, env_cfg)
+        stack = WrapperStack(env, env_cfg)
+        try:
+            return stack.build(teleop_devices=devices)
+        except BaseException:
+            try:
+                stack.env.close()
+            except BaseException:
+                get_logger().exception(
+                    "Failed to close %s after wrapper construction failed",
+                    env_cls.__name__,
+                )
+            raise
 
     create.__name__ = f"create_{env_cls.__name__}"
     create.__qualname__ = create.__name__
@@ -71,7 +85,9 @@ def register_tasks(
         namespace: The caller's ``globals()``, where entry points are bound.
         tasks: Mapping from Gymnasium ID to environment class.
         validate_config: Optional check of the task overrides and outer config
-            before constructing each environment in this registration.
+            before constructing each environment in this registration. Return
+            resolved teleop devices to use them when building the stack, or
+            ``None`` to resolve them from the constructed environment.
 
     Returns:
         The entry point names bound into ``namespace``, for ``__all__``.

@@ -9979,6 +9979,70 @@ def test_go2_dummy_and_registration_never_import_sdk():
         env.close()
 
 
+@pytest.mark.parametrize(
+    ("hardware", "stop_code"),
+    [({}, 0), ({"enable_motion": True}, 0), ({"enable_motion": True}, 9)],
+    ids=["readonly", "motion", "stop-fails-during-cleanup"],
+)
+def test_go2_registration_releases_hardware_after_wrapper_failure(
+    go2_sdk, monkeypatch, hardware, stop_code
+):
+    import gymnasium as gym
+
+    from rlinf.robotics import Go2Config
+
+    config = Go2Config(node_rank=0, interface="fake-go2", **hardware)
+    discovery = RobotDiscovery.registry["UnitreeGo2"].discovery_cls
+    info = discovery.enumerate(0, [config]).infos[0]
+
+    def make(**env_cfg):
+        return gym.make(
+            "rlinf.envs.real.go2:Go2DriveEnv-v1",
+            override_cfg={},
+            worker_info=None,
+            robot_info=info,
+            env_idx=0,
+            env_cfg=env_cfg,
+        )
+
+    with pytest.raises(ValueError, match="Unsupported teleop device"):
+        make(teleop="spacemouse")
+    assert go2_sdk.events == []
+
+    def open_missing_keyboard(path):
+        go2_sdk.stop_code = stop_code
+        raise FileNotFoundError(path)
+
+    monkeypatch.setitem(
+        sys.modules,
+        "evdev",
+        SimpleNamespace(
+            InputDevice=open_missing_keyboard, ecodes={}, list_devices=list
+        ),
+    )
+    with pytest.raises(
+        RuntimeError, match="keyboard_device='missing' does not exist"
+    ) as failure:
+        make(keyboard_reward_wrapper="single_stage", keyboard_device="missing")
+    assert isinstance(failure.value.__cause__, FileNotFoundError)
+    assert go2_sdk.events[-1] == ("close",)
+    assert go2_sdk.events.count(("stop",)) == (2 if config.enable_motion else 0)
+    assert go2_sdk.events.count(("client",)) == int(config.enable_motion)
+
+    go2_sdk.stop_code = 0
+    with pytest.warns(
+        DeprecationWarning, match="'teleop_device' is retired"
+    ) as notices:
+        with make(teleop_device="none") as env:
+            observation, _ = env.reset()
+            assert env.observation_space.contains(observation)
+    assert len(notices) == 1
+    assert go2_sdk.events.count(("dds", 0, "fake-go2")) == 1
+    assert go2_sdk.events.count(("subscribe", "rt/lowstate")) == 2
+    assert go2_sdk.events.count(("close",)) == 2
+    assert not any(event[0] == "move" for event in go2_sdk.events)
+
+
 def test_go2_close_cannot_be_followed_by_a_racing_move(go2_sdk, connect_go2):
     base = connect_go2()
     go2_sdk.close_release.clear()

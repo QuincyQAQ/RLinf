@@ -14,13 +14,12 @@ Setup and Run
 
       **1. Install the Go2 runtime**
 
-      Install the Go2 runtime (Isaac Lab 2.3.2 and Isaac Sim 5.1), then install the three task definitions from the pinned `Go2 locomotion benchmark <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env>`_ in the activated environment:
+      The Go2 installer sets up Isaac Lab 2.3.2, Isaac Sim 5.1, and the three task definitions from the `Go2 locomotion benchmark <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env>`_.
 
       .. code-block:: bash
 
          bash requirements/install.sh embodied --env go2_abc
          source .venv/bin/activate
-         uv pip install -r requirements/embodied/envs/go2_abc.txt
 
       Run ``python -c "import isaacsim"`` in the activated environment to answer the `NVIDIA license prompt <https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_python.html#running-isaac-sim>`_. For a batch job, you can set ``OMNI_KIT_ACCEPT_EULA=YES`` in the job environment after accepting the terms.
 
@@ -57,10 +56,10 @@ Setup and Run
            --config-path "$PWD/examples/embodiment/config" --config-name isaaclab_go2_c_ppo \
            "env.train.init_params.asset_root=$GO2_ASSET_ROOT" "runner.logger.log_path=$PWD/logs/go2-stairs"
 
-Evaluate Your Stairs Checkpoint
--------------------------------
+Evaluate a Trained Policy
+-------------------------
 
-Install the RSL-RL checkpoint loader and fetch the four evaluator source files. The evaluator uses the task definitions installed in step 1. Run this setup from the RLinf repository root.
+From the RLinf repository root, install the RSL-RL checkpoint loader and fetch the evaluation scripts for tasks A, B, and C.
 
 .. code-block:: bash
 
@@ -70,24 +69,27 @@ Install the RSL-RL checkpoint loader and fetch the four evaluator source files. 
      runtime=../public-evaluator
      mkdir -p "$runtime/a40" "$runtime/benchmark/scripts"
      wrappers=https://raw.githubusercontent.com/QuincyQAQ/RLinf/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/a40
-     for module in evaluate_continuation evaluate_dual passage_metrics; do
+     for module in evaluate_continuation evaluate_dual passage_metrics b1_numerical_boundary; do
        curl -fsSL "$wrappers/$module.py" -o "$runtime/a40/$module.py"
      done
      benchmark=https://raw.githubusercontent.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env/743ac04d9543b04b7854f1100bfa0cc69c993106
      curl -fsSL "$benchmark/scripts/evaluate.py" -o "$runtime/benchmark/scripts/evaluate.py"
    )
 
-In a Slurm GPU allocation, set ``RUN_DIR`` to the log directory of your training run. The standard launcher uses a timestamped directory under ``logs/``; the mirror command above uses ``logs/go2-stairs``. Choose a fresh output directory for each checkpoint. Append ``--asset-root "$GO2_ASSET_ROOT"`` if using the mirror.
+In a Slurm GPU allocation, select the task you trained and its run directory. The example uses the stairs run above. For a standard launch, use the timestamped run directory under ``logs/``. Set the training seed to the value used for that checkpoint, or omit the seed option if unknown.
 
 .. code-block:: bash
 
+   TASK=C
    RUN_DIR=logs/go2-stairs
-   CHECKPOINT="$RUN_DIR/C_rlinf/checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt"
-   python -m examples.embodiment.go2_abc.evaluate_stairs "$CHECKPOINT" "$RUN_DIR/stairs-eval"
+   CHECKPOINT="$RUN_DIR/${TASK}_rlinf/checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt"
+   python -m examples.embodiment.go2_abc.evaluate --task "$TASK" --train-seed 0 "$CHECKPOINT" "$RUN_DIR/eval"
 
-The evaluator exports your trained weights to ``stairs-eval/policy.pt`` and runs 256 parallel environments to collect at least 1,024 episodes per seed. The two seed directories contain the episode records. After verifying both reports, the command prints the pooled tracking and simulated stair-passage rates and writes their counts and rates to ``stairs-eval/summary.json``.
+Set ``TASK=A`` for flat ground or ``TASK=B`` for rough terrain. Use a fresh output directory for each checkpoint. For a local asset mirror, append ``--asset-root "$GO2_ASSET_ROOT"``. To verify that both the actor and critic changed during training, pass their starting weights with ``--initial-checkpoint``.
 
-For the RSL-RL PPO comparison, place the pinned `train.py <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env/blob/743ac04d9543b04b7854f1100bfa0cc69c993106/scripts/train.py>`_ beside ``evaluate.py``. Place ``train_continuation_rsl.py`` from the `trainer sources <https://github.com/QuincyQAQ/RLinf/tree/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/a40>`_ in ``../public-evaluator/a40/``. Task B also imports ``train_legacy_distribution.py`` and ``b1_numerical_boundary.py`` from the same directory.
+The evaluator collects at least 1,024 episodes in 256 parallel environments for each evaluation seed (23456 and 34567). Each seed directory contains its episode records. The pooled tracking count and rate go into ``summary.json``. Task C also reports stair passage.
+
+For the RSL-RL PPO comparison, place the pinned `train.py <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env/blob/743ac04d9543b04b7854f1100bfa0cc69c993106/scripts/train.py>`_ beside ``evaluate.py``. Place ``train_continuation_rsl.py`` from the `trainer sources <https://github.com/QuincyQAQ/RLinf/tree/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/a40>`_ in ``../public-evaluator/a40/``. For task B, also copy ``train_legacy_distribution.py`` from the trainer sources.
 
 Select your task’s ``*_ppo.json`` file from the `training recipes <https://github.com/QuincyQAQ/RLinf/tree/23f16691d4dede5dab949a5cbf7934f6021e7ddf/examples/embodiment/go2_abc/config>`_. Run ``train_continuation_rsl.py`` with the arguments and environment variables in that file. Set the frozen checkpoint and asset paths for your machine and choose training seed 0 or 2 with ``--seed``.
 
@@ -160,9 +162,9 @@ Replay one synthetic frame from the control test fixture with your trained check
 
 .. code-block:: bash
 
-   REPLAY_DIR=$(mktemp -d "${GO2_ABC_DATA:-data/go2_abc}/replay.XXXXXX")
+   REPLAY_DIR=$(mktemp -d "$RUN_DIR/replay.XXXXXX")
    python -c 'import json; print(json.dumps(json.load(open("tests/fixtures/go2_control_reference.json"))["frame"]))' > "$REPLAY_DIR/frame.jsonl"
-   python -m examples.embodiment.go2_abc.deploy --task C --checkpoint "$CHECKPOINT" \
+   python -m examples.embodiment.go2_abc.deploy --task "$TASK" --checkpoint "$CHECKPOINT" \
      --frames "$REPLAY_DIR/frame.jsonl" --output "$REPLAY_DIR/commands.jsonl"
 
 To replay the frozen starting weights from step 2, replace ``--checkpoint "$CHECKPOINT"`` with ``--group baseline``. The optional ``--data`` argument selects the data root for group-based loading.

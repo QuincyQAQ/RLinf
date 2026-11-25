@@ -16,6 +16,7 @@
 
 from typing import Any, Mapping
 
+from rlinf.envs.real.wrappers.teleop.config import resolve_teleop_devices
 from rlinf.robotics import Go2Config, RobotInfo
 from rlinf.scheduler import WorkerInfo
 
@@ -25,11 +26,11 @@ from .base import Go2Env, Go2EnvConfig
 class Go2DriveEnv(Go2Env):
     """Exercise state reception and body velocity commands without training."""
 
-    @staticmethod
+    @classmethod
     def validate_env_config(
-        override_cfg: Mapping[str, Any], env_cfg: Mapping[str, Any]
-    ) -> None:
-        """Require the robot's stop to occur by the outer episode boundary."""
+        cls, override_cfg: Mapping[str, Any], env_cfg: Mapping[str, Any]
+    ) -> list[Any]:
+        """Check the stop boundary and teleop selection before opening DDS."""
         outer = env_cfg.get("max_episode_steps")
         inner = override_cfg.get("max_num_steps", Go2EnvConfig.max_num_steps)
         if outer is not None and isinstance(inner, int) and outer < inner:
@@ -38,6 +39,9 @@ class Go2DriveEnv(Go2Env):
                 f"max_num_steps={inner}. Set max_episode_steps to null or at "
                 "least max_num_steps."
             )
+        return resolve_teleop_devices(
+            env_cfg, supported=cls.TELEOP, default=cls.TELEOP_DEFAULT
+        )
 
     def __init__(
         self,

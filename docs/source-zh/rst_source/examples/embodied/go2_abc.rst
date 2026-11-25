@@ -14,13 +14,12 @@
 
       **1. 安装 Go2 运行环境**
 
-      先安装 Go2 运行环境（Isaac Lab 2.3.2 和 Isaac Sim 5.1），再在已激活的环境中安装固定版本的 `Go2 运动基准库 <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env>`_，其中包含三项仿真任务：
+      安装脚本会准备 Isaac Lab 2.3.2、Isaac Sim 5.1，以及 `Go2 运动基准库 <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env>`_ 中的三项仿真任务。
 
       .. code-block:: bash
 
          bash requirements/install.sh embodied --env go2_abc
          source .venv/bin/activate
-         uv pip install -r requirements/embodied/envs/go2_abc.txt
 
       在已激活的环境中运行 ``python -c "import isaacsim"``，按终端提示确认 `NVIDIA 许可条款 <https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_python.html#running-isaac-sim>`_。提交批处理作业时，同意条款后可在作业环境中设置 ``OMNI_KIT_ACCEPT_EULA=YES``。
 
@@ -57,10 +56,10 @@
            --config-path "$PWD/examples/embodiment/config" --config-name isaaclab_go2_c_ppo \
            "env.train.init_params.asset_root=$GO2_ASSET_ROOT" "runner.logger.log_path=$PWD/logs/go2-stairs"
 
-评测训练好的楼梯任务权重
-------------------------
+评测训练好的策略
+----------------
 
-安装 RSL-RL 权重加载器，并下载评测所需的四个源文件。评测使用步骤 1 已安装的任务定义。请从 RLinf 仓库根目录执行以下命令。
+在 RLinf 仓库根目录安装 RSL-RL 权重加载器，并下载 A、B、C 三项任务的评测脚本。
 
 .. code-block:: bash
 
@@ -70,24 +69,27 @@
      runtime=../public-evaluator
      mkdir -p "$runtime/a40" "$runtime/benchmark/scripts"
      wrappers=https://raw.githubusercontent.com/QuincyQAQ/RLinf/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/a40
-     for module in evaluate_continuation evaluate_dual passage_metrics; do
+     for module in evaluate_continuation evaluate_dual passage_metrics b1_numerical_boundary; do
        curl -fsSL "$wrappers/$module.py" -o "$runtime/a40/$module.py"
      done
      benchmark=https://raw.githubusercontent.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env/743ac04d9543b04b7854f1100bfa0cc69c993106
      curl -fsSL "$benchmark/scripts/evaluate.py" -o "$runtime/benchmark/scripts/evaluate.py"
    )
 
-在 Slurm 分配的 GPU 节点上，将 ``RUN_DIR`` 设为本次训练的日志目录。标准启动器在 ``logs/`` 下创建带时间戳的目录，上面的镜像示例使用 ``logs/go2-stairs``。每次评测指定新的输出目录。使用镜像时，在评测命令末尾加上 ``--asset-root "$GO2_ASSET_ROOT"``。
+在 Slurm 分配的 GPU 节点上，选择训练任务及其日志目录。以下命令使用前面楼梯任务的目录。通过标准脚本启动的训练，请选用 ``logs/`` 下对应的时间戳目录。训练种子按该权重的实际值填写，未知时可省略种子参数。
 
 .. code-block:: bash
 
+   TASK=C
    RUN_DIR=logs/go2-stairs
-   CHECKPOINT="$RUN_DIR/C_rlinf/checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt"
-   python -m examples.embodiment.go2_abc.evaluate_stairs "$CHECKPOINT" "$RUN_DIR/stairs-eval"
+   CHECKPOINT="$RUN_DIR/${TASK}_rlinf/checkpoints/global_step_1000/actor/model_state_dict/full_weights.pt"
+   python -m examples.embodiment.go2_abc.evaluate --task "$TASK" --train-seed 0 "$CHECKPOINT" "$RUN_DIR/eval"
 
-评测程序将本次训练的权重导出到 ``stairs-eval/policy.pt``，用 256 个并行环境为每个种子采集至少 1,024 个回合。两个种子目录分别保存逐回合记录。两份报告校验通过后，终端会显示合并后的速度跟踪成功率和仿真楼梯通过率，成功回合数、总回合数和比例写入 ``stairs-eval/summary.json``。
+评测平地时设为 ``TASK=A``，崎岖地面设为 ``TASK=B``。每份权重使用新的输出目录。本地资产镜像可通过 ``--asset-root "$GO2_ASSET_ROOT"`` 指定。若要核对 actor 和 critic 是否都经过更新，可用 ``--initial-checkpoint`` 传入此次训练实际使用的初始权重。
 
-复现 RSL-RL PPO 对照组时，将固定版本的 `train.py <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env/blob/743ac04d9543b04b7854f1100bfa0cc69c993106/scripts/train.py>`_ 放到 ``evaluate.py`` 所在目录。将 `续训源码目录 <https://github.com/QuincyQAQ/RLinf/tree/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/a40>`_ 中的 ``train_continuation_rsl.py`` 放入 ``../public-evaluator/a40/``。任务 B 还需同一目录中的 ``train_legacy_distribution.py`` 和 ``b1_numerical_boundary.py``。
+评测使用固定种子 23456 和 34567，每个种子在 256 个并行环境中采集至少 1,024 个回合。两个种子目录分别保存逐回合记录，合并后的速度跟踪成功数和成功率写入 ``summary.json``。任务 C 另统计楼梯通过数和通过率。
+
+复现 RSL-RL PPO 对照组时，将固定版本的 `train.py <https://github.com/viktoriageorrg04/bsc-thesis-multi-task-RL-env/blob/743ac04d9543b04b7854f1100bfa0cc69c993106/scripts/train.py>`_ 放到 ``evaluate.py`` 所在目录。将 `续训源码目录 <https://github.com/QuincyQAQ/RLinf/tree/b405f67382ce63af2401a2a9ff5b0b3c7f28ccb7/a40>`_ 中的 ``train_continuation_rsl.py`` 放入 ``../public-evaluator/a40/``。任务 B 还需从同一源码目录复制 ``train_legacy_distribution.py``。
 
 在 `训练配置 <https://github.com/QuincyQAQ/RLinf/tree/23f16691d4dede5dab949a5cbf7934f6021e7ddf/examples/embodiment/go2_abc/config>`_ 中选择对应任务的 ``*_ppo.json``，按文件中的参数和环境变量启动 ``train_continuation_rsl.py``。将冻结权重和资产镜像路径替换为本机路径，``--seed`` 设为 0 或 2。
 
@@ -160,9 +162,9 @@
 
 .. code-block:: bash
 
-   REPLAY_DIR=$(mktemp -d "${GO2_ABC_DATA:-data/go2_abc}/replay.XXXXXX")
+   REPLAY_DIR=$(mktemp -d "$RUN_DIR/replay.XXXXXX")
    python -c 'import json; print(json.dumps(json.load(open("tests/fixtures/go2_control_reference.json"))["frame"]))' > "$REPLAY_DIR/frame.jsonl"
-   python -m examples.embodiment.go2_abc.deploy --task C --checkpoint "$CHECKPOINT" \
+   python -m examples.embodiment.go2_abc.deploy --task "$TASK" --checkpoint "$CHECKPOINT" \
      --frames "$REPLAY_DIR/frame.jsonl" --output "$REPLAY_DIR/commands.jsonl"
 
 回放步骤 2 的冻结初始权重时，将 ``--checkpoint "$CHECKPOINT"`` 换成 ``--group baseline``。按组别加载权重时可使用 ``--data`` 指定数据根目录。

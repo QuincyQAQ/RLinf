@@ -122,6 +122,189 @@ def test_go2_rejects_episode_modes_its_simulator_cannot_honor(
         Go2IsaacLabEnv(cfg, 2)
 
 
+@pytest.mark.parametrize(
+    "task,task_id,family_id,label,seed,legacy",
+    [
+        ("A", 1, 0, "A2_omni", None, False),
+        ("B", 2, 1, "B1_rough", 2, False),
+        ("C", 3, 1, "B2_stairs", None, False),
+        ("C", 3, 1, "B2_stairs", None, True),
+        ("C", 3, 1, "B2_stairs", 2, True),
+    ],
+)
+def test_go2_evaluator_pools_same_task_episodes(
+    tmp_path, monkeypatch, task, task_id, family_id, label, seed, legacy
+):
+    import json
+    import sys
+    from pathlib import Path
+    from types import SimpleNamespace
+
+    from examples.embodiment.go2_abc import evaluate, evaluate_stairs
+    from rlinf.envs.sim.isaaclab.tasks.go2 import FLAT, ROUGH, STAIRS
+    from rlinf.models.embodiment.go2_policy import Go2Policy
+
+    gym_id = {"A": FLAT, "B": ROUGH, "C": STAIRS}[task]
+    report_seed = 0 if legacy and seed is None else seed
+    train_name = label if report_seed is None else f"{label}_s{report_seed}"
+    checkpoint, output = tmp_path / "full_weights.pt", tmp_path / "output"
+    torch.save(Go2Policy().state_dict(), checkpoint)
+    seeds = []
+
+    def run_benchmark(command, env, check):
+        assert check
+        assert Path(command[1]).name == "evaluate_continuation.py"
+        options = command[2:]
+        assert options[options.index("--task") + 1] == gym_id
+        assert options[options.index("--eval_task") + 1] == label
+        assert options[options.index("--report_train_task") + 1] == train_name
+        assert options[options.index("--num_envs") + 1] == "256"
+        assert options[options.index("--num_episodes") + 1] == "1024"
+        assert (
+            "--kit_args=--/app/extensions/excluded/0=omni.kit.telemetry "
+            f"--/persistent/isaac/asset_root/cloud={tmp_path / 'assets'}"
+        ) in options
+        assert env.get("GO2_B1_NUMERIC_GUARD") == ("1" if task == "B" else None)
+        eval_seed = int(env["GO2_EVAL_SEED"])
+        seeds.append(eval_seed)
+        directory = Path(options[options.index("--output_dir") + 1]) / train_name
+        assert directory == output / str(eval_seed) / train_name
+        directory.mkdir(parents=True)
+        size = 1024 if eval_seed == 23456 else 1026
+        success = eval_seed == 23456
+        row = {"task_id": task_id, "family_id": family_id, "episode_success": success}
+        summary = {
+            "train_task": train_name,
+            "eval_task": gym_id,
+            "num_episodes": size,
+            "success_rate": float(success),
+        }
+        if task == "C":
+            row["physical_obstacle_passage"] = not success
+            summary.update(
+                required_obstacle_metrics_complete=True,
+                physical_measured_episodes=size,
+                physical_passage_successes=0 if success else size,
+                physical_obstacle_passage_rate=float(not success),
+            )
+        (directory / "summary.json").write_text(json.dumps({label: summary}))
+        (directory / f"{label}.json").write_text(
+            json.dumps({"summary": summary, "episodes": [row] * size})
+        )
+
+    monkeypatch.setenv("GO2_ABC_DATA", str(tmp_path))
+    arguments = [] if legacy else ["--task", task]
+    if legacy:
+        initial = tmp_path / "models/C/baseline.pt"
+        if seed is not None:
+            initial = tmp_path / "custom.pt"
+            arguments += ["--initial-checkpoint", str(initial)]
+        initial.parent.mkdir(parents=True, exist_ok=True)
+        torch.save({"model_state_dict": Go2Policy().state_dict()}, initial)
+    if seed is not None:
+        arguments += ["--train-seed", str(seed)]
+    arguments.extend(
+        [str(checkpoint), str(output), "--asset-root", str(tmp_path / "assets")]
+    )
+    monkeypatch.setattr(sys, "argv", ["evaluate", *arguments])
+    monkeypatch.setenv("SLURM_JOB_ID", "test")
+    monkeypatch.setenv("GO2_B1_NUMERIC_GUARD", "0")
+    monkeypatch.setattr(evaluate, "subprocess", SimpleNamespace(run=run_benchmark))
+    (evaluate_stairs.main if legacy else evaluate.main)()
+
+    assert seeds == [23456, 34567]
+    expected = {
+        "num_episodes": 2050,
+        "tracking_successes": 1024,
+        "tracking_rate": 1024 / 2050,
+    }
+    if task == "C":
+        expected.update(passage_successes=1026, passage_rate=1026 / 2050)
+    assert json.loads((output / "summary.json").read_text()) == expected
+
+
+def test_go2_evaluator_rejects_negative_training_seed(monkeypatch, capsys):
+    import sys
+
+    from examples.embodiment.go2_abc.evaluate import main
+
+    monkeypatch.setattr(
+        sys, "argv", ["evaluate", "--task", "B", "--train-seed", "-1", "ckpt", "out"]
+    )
+    with pytest.raises(SystemExit) as error:
+        main()
+    assert error.value.code == 2
+    assert "--train-seed must be nonnegative" in capsys.readouterr().err
+
+
+def test_go2_stairs_checks_its_frozen_baseline_by_default(tmp_path, monkeypatch):
+    import sys
+
+    from examples.embodiment.go2_abc import evaluate_stairs
+    from rlinf.models.embodiment.go2_policy import Go2Policy
+
+    baseline = tmp_path / "models/C/baseline.pt"
+    baseline.parent.mkdir(parents=True)
+    weights = Go2Policy().state_dict()
+    torch.save({"model_state_dict": weights}, baseline)
+    checkpoint = tmp_path / "full_weights.pt"
+    torch.save(weights, checkpoint)
+    monkeypatch.setenv("SLURM_JOB_ID", "test")
+    monkeypatch.setenv("GO2_ABC_DATA", str(tmp_path))
+    monkeypatch.setattr(
+        sys, "argv", ["evaluate_stairs", str(checkpoint), str(tmp_path / "out")]
+    )
+    with pytest.raises(ValueError, match="No update to actor"):
+        evaluate_stairs.main()
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [
+        ["-m", "examples.embodiment.go2_abc.evaluate_stairs"],
+        ["examples/embodiment/go2_abc/evaluate_stairs.py"],
+    ],
+)
+def test_go2_stairs_command_line_help(entry, monkeypatch):
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    monkeypatch.delenv("PYTHONPATH", raising=False)
+    result = subprocess.run(
+        [sys.executable, *entry, "--help"],
+        cwd=Path(__file__).resolve().parents[2],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert "checkpoint output" in result.stdout
+
+
+@pytest.mark.parametrize("wrapped,unchanged", [(False, "actor"), (True, "critic")])
+def test_go2_evaluator_checks_supplied_starting_weights(tmp_path, wrapped, unchanged):
+    from examples.embodiment.go2_abc.evaluate import export_policy
+    from rlinf.models.embodiment.go2_policy import Go2Policy
+
+    initial, checkpoint, policy = (
+        tmp_path / name for name in ("start", "final", "policy")
+    )
+    weights = Go2Policy().state_dict()
+    torch.save({"model_state_dict": weights} if wrapped else weights, initial)
+    updated = "actor" if unchanged == "critic" else "critic"
+    weights[f"{updated}.0.bias"].add_(1)
+    torch.save(weights, checkpoint)
+    with pytest.raises(ValueError, match=f"No update to {unchanged}"):
+        export_policy(checkpoint, initial, policy)
+    weights[f"{unchanged}.0.bias"].add_(1)
+    torch.save(weights, checkpoint)
+    export_policy(checkpoint, initial, policy)
+    exported = torch.load(policy, map_location="cpu", weights_only=True)[
+        "model_state_dict"
+    ]
+    assert all(torch.equal(value, exported[key]) for key, value in weights.items())
+
+
 @pytest.fixture
 def go2_manager_cfg(monkeypatch):
     import sys

@@ -111,6 +111,6 @@ Setup and Run
 Visualization and Results
 -------------------------
 
-The report records interface errors, the SDK velocity estimate after the stop request, and the operator’s observation. Measure travel distance, turn angle, and stopping distance separately if your application requires them.
+The report records interface errors and the SDK velocity estimate after the stop request. Record your observation of the motion and stop separately. Measure travel distance, turn angle, and stopping distance separately if your application requires them.
 
 For policy training in simulation, see :doc:`go2_abc`.
